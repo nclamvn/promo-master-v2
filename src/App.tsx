@@ -2,6 +2,17 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/layout/Layout';
 import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
+import Budgets from './pages/Budgets';
+import BudgetDetail from './pages/BudgetDetail';
+import Promotions from './pages/Promotions';
+import PromotionDetail from './pages/PromotionDetail';
+import Calendar from './pages/Calendar';
+import Targets from './pages/Targets';
+import Baselines from './pages/Baselines';
+import Analytics from './pages/Analytics';
+import WeeklyKpi from './pages/WeeklyKpi';
+import Claims from './pages/Claims';
+import Settings from './pages/Settings';
 
 function App() {
   return (
@@ -10,22 +21,19 @@ function App() {
       <Route path="/" element={<Layout />}>
         <Route index element={<Navigate to="/dashboard" replace />} />
         <Route path="dashboard" element={<Dashboard />} />
-        <Route path="budgets" element={<PlaceholderPage title="Budgets" />} />
-        <Route path="promotions" element={<PlaceholderPage title="Promotions" />} />
-        <Route path="analytics" element={<PlaceholderPage title="Analytics" />} />
-        <Route path="claims" element={<PlaceholderPage title="Claims" />} />
-        <Route path="settings" element={<PlaceholderPage title="Settings" />} />
+        <Route path="budgets" element={<Budgets />} />
+        <Route path="budgets/:id" element={<BudgetDetail />} />
+        <Route path="promotions" element={<Promotions />} />
+        <Route path="promotions/:id" element={<PromotionDetail />} />
+        <Route path="calendar" element={<Calendar />} />
+        <Route path="targets" element={<Targets />} />
+        <Route path="baselines" element={<Baselines />} />
+        <Route path="analytics" element={<Analytics />} />
+        <Route path="analytics/weekly-kpi" element={<WeeklyKpi />} />
+        <Route path="claims" element={<Claims />} />
+        <Route path="settings" element={<Settings />} />
       </Route>
     </Routes>
-  );
-}
-
-function PlaceholderPage({ title }: { title: string }) {
-  return (
-    <div className="p-6">
-      <h1 className="text-2xl font-semibold text-gray-900">{title}</h1>
-      <p className="mt-2 text-gray-600">This page is under development.</p>
-    </div>
   );
 }
 

@@ -1,9 +1,11 @@
-import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard,
   Wallet,
   Megaphone,
+  CalendarDays,
+  Target,
+  TrendingUp,
   BarChart3,
   FileText,
   Settings,
@@ -11,35 +13,39 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import { clsx } from 'clsx';
+import { useUIStore } from '@/stores/uiStore';
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Budgets', href: '/budgets', icon: Wallet },
   { name: 'Promotions', href: '/promotions', icon: Megaphone },
+  { name: 'Calendar', href: '/calendar', icon: CalendarDays },
+  { name: 'Targets', href: '/targets', icon: Target },
+  { name: 'Baselines', href: '/baselines', icon: TrendingUp },
   { name: 'Analytics', href: '/analytics', icon: BarChart3 },
   { name: 'Claims', href: '/claims', icon: FileText },
   { name: 'Settings', href: '/settings', icon: Settings },
 ];
 
 export default function Sidebar() {
-  const [collapsed, setCollapsed] = useState(false);
+  const { sidebarCollapsed, toggleSidebar } = useUIStore();
 
   return (
     <aside
       className={clsx(
         'flex flex-col border-r border-gray-200 bg-white transition-all duration-200',
-        collapsed ? 'w-16' : 'w-64'
+        sidebarCollapsed ? 'w-16' : 'w-64'
       )}
     >
       <div className="flex h-16 items-center justify-between border-b border-gray-200 px-4">
-        {!collapsed && (
+        {!sidebarCollapsed && (
           <span className="text-lg font-bold text-blue-600">PromoMaster</span>
         )}
         <button
-          onClick={() => setCollapsed(!collapsed)}
+          onClick={toggleSidebar}
           className="rounded-md p-1.5 text-gray-500 hover:bg-gray-100 hover:text-gray-700"
         >
-          {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
+          {sidebarCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
         </button>
       </div>
 
@@ -54,12 +60,12 @@ export default function Sidebar() {
                 isActive
                   ? 'bg-blue-50 text-blue-700'
                   : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900',
-                collapsed && 'justify-center'
+                sidebarCollapsed && 'justify-center'
               )
             }
           >
             <item.icon size={20} />
-            {!collapsed && <span>{item.name}</span>}
+            {!sidebarCollapsed && <span>{item.name}</span>}
           </NavLink>
         ))}
       </nav>
