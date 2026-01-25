@@ -56,6 +56,11 @@ const TargetNew = lazy(() => import('@/pages/targets/TargetNew'));
 const BaselineList = lazy(() => import('@/pages/baselines/BaselineList'));
 const BaselineNew = lazy(() => import('@/pages/baselines/BaselineNew'));
 
+// Finance pages
+const AccrualList = lazy(() => import('@/pages/finance/accruals/AccrualList'));
+const AccrualDetail = lazy(() => import('@/pages/finance/accruals/AccrualDetail'));
+const AccrualCalculate = lazy(() => import('@/pages/finance/accruals/AccrualCalculate'));
+
 const NotFound = lazy(() => import('@/pages/errors/NotFound'));
 
 // Suspense wrapper
@@ -184,6 +189,17 @@ export default function AppRouter() {
         } />
         <Route path="/baselines/new" element={
           <SuspenseWrapper><BaselineNew /></SuspenseWrapper>
+        } />
+
+        {/* Finance - Accruals */}
+        <Route path="/finance/accruals" element={
+          <SuspenseWrapper><AccrualList /></SuspenseWrapper>
+        } />
+        <Route path="/finance/accruals/calculate" element={
+          <SuspenseWrapper><AccrualCalculate /></SuspenseWrapper>
+        } />
+        <Route path="/finance/accruals/:id" element={
+          <SuspenseWrapper><AccrualDetail /></SuspenseWrapper>
         } />
 
         {/* Settings */}

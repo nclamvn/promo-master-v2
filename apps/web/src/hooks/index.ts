@@ -9,6 +9,7 @@ export * from './useFunds';
 export * from './useCustomers';
 export * from './useProducts';
 export * from './useDashboard';
+export * from './useAccruals';
 
 // Utility hooks
 export * from './useDebounce';
