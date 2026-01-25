@@ -22,23 +22,50 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       if (promotionId) where.promotionId = promotionId;
       if (period) where.period = period;
 
-      const [accruals, total] = await Promise.all([
+      const [accruals, total, summaryData] = await Promise.all([
         prisma.accrualEntry.findMany({
           where,
           skip,
           take,
           orderBy: { createdAt: 'desc' },
           include: {
-            promotion: { select: { id: true, code: true, name: true } },
+            promotion: { select: { id: true, code: true, name: true, budget: true } },
             createdBy: { select: { id: true, name: true } },
           },
         }),
         prisma.accrualEntry.count({ where }),
+        prisma.accrualEntry.groupBy({
+          by: ['status'],
+          _sum: { amount: true },
+          _count: true,
+        }),
       ]);
+
+      // Calculate summary
+      const summary = {
+        totalAmount: 0,
+        pendingAmount: 0,
+        postedAmount: 0,
+        reversedAmount: 0,
+        entryCount: total,
+      };
+
+      summaryData.forEach((item) => {
+        const amount = Number(item._sum.amount) || 0;
+        summary.totalAmount += amount;
+        if (item.status === 'PENDING' || item.status === 'CALCULATED') {
+          summary.pendingAmount += amount;
+        } else if (item.status === 'POSTED') {
+          summary.postedAmount += amount;
+        } else if (item.status === 'REVERSED') {
+          summary.reversedAmount += amount;
+        }
+      });
 
       return res.status(200).json({
         data: accruals,
         pagination: { page: parseInt(page), limit: take, total, totalPages: Math.ceil(total / take) },
+        summary,
       });
     }
 
