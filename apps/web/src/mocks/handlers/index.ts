@@ -933,7 +933,7 @@ export const handlers = [
           id: c.id,
           code: c.code,
           amount: c.amount,
-          claimDate: c.claimDate || c.createdAt,
+          claimDate: c.submittedAt || c.createdAt,
           status: c.status,
           promotion: {
             id: c.promotionId || 'promo-1',
@@ -1604,7 +1604,7 @@ export const handlers = [
       data: mockDeliveries.map(d => ({
         id: d.id,
         title: `Delivery to ${d.customerName || 'Customer'}`,
-        date: d.deliveryDate || d.scheduledDate,
+        date: d.deliveredDate || d.scheduledDate,
         status: d.status,
       }))
     });
@@ -1782,7 +1782,7 @@ export const handlers = [
       success: true,
       data: {
         totalItems: mockInventory.length,
-        totalValue: mockInventory.reduce((sum, i) => sum + (i.quantity * i.unitPrice), 0),
+        totalValue: mockInventory.reduce((sum, i) => sum + (i.quantity * 50000), 0), // 50k VND per unit
         lowStock: mockInventory.filter(i => i.quantity < 100).length,
         outOfStock: mockInventory.filter(i => i.quantity === 0).length,
       }
