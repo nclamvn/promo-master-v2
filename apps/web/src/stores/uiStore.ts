@@ -7,14 +7,14 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 
 interface UIState {
   sidebarOpen: boolean;
-  theme: 'light' | 'dark' | 'system';
+  theme: 'light' | 'dark';
   isMobile: boolean;
 }
 
 interface UIActions {
   toggleSidebar: () => void;
   setSidebarOpen: (open: boolean) => void;
-  setTheme: (theme: 'light' | 'dark' | 'system') => void;
+  setTheme: (theme: 'light' | 'dark') => void;
   setIsMobile: (isMobile: boolean) => void;
 }
 
@@ -24,7 +24,7 @@ export const useUIStore = create<UIStore>()(
   persist(
     (set) => ({
       sidebarOpen: true,
-      theme: 'dark',
+      theme: 'light',
       isMobile: false,
 
       toggleSidebar: () => set((state) => ({ sidebarOpen: !state.sidebarOpen })),

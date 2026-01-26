@@ -21,17 +21,17 @@ interface AuditLogTableProps {
 }
 
 const ACTION_COLORS: Record<string, string> = {
-  create: 'bg-green-100 text-green-700',
-  update: 'bg-primary-muted text-primary',
-  delete: 'bg-danger-muted text-danger',
-  approve: 'bg-success-muted text-success',
-  reject: 'bg-danger-muted text-danger',
-  login: 'bg-surface-hover text-foreground-muted',
-  logout: 'bg-surface-hover text-foreground-muted',
-  revoke: 'bg-warning-muted text-warning',
-  sync: 'bg-primary-muted text-primary',
-  import: 'bg-accent-muted text-accent',
-  export: 'bg-accent-muted text-accent',
+  create: 'bg-emerald-600 text-white dark:bg-emerald-500',
+  update: 'bg-blue-500 text-white dark:bg-blue-600',
+  delete: 'bg-red-500 text-white dark:bg-red-600',
+  approve: 'bg-emerald-600 text-white dark:bg-emerald-500',
+  reject: 'bg-red-500 text-white dark:bg-red-600',
+  login: 'bg-slate-500 text-white dark:bg-slate-600',
+  logout: 'bg-slate-500 text-white dark:bg-slate-600',
+  revoke: 'bg-amber-500 text-white dark:bg-amber-600',
+  sync: 'bg-blue-500 text-white dark:bg-blue-600',
+  import: 'bg-violet-500 text-white dark:bg-violet-600',
+  export: 'bg-violet-500 text-white dark:bg-violet-600',
 };
 
 export function AuditLogTable({ logs, compact = false }: AuditLogTableProps) {

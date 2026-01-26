@@ -336,9 +336,9 @@ export default function Dashboard() {
                 <div key={index} className="flex items-center gap-4 px-4 py-3 hover:bg-surface-hover transition-colors">
                   <div className={cn(
                     'flex h-8 w-8 items-center justify-center rounded',
-                    activity.type === 'PROMOTION_APPROVED' && 'bg-success-muted text-success',
-                    activity.type === 'CLAIM_SUBMITTED' && 'bg-warning-muted text-warning',
-                    activity.type === 'BUDGET_ALERT' && 'bg-danger-muted text-danger',
+                    activity.type === 'PROMOTION_APPROVED' && 'bg-emerald-600 text-white dark:bg-emerald-500',
+                    activity.type === 'CLAIM_SUBMITTED' && 'bg-amber-500 text-white dark:bg-amber-600',
+                    activity.type === 'BUDGET_ALERT' && 'bg-red-500 text-white dark:bg-red-600',
                   )}>
                     {activity.type === 'PROMOTION_APPROVED' && <CheckCircle className="h-4 w-4" />}
                     {activity.type === 'CLAIM_SUBMITTED' && <FileText className="h-4 w-4" />}

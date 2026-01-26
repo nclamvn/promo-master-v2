@@ -36,101 +36,101 @@ const statusConfig: Record<string, {
 }> = {
   DRAFT: {
     label: 'Draft',
-    bg: 'bg-surface-hover',
-    text: 'text-foreground-muted',
-    border: 'border-surface-border',
-    dot: 'bg-foreground-subtle'
+    bg: 'bg-slate-500 dark:bg-slate-600',
+    text: 'text-white',
+    border: 'border-slate-600 dark:border-slate-700',
+    dot: 'bg-white/80'
   },
   PENDING: {
     label: 'Pending',
-    bg: 'bg-warning-muted',
-    text: 'text-warning',
-    border: 'border-warning/30',
-    dot: 'bg-warning'
+    bg: 'bg-amber-500 dark:bg-amber-600',
+    text: 'text-white',
+    border: 'border-amber-600 dark:border-amber-700',
+    dot: 'bg-white/80'
   },
   APPROVED: {
     label: 'Approved',
-    bg: 'bg-primary-muted',
-    text: 'text-primary',
-    border: 'border-primary/30',
-    dot: 'bg-primary'
+    bg: 'bg-blue-500 dark:bg-blue-600',
+    text: 'text-white',
+    border: 'border-blue-600 dark:border-blue-700',
+    dot: 'bg-white/80'
   },
   ACTIVE: {
     label: 'Active',
-    bg: 'bg-success-muted',
-    text: 'text-success',
-    border: 'border-success/30',
-    dot: 'bg-success'
+    bg: 'bg-emerald-600 dark:bg-emerald-500',
+    text: 'text-white',
+    border: 'border-emerald-700 dark:border-emerald-600',
+    dot: 'bg-white/80'
   },
   COMPLETED: {
     label: 'Completed',
-    bg: 'bg-accent-muted',
-    text: 'text-accent',
-    border: 'border-accent/30',
-    dot: 'bg-accent'
+    bg: 'bg-violet-500 dark:bg-violet-600',
+    text: 'text-white',
+    border: 'border-violet-600 dark:border-violet-700',
+    dot: 'bg-white/80'
   },
   CANCELLED: {
     label: 'Cancelled',
-    bg: 'bg-danger-muted',
-    text: 'text-danger',
-    border: 'border-danger/30',
-    dot: 'bg-danger'
+    bg: 'bg-red-500 dark:bg-red-600',
+    text: 'text-white',
+    border: 'border-red-600 dark:border-red-700',
+    dot: 'bg-white/80'
   },
   REJECTED: {
     label: 'Rejected',
-    bg: 'bg-danger-muted',
-    text: 'text-danger',
-    border: 'border-danger/30',
-    dot: 'bg-danger'
+    bg: 'bg-red-500 dark:bg-red-600',
+    text: 'text-white',
+    border: 'border-red-600 dark:border-red-700',
+    dot: 'bg-white/80'
   },
   PAID: {
     label: 'Paid',
-    bg: 'bg-success-muted',
-    text: 'text-success',
-    border: 'border-success/30',
-    dot: 'bg-success'
+    bg: 'bg-emerald-600 dark:bg-emerald-500',
+    text: 'text-white',
+    border: 'border-emerald-700 dark:border-emerald-600',
+    dot: 'bg-white/80'
   },
   UNPAID: {
     label: 'Unpaid',
-    bg: 'bg-warning-muted',
-    text: 'text-warning',
-    border: 'border-warning/30',
-    dot: 'bg-warning'
+    bg: 'bg-amber-500 dark:bg-amber-600',
+    text: 'text-white',
+    border: 'border-amber-600 dark:border-amber-700',
+    dot: 'bg-white/80'
   },
   INACTIVE: {
     label: 'Inactive',
-    bg: 'bg-surface-hover',
-    text: 'text-foreground-muted',
-    border: 'border-surface-border',
-    dot: 'bg-foreground-subtle'
+    bg: 'bg-slate-500 dark:bg-slate-600',
+    text: 'text-white',
+    border: 'border-slate-600 dark:border-slate-700',
+    dot: 'bg-white/80'
   },
   DEPLETED: {
     label: 'Depleted',
-    bg: 'bg-danger-muted',
-    text: 'text-danger',
-    border: 'border-danger/30',
-    dot: 'bg-danger'
+    bg: 'bg-red-500 dark:bg-red-600',
+    text: 'text-white',
+    border: 'border-red-600 dark:border-red-700',
+    dot: 'bg-white/80'
   },
   OVERDUE: {
     label: 'Overdue',
-    bg: 'bg-danger-muted',
-    text: 'text-danger',
-    border: 'border-danger/30',
-    dot: 'bg-danger animate-status-blink'
+    bg: 'bg-red-500 dark:bg-red-600',
+    text: 'text-white',
+    border: 'border-red-600 dark:border-red-700',
+    dot: 'bg-white/80 animate-status-blink'
   },
   AT_RISK: {
     label: 'At Risk',
-    bg: 'bg-warning-muted',
-    text: 'text-warning',
-    border: 'border-warning/30',
-    dot: 'bg-warning animate-pulse-subtle'
+    bg: 'bg-amber-500 dark:bg-amber-600',
+    text: 'text-white',
+    border: 'border-amber-600 dark:border-amber-700',
+    dot: 'bg-white/80 animate-pulse-subtle'
   },
   ON_TRACK: {
     label: 'On Track',
-    bg: 'bg-success-muted',
-    text: 'text-success',
-    border: 'border-success/30',
-    dot: 'bg-success'
+    bg: 'bg-emerald-600 dark:bg-emerald-500',
+    text: 'text-white',
+    border: 'border-emerald-700 dark:border-emerald-600',
+    dot: 'bg-white/80'
   },
 };
 

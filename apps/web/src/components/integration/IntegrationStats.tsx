@@ -112,9 +112,9 @@ interface ConnectionStatusBadgeProps {
 
 export function ConnectionStatusBadge({ status }: ConnectionStatusBadgeProps) {
   const config = {
-    ACTIVE: { label: 'Active', className: 'bg-success-muted text-success', icon: CheckCircle },
-    INACTIVE: { label: 'Inactive', className: 'bg-surface-hover text-foreground-muted', icon: Activity },
-    ERROR: { label: 'Error', className: 'bg-danger-muted text-danger', icon: AlertTriangle },
+    ACTIVE: { label: 'Active', className: 'bg-emerald-600 text-white dark:bg-emerald-500', icon: CheckCircle },
+    INACTIVE: { label: 'Inactive', className: 'bg-slate-500 text-white dark:bg-slate-600', icon: Activity },
+    ERROR: { label: 'Error', className: 'bg-red-500 text-white dark:bg-red-600', icon: AlertTriangle },
   };
 
   const { label, className, icon: Icon } = config[status];
@@ -133,11 +133,11 @@ interface SyncStatusBadgeProps {
 
 export function SyncStatusBadge({ status }: SyncStatusBadgeProps) {
   const config = {
-    PENDING: { label: 'Pending', className: 'bg-surface-hover text-foreground-muted' },
-    RUNNING: { label: 'Running', className: 'bg-primary-muted text-primary' },
-    COMPLETED: { label: 'Completed', className: 'bg-success-muted text-success' },
-    COMPLETED_WITH_ERRORS: { label: 'With Errors', className: 'bg-warning-muted text-warning' },
-    FAILED: { label: 'Failed', className: 'bg-danger-muted text-danger' },
+    PENDING: { label: 'Pending', className: 'bg-slate-500 text-white dark:bg-slate-600' },
+    RUNNING: { label: 'Running', className: 'bg-blue-500 text-white dark:bg-blue-600' },
+    COMPLETED: { label: 'Completed', className: 'bg-emerald-600 text-white dark:bg-emerald-500' },
+    COMPLETED_WITH_ERRORS: { label: 'With Errors', className: 'bg-amber-500 text-white dark:bg-amber-600' },
+    FAILED: { label: 'Failed', className: 'bg-red-500 text-white dark:bg-red-600' },
   };
 
   const { label, className } = config[status];

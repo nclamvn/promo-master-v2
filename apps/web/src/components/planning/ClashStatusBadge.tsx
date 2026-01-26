@@ -35,9 +35,9 @@ const severityConfig: Record<
   string,
   { label: string; className: string }
 > = {
-  HIGH: { label: 'High', className: 'bg-danger-muted text-danger border-danger/30' },
-  MEDIUM: { label: 'Medium', className: 'bg-warning-muted text-warning border-warning/30' },
-  LOW: { label: 'Low', className: 'bg-primary-muted text-primary border-primary/30' },
+  HIGH: { label: 'High', className: 'bg-red-500 text-white border-red-600 dark:bg-red-600 dark:border-red-700' },
+  MEDIUM: { label: 'Medium', className: 'bg-amber-500 text-white border-amber-600 dark:bg-amber-600 dark:border-amber-700' },
+  LOW: { label: 'Low', className: 'bg-blue-500 text-white border-blue-600 dark:bg-blue-600 dark:border-blue-700' },
 };
 
 export function ClashSeverityBadge({ severity }: ClashSeverityBadgeProps) {

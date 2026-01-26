@@ -383,17 +383,17 @@ export const DMS_TYPE_LABELS: Record<DMSType, string> = {
 };
 
 export const CONNECTION_STATUS_CONFIG: Record<ConnectionStatus, { label: string; color: string; bgColor: string }> = {
-  ACTIVE: { label: 'Active', color: 'text-success', bgColor: 'bg-success-muted' },
-  INACTIVE: { label: 'Inactive', color: 'text-foreground-muted', bgColor: 'bg-surface-hover' },
-  ERROR: { label: 'Error', color: 'text-danger', bgColor: 'bg-danger-muted' },
+  ACTIVE: { label: 'Active', color: 'text-white', bgColor: 'bg-emerald-600 dark:bg-emerald-500' },
+  INACTIVE: { label: 'Inactive', color: 'text-white', bgColor: 'bg-slate-500 dark:bg-slate-600' },
+  ERROR: { label: 'Error', color: 'text-white', bgColor: 'bg-red-500 dark:bg-red-600' },
 };
 
 export const SYNC_STATUS_CONFIG: Record<SyncStatus, { label: string; color: string; bgColor: string }> = {
-  PENDING: { label: 'Pending', color: 'text-foreground-muted', bgColor: 'bg-surface-hover' },
-  RUNNING: { label: 'Running', color: 'text-primary', bgColor: 'bg-primary-muted' },
-  COMPLETED: { label: 'Completed', color: 'text-success', bgColor: 'bg-success-muted' },
-  COMPLETED_WITH_ERRORS: { label: 'Completed with Errors', color: 'text-warning', bgColor: 'bg-warning-muted' },
-  FAILED: { label: 'Failed', color: 'text-danger', bgColor: 'bg-danger-muted' },
+  PENDING: { label: 'Pending', color: 'text-white', bgColor: 'bg-slate-500 dark:bg-slate-600' },
+  RUNNING: { label: 'Running', color: 'text-white', bgColor: 'bg-blue-500 dark:bg-blue-600' },
+  COMPLETED: { label: 'Completed', color: 'text-white', bgColor: 'bg-emerald-600 dark:bg-emerald-500' },
+  COMPLETED_WITH_ERRORS: { label: 'Completed with Errors', color: 'text-white', bgColor: 'bg-amber-500 dark:bg-amber-600' },
+  FAILED: { label: 'Failed', color: 'text-white', bgColor: 'bg-red-500 dark:bg-red-600' },
 };
 
 export const WEBHOOK_EVENTS = [

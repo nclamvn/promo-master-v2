@@ -2,7 +2,7 @@
  * Theme Toggle Component
  */
 
-import { Sun, Moon, Monitor } from 'lucide-react';
+import { Sun, Moon } from 'lucide-react';
 import { useUIStore } from '@/stores/uiStore';
 import { cn } from '@/lib/utils';
 
@@ -17,7 +17,6 @@ export function ThemeToggle({ className, showLabel = false }: ThemeToggleProps) 
   const themes = [
     { value: 'light' as const, icon: Sun, label: 'Light' },
     { value: 'dark' as const, icon: Moon, label: 'Dark' },
-    { value: 'system' as const, icon: Monitor, label: 'System' },
   ];
 
   return (
@@ -51,19 +50,16 @@ export function ThemeToggle({ className, showLabel = false }: ThemeToggleProps) 
 export function ThemeToggleCompact({ className }: { className?: string }) {
   const { theme, setTheme } = useUIStore();
 
-  const cycleTheme = () => {
-    const themes: ('light' | 'dark' | 'system')[] = ['light', 'dark', 'system'];
-    const currentIndex = themes.indexOf(theme);
-    const nextIndex = (currentIndex + 1) % themes.length;
-    setTheme(themes[nextIndex]);
+  const toggleTheme = () => {
+    setTheme(theme === 'light' ? 'dark' : 'light');
   };
 
-  const Icon = theme === 'light' ? Sun : theme === 'dark' ? Moon : Monitor;
-  const label = theme === 'light' ? 'Light' : theme === 'dark' ? 'Dark' : 'System';
+  const Icon = theme === 'dark' ? Moon : Sun;
+  const label = theme === 'dark' ? 'Dark' : 'Light';
 
   return (
     <button
-      onClick={cycleTheme}
+      onClick={toggleTheme}
       className={cn(
         'flex items-center gap-1.5 px-2 py-1.5 rounded text-xs font-medium',
         'text-foreground-muted hover:text-foreground hover:bg-surface-hover',

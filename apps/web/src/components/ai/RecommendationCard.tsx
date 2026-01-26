@@ -36,10 +36,10 @@ const recommendationTypeIcons: Record<string, React.ElementType> = {
 };
 
 const statusColors: Record<string, string> = {
-  PENDING: 'bg-warning-muted text-warning',
-  ACCEPTED: 'bg-success-muted text-success',
-  REJECTED: 'bg-danger-muted text-danger',
-  EXPIRED: 'bg-surface-hover text-foreground-muted',
+  PENDING: 'bg-amber-500 text-white dark:bg-amber-600',
+  ACCEPTED: 'bg-emerald-600 text-white dark:bg-emerald-500',
+  REJECTED: 'bg-red-500 text-white dark:bg-red-600',
+  EXPIRED: 'bg-slate-500 text-white dark:bg-slate-600',
 };
 
 export function RecommendationCard({

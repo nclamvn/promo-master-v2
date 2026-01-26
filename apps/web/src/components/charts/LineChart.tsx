@@ -69,7 +69,15 @@ export function LineChart({
   const formatter = getFormatter(formatValue);
 
   return (
-    <div className={cn('rounded border border-surface-border bg-card', className)}>
+    <div className={cn(
+      'rounded-2xl overflow-hidden',
+      // Clean modern design
+      'bg-card',
+      'border border-surface-border',
+      // Soft shadow
+      'shadow-sm',
+      className
+    )}>
       {title && (
         <div className="px-4 py-3 border-b border-surface-border">
           <h3 className="text-sm font-semibold text-foreground uppercase tracking-wide">

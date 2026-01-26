@@ -277,7 +277,7 @@ export const handlers = [
   // AUTH
   // ═══════════════════════════════════════════════════════════════════════════
 
-  http.post('*/auth/login', async ({ request }) => {
+  http.post('/api/auth/login', async ({ request }) => {
     await delay(500);
     const body = await request.json() as { email?: string; password?: string };
     if (body.email && body.password) {
@@ -294,17 +294,17 @@ export const handlers = [
     return HttpResponse.json({ success: false, error: { message: 'Invalid credentials' } }, { status: 401 });
   }),
 
-  http.post('*/auth/logout', async () => {
+  http.post('/api/auth/logout', async () => {
     await delay(200);
     return HttpResponse.json({ success: true });
   }),
 
-  http.get('*/auth/me', async () => {
+  http.get('/api/auth/me', async () => {
     await delay(200);
     return HttpResponse.json({ success: true, data: currentUser });
   }),
 
-  http.post('*/auth/refresh', async () => {
+  http.post('/api/auth/refresh', async () => {
     await delay(200);
     const timestamp = Date.now();
     return HttpResponse.json({
@@ -320,7 +320,7 @@ export const handlers = [
   // PROMOTIONS
   // ═══════════════════════════════════════════════════════════════════════════
 
-  http.get('*/promotions', async ({ request }) => {
+  http.get('/api/promotions', async ({ request }) => {
     await delay(300);
     const url = new URL(request.url);
     const page = parseInt(url.searchParams.get('page') || '1');
@@ -330,12 +330,12 @@ export const handlers = [
     return HttpResponse.json({ success: true, data: result.data, pagination: result.pagination });
   }),
 
-  http.get('*/promotions/stats', async () => {
+  http.get('/api/promotions/stats', async () => {
     await delay(200);
     return HttpResponse.json({ success: true, data: mockPromotionStats });
   }),
 
-  http.get('*/promotions/:id', async ({ params }) => {
+  http.get('/api/promotions/:id', async ({ params }) => {
     await delay(200);
     const promotion = mockPromotions.find(p => p.id === params.id);
     if (!promotion) {
@@ -344,7 +344,7 @@ export const handlers = [
     return HttpResponse.json({ success: true, data: promotion });
   }),
 
-  http.post('*/promotions', async ({ request }) => {
+  http.post('/api/promotions', async ({ request }) => {
     await delay(500);
     const body = await request.json() as Record<string, unknown>;
     const newPromotion = {
@@ -360,7 +360,7 @@ export const handlers = [
     return HttpResponse.json({ success: true, data: newPromotion }, { status: 201 });
   }),
 
-  http.put('*/promotions/:id', async ({ params, request }) => {
+  http.put('/api/promotions/:id', async ({ params, request }) => {
     await delay(300);
     const body = await request.json() as Record<string, unknown>;
     const promotion = mockPromotions.find(p => p.id === params.id);
@@ -371,7 +371,7 @@ export const handlers = [
     return HttpResponse.json({ success: true, data: updated });
   }),
 
-  http.patch('*/promotions/:id', async ({ params, request }) => {
+  http.patch('/api/promotions/:id', async ({ params, request }) => {
     await delay(300);
     const body = await request.json() as Record<string, unknown>;
     const promotion = mockPromotions.find(p => p.id === params.id);
@@ -382,12 +382,12 @@ export const handlers = [
     return HttpResponse.json({ success: true, data: updated });
   }),
 
-  http.delete('*/promotions/:id', async () => {
+  http.delete('/api/promotions/:id', async () => {
     await delay(300);
     return HttpResponse.json({ success: true, message: 'Promotion deleted' });
   }),
 
-  http.post('*/promotions/:id/submit', async ({ params }) => {
+  http.post('/api/promotions/:id/submit', async ({ params }) => {
     await delay(500);
     const promotion = mockPromotions.find(p => p.id === params.id);
     if (promotion) {
@@ -396,7 +396,7 @@ export const handlers = [
     return HttpResponse.json({ success: false, error: { message: 'Not found' } }, { status: 404 });
   }),
 
-  http.post('*/promotions/:id/approve', async ({ params }) => {
+  http.post('/api/promotions/:id/approve', async ({ params }) => {
     await delay(500);
     const promotion = mockPromotions.find(p => p.id === params.id);
     if (promotion) {
@@ -405,7 +405,7 @@ export const handlers = [
     return HttpResponse.json({ success: false, error: { message: 'Not found' } }, { status: 404 });
   }),
 
-  http.post('*/promotions/:id/reject', async ({ params, request }) => {
+  http.post('/api/promotions/:id/reject', async ({ params, request }) => {
     await delay(500);
     const body = await request.json() as { reason?: string };
     const promotion = mockPromotions.find(p => p.id === params.id);
@@ -419,7 +419,7 @@ export const handlers = [
   // CLAIMS
   // ═══════════════════════════════════════════════════════════════════════════
 
-  http.get('*/claims', async ({ request }) => {
+  http.get('/api/claims', async ({ request }) => {
     await delay(300);
     const url = new URL(request.url);
     const page = parseInt(url.searchParams.get('page') || '1');
@@ -429,12 +429,12 @@ export const handlers = [
     return HttpResponse.json({ success: true, data: result.data, pagination: result.pagination });
   }),
 
-  http.get('*/claims/stats', async () => {
+  http.get('/api/claims/stats', async () => {
     await delay(200);
     return HttpResponse.json({ success: true, data: mockClaimStats });
   }),
 
-  http.get('*/claims/:id', async ({ params }) => {
+  http.get('/api/claims/:id', async ({ params }) => {
     await delay(200);
     const claim = mockClaims.find(c => c.id === params.id);
     if (!claim) {
@@ -443,7 +443,7 @@ export const handlers = [
     return HttpResponse.json({ success: true, data: claim });
   }),
 
-  http.post('*/claims', async ({ request }) => {
+  http.post('/api/claims', async ({ request }) => {
     await delay(500);
     const body = await request.json() as Record<string, unknown>;
     const newClaim = {
@@ -458,7 +458,7 @@ export const handlers = [
     return HttpResponse.json({ success: true, data: newClaim }, { status: 201 });
   }),
 
-  http.patch('*/claims/:id', async ({ params, request }) => {
+  http.patch('/api/claims/:id', async ({ params, request }) => {
     await delay(300);
     const body = await request.json() as Record<string, unknown>;
     const claim = mockClaims.find(c => c.id === params.id);
@@ -469,12 +469,12 @@ export const handlers = [
     return HttpResponse.json({ success: true, data: updated });
   }),
 
-  http.delete('*/claims/:id', async () => {
+  http.delete('/api/claims/:id', async () => {
     await delay(300);
     return HttpResponse.json({ success: true, message: 'Claim deleted' });
   }),
 
-  http.post('*/claims/:id/submit', async ({ params }) => {
+  http.post('/api/claims/:id/submit', async ({ params }) => {
     await delay(500);
     const claim = mockClaims.find(c => c.id === params.id);
     if (claim) {
@@ -483,7 +483,7 @@ export const handlers = [
     return HttpResponse.json({ success: false, error: { message: 'Not found' } }, { status: 404 });
   }),
 
-  http.post('*/claims/:id/approve', async ({ params }) => {
+  http.post('/api/claims/:id/approve', async ({ params }) => {
     await delay(500);
     const claim = mockClaims.find(c => c.id === params.id);
     if (claim) {
@@ -492,7 +492,7 @@ export const handlers = [
     return HttpResponse.json({ success: false, error: { message: 'Not found' } }, { status: 404 });
   }),
 
-  http.post('*/claims/:id/reject', async ({ params, request }) => {
+  http.post('/api/claims/:id/reject', async ({ params, request }) => {
     await delay(500);
     const body = await request.json() as { reason?: string };
     const claim = mockClaims.find(c => c.id === params.id);
@@ -506,7 +506,7 @@ export const handlers = [
   // CUSTOMERS
   // ═══════════════════════════════════════════════════════════════════════════
 
-  http.get('*/customers', async ({ request }) => {
+  http.get('/api/customers', async ({ request }) => {
     await delay(300);
     const url = new URL(request.url);
     const page = parseInt(url.searchParams.get('page') || '1');
@@ -516,7 +516,7 @@ export const handlers = [
     return HttpResponse.json({ success: true, data: result.data, pagination: result.pagination });
   }),
 
-  http.get('*/customers/:id', async ({ params }) => {
+  http.get('/api/customers/:id', async ({ params }) => {
     await delay(200);
     const customer = mockCustomers.find(c => c.id === params.id);
     if (!customer) {
@@ -529,7 +529,7 @@ export const handlers = [
   // PRODUCTS
   // ═══════════════════════════════════════════════════════════════════════════
 
-  http.get('*/products', async ({ request }) => {
+  http.get('/api/products', async ({ request }) => {
     await delay(300);
     const url = new URL(request.url);
     const page = parseInt(url.searchParams.get('page') || '1');
@@ -539,7 +539,7 @@ export const handlers = [
     return HttpResponse.json({ success: true, data: result.data, pagination: result.pagination });
   }),
 
-  http.get('*/products/:id', async ({ params }) => {
+  http.get('/api/products/:id', async ({ params }) => {
     await delay(200);
     const product = mockProducts.find(p => p.id === params.id);
     if (!product) {
@@ -552,7 +552,7 @@ export const handlers = [
   // FUNDS
   // ═══════════════════════════════════════════════════════════════════════════
 
-  http.get('*/funds', async ({ request }) => {
+  http.get('/api/funds', async ({ request }) => {
     await delay(300);
     const url = new URL(request.url);
     const page = parseInt(url.searchParams.get('page') || '1');
@@ -561,7 +561,7 @@ export const handlers = [
     return HttpResponse.json({ success: true, data: result.data, pagination: result.pagination });
   }),
 
-  http.get('*/funds/:id', async ({ params }) => {
+  http.get('/api/funds/:id', async ({ params }) => {
     await delay(200);
     const fund = mockFunds.find(f => f.id === params.id);
     if (!fund) {
@@ -570,7 +570,7 @@ export const handlers = [
     return HttpResponse.json({ success: true, data: fund });
   }),
 
-  http.get('*/funds/:id/utilization', async ({ params }) => {
+  http.get('/api/funds/:id/utilization', async ({ params }) => {
     await delay(200);
     const fund = mockFunds.find(f => f.id === params.id);
     if (!fund) {
@@ -592,7 +592,7 @@ export const handlers = [
     });
   }),
 
-  http.post('*/funds', async ({ request }) => {
+  http.post('/api/funds', async ({ request }) => {
     await delay(500);
     const body = await request.json() as Record<string, unknown>;
     const newFund = {
@@ -608,7 +608,7 @@ export const handlers = [
     return HttpResponse.json({ success: true, data: newFund }, { status: 201 });
   }),
 
-  http.patch('*/funds/:id', async ({ params, request }) => {
+  http.patch('/api/funds/:id', async ({ params, request }) => {
     await delay(300);
     const body = await request.json() as Record<string, unknown>;
     const fund = mockFunds.find(f => f.id === params.id);
@@ -619,7 +619,7 @@ export const handlers = [
     return HttpResponse.json({ success: true, data: updated });
   }),
 
-  http.delete('*/funds/:id', async () => {
+  http.delete('/api/funds/:id', async () => {
     await delay(300);
     return HttpResponse.json({ success: true, message: 'Fund deleted' });
   }),
@@ -628,7 +628,7 @@ export const handlers = [
   // BUDGETS
   // ═══════════════════════════════════════════════════════════════════════════
 
-  http.get('*/budgets', async ({ request }) => {
+  http.get('/api/budgets', async ({ request }) => {
     await delay(300);
     const url = new URL(request.url);
     const page = parseInt(url.searchParams.get('page') || '1');
@@ -637,12 +637,12 @@ export const handlers = [
     return HttpResponse.json({ success: true, data: result.data, pagination: result.pagination });
   }),
 
-  http.get('*/budgets/years', async () => {
+  http.get('/api/budgets/years', async () => {
     await delay(200);
     return HttpResponse.json({ success: true, data: [2024, 2025, 2026] });
   }),
 
-  http.get('*/budgets/:id', async ({ params }) => {
+  http.get('/api/budgets/:id', async ({ params }) => {
     await delay(200);
     const budget = mockBudgets.find(b => b.id === params.id);
     if (!budget) {
@@ -651,7 +651,7 @@ export const handlers = [
     return HttpResponse.json({ success: true, data: budget });
   }),
 
-  http.post('*/budgets', async ({ request }) => {
+  http.post('/api/budgets', async ({ request }) => {
     await delay(500);
     const body = await request.json() as Record<string, unknown>;
     const newBudget = {
@@ -668,7 +668,7 @@ export const handlers = [
     return HttpResponse.json({ success: true, data: newBudget }, { status: 201 });
   }),
 
-  http.patch('*/budgets/:id', async ({ params, request }) => {
+  http.patch('/api/budgets/:id', async ({ params, request }) => {
     await delay(300);
     const body = await request.json() as Record<string, unknown>;
     const budget = mockBudgets.find(b => b.id === params.id);
@@ -679,7 +679,7 @@ export const handlers = [
     return HttpResponse.json({ success: true, data: updated });
   }),
 
-  http.delete('*/budgets/:id', async () => {
+  http.delete('/api/budgets/:id', async () => {
     await delay(300);
     return HttpResponse.json({ success: true, message: 'Budget deleted' });
   }),
@@ -688,7 +688,7 @@ export const handlers = [
   // TARGETS
   // ═══════════════════════════════════════════════════════════════════════════
 
-  http.get('*/targets', async ({ request }) => {
+  http.get('/api/targets', async ({ request }) => {
     await delay(300);
     const url = new URL(request.url);
     const page = parseInt(url.searchParams.get('page') || '1');
@@ -697,7 +697,7 @@ export const handlers = [
     return HttpResponse.json({ success: true, data: result.data, pagination: result.pagination });
   }),
 
-  http.get('*/targets/:id', async ({ params }) => {
+  http.get('/api/targets/:id', async ({ params }) => {
     await delay(200);
     const target = mockTargets.find(t => t.id === params.id);
     if (!target) {
@@ -706,7 +706,7 @@ export const handlers = [
     return HttpResponse.json({ success: true, data: target });
   }),
 
-  http.post('*/targets', async ({ request }) => {
+  http.post('/api/targets', async ({ request }) => {
     await delay(500);
     const body = await request.json() as Record<string, unknown>;
     const newTarget = {
@@ -721,7 +721,7 @@ export const handlers = [
     return HttpResponse.json({ success: true, data: newTarget }, { status: 201 });
   }),
 
-  http.patch('*/targets/:id', async ({ params, request }) => {
+  http.patch('/api/targets/:id', async ({ params, request }) => {
     await delay(300);
     const body = await request.json() as Record<string, unknown>;
     const target = mockTargets.find(t => t.id === params.id);
@@ -732,7 +732,7 @@ export const handlers = [
     return HttpResponse.json({ success: true, data: updated });
   }),
 
-  http.delete('*/targets/:id', async () => {
+  http.delete('/api/targets/:id', async () => {
     await delay(300);
     return HttpResponse.json({ success: true, message: 'Target deleted' });
   }),
@@ -741,7 +741,7 @@ export const handlers = [
   // BASELINES
   // ═══════════════════════════════════════════════════════════════════════════
 
-  http.get('*/baselines', async ({ request }) => {
+  http.get('/api/baselines', async ({ request }) => {
     await delay(300);
     const url = new URL(request.url);
     const page = parseInt(url.searchParams.get('page') || '1');
@@ -750,7 +750,7 @@ export const handlers = [
     return HttpResponse.json({ success: true, data: result.data, pagination: result.pagination });
   }),
 
-  http.get('*/baselines/:id', async ({ params }) => {
+  http.get('/api/baselines/:id', async ({ params }) => {
     await delay(200);
     const baseline = mockBaselines.find(b => b.id === params.id);
     if (!baseline) {
@@ -759,7 +759,7 @@ export const handlers = [
     return HttpResponse.json({ success: true, data: baseline });
   }),
 
-  http.post('*/baselines', async ({ request }) => {
+  http.post('/api/baselines', async ({ request }) => {
     await delay(500);
     const body = await request.json() as Record<string, unknown>;
     const newBaseline = {
@@ -772,7 +772,7 @@ export const handlers = [
     return HttpResponse.json({ success: true, data: newBaseline }, { status: 201 });
   }),
 
-  http.patch('*/baselines/:id', async ({ params, request }) => {
+  http.patch('/api/baselines/:id', async ({ params, request }) => {
     await delay(300);
     const body = await request.json() as Record<string, unknown>;
     const baseline = mockBaselines.find(b => b.id === params.id);
@@ -783,7 +783,7 @@ export const handlers = [
     return HttpResponse.json({ success: true, data: updated });
   }),
 
-  http.delete('*/baselines/:id', async () => {
+  http.delete('/api/baselines/:id', async () => {
     await delay(300);
     return HttpResponse.json({ success: true, message: 'Baseline deleted' });
   }),
@@ -792,7 +792,7 @@ export const handlers = [
   // FINANCE - ACCRUALS
   // ═══════════════════════════════════════════════════════════════════════════
 
-  http.get('*/finance/accruals', async ({ request }) => {
+  http.get('/api/finance/accruals', async ({ request }) => {
     await delay(300);
     const url = new URL(request.url);
     const page = parseInt(url.searchParams.get('page') || '1');
@@ -809,7 +809,7 @@ export const handlers = [
     return HttpResponse.json({ success: true, data: result.data, pagination: result.pagination });
   }),
 
-  http.get('*/finance/accruals/:id', async ({ params }) => {
+  http.get('/api/finance/accruals/:id', async ({ params }) => {
     await delay(200);
     const accrual = mockAccruals.find(a => a.id === params.id);
     if (!accrual) {
@@ -825,7 +825,7 @@ export const handlers = [
     return HttpResponse.json({ success: true, data: transformed });
   }),
 
-  http.post('*/finance/accruals/calculate', async ({ request }) => {
+  http.post('/api/finance/accruals/calculate', async ({ request }) => {
     await delay(1000);
     const body = await request.json() as { promotionId?: string };
     return HttpResponse.json({
@@ -843,7 +843,7 @@ export const handlers = [
     });
   }),
 
-  http.post('*/finance/accruals/preview', async () => {
+  http.post('/api/finance/accruals/preview', async () => {
     await delay(500);
     return HttpResponse.json({
       success: true,
@@ -855,7 +855,7 @@ export const handlers = [
     });
   }),
 
-  http.put('*/finance/accruals/:id', async ({ params, request }) => {
+  http.put('/api/finance/accruals/:id', async ({ params, request }) => {
     await delay(300);
     const body = await request.json() as Record<string, unknown>;
     const accrual = mockAccruals.find(a => a.id === params.id);
@@ -866,12 +866,12 @@ export const handlers = [
     return HttpResponse.json({ success: true, data: updated });
   }),
 
-  http.delete('*/finance/accruals/:id', async () => {
+  http.delete('/api/finance/accruals/:id', async () => {
     await delay(300);
     return HttpResponse.json({ success: true, message: 'Accrual deleted' });
   }),
 
-  http.post('*/finance/accruals/:id/post', async ({ params }) => {
+  http.post('/api/finance/accruals/:id/post', async ({ params }) => {
     await delay(500);
     return HttpResponse.json({
       success: true,
@@ -879,7 +879,7 @@ export const handlers = [
     });
   }),
 
-  http.post('*/finance/accruals/post-batch', async ({ request }) => {
+  http.post('/api/finance/accruals/post-batch', async ({ request }) => {
     await delay(1000);
     const body = await request.json() as { ids?: string[] };
     return HttpResponse.json({
@@ -892,7 +892,7 @@ export const handlers = [
     });
   }),
 
-  http.post('*/finance/accruals/:id/reverse', async ({ params }) => {
+  http.post('/api/finance/accruals/:id/reverse', async ({ params }) => {
     await delay(500);
     return HttpResponse.json({
       success: true,
@@ -904,7 +904,7 @@ export const handlers = [
   // FINANCE - DEDUCTIONS
   // ═══════════════════════════════════════════════════════════════════════════
 
-  http.get('*/finance/deductions', async ({ request }) => {
+  http.get('/api/finance/deductions', async ({ request }) => {
     await delay(300);
     const url = new URL(request.url);
     const page = parseInt(url.searchParams.get('page') || '1');
@@ -914,7 +914,7 @@ export const handlers = [
     return HttpResponse.json({ success: true, data: result.data, pagination: result.pagination });
   }),
 
-  http.get('*/finance/deductions/:id', async ({ params }) => {
+  http.get('/api/finance/deductions/:id', async ({ params }) => {
     await delay(200);
     const deduction = mockDeductions.find(d => d.id === params.id);
     if (!deduction) {
@@ -923,7 +923,7 @@ export const handlers = [
     return HttpResponse.json({ success: true, data: deduction });
   }),
 
-  http.get('*/finance/deductions/:id/suggestions', async () => {
+  http.get('/api/finance/deductions/:id/suggestions', async () => {
     await delay(300);
     return HttpResponse.json({
       success: true,
@@ -947,7 +947,7 @@ export const handlers = [
     });
   }),
 
-  http.post('*/finance/deductions', async ({ request }) => {
+  http.post('/api/finance/deductions', async ({ request }) => {
     await delay(500);
     const body = await request.json() as Record<string, unknown>;
     const newDeduction = {
@@ -961,7 +961,7 @@ export const handlers = [
     return HttpResponse.json({ success: true, data: newDeduction }, { status: 201 });
   }),
 
-  http.put('*/finance/deductions/:id', async ({ params, request }) => {
+  http.put('/api/finance/deductions/:id', async ({ params, request }) => {
     await delay(300);
     const body = await request.json() as Record<string, unknown>;
     const deduction = mockDeductions.find(d => d.id === params.id);
@@ -972,12 +972,12 @@ export const handlers = [
     return HttpResponse.json({ success: true, data: updated });
   }),
 
-  http.delete('*/finance/deductions/:id', async () => {
+  http.delete('/api/finance/deductions/:id', async () => {
     await delay(300);
     return HttpResponse.json({ success: true, message: 'Deduction deleted' });
   }),
 
-  http.post('*/finance/deductions/:id/match', async ({ params, request }) => {
+  http.post('/api/finance/deductions/:id/match', async ({ params, request }) => {
     await delay(500);
     const body = await request.json() as { claimId?: string };
     return HttpResponse.json({
@@ -986,7 +986,7 @@ export const handlers = [
     });
   }),
 
-  http.post('*/finance/deductions/:id/dispute', async ({ params, request }) => {
+  http.post('/api/finance/deductions/:id/dispute', async ({ params, request }) => {
     await delay(500);
     const body = await request.json() as { reason?: string };
     return HttpResponse.json({
@@ -995,7 +995,7 @@ export const handlers = [
     });
   }),
 
-  http.post('*/finance/deductions/:id/resolve', async ({ params, request }) => {
+  http.post('/api/finance/deductions/:id/resolve', async ({ params, request }) => {
     await delay(500);
     const body = await request.json() as { resolution?: string; amount?: number };
     return HttpResponse.json({
@@ -1008,7 +1008,7 @@ export const handlers = [
   // FINANCE - JOURNALS
   // ═══════════════════════════════════════════════════════════════════════════
 
-  http.get('*/finance/journals', async ({ request }) => {
+  http.get('/api/finance/journals', async ({ request }) => {
     await delay(300);
     const url = new URL(request.url);
     const page = parseInt(url.searchParams.get('page') || '1');
@@ -1018,7 +1018,7 @@ export const handlers = [
     return HttpResponse.json({ success: true, data: result.data, pagination: result.pagination });
   }),
 
-  http.get('*/finance/journals/:id', async ({ params }) => {
+  http.get('/api/finance/journals/:id', async ({ params }) => {
     await delay(200);
     const journal = mockJournals.find(j => j.id === params.id);
     if (!journal) {
@@ -1027,7 +1027,7 @@ export const handlers = [
     return HttpResponse.json({ success: true, data: journal });
   }),
 
-  http.post('*/finance/journals', async ({ request }) => {
+  http.post('/api/finance/journals', async ({ request }) => {
     await delay(500);
     const body = await request.json() as Record<string, unknown>;
     const newJournal = {
@@ -1041,7 +1041,7 @@ export const handlers = [
     return HttpResponse.json({ success: true, data: newJournal }, { status: 201 });
   }),
 
-  http.put('*/finance/journals/:id', async ({ params, request }) => {
+  http.put('/api/finance/journals/:id', async ({ params, request }) => {
     await delay(300);
     const body = await request.json() as Record<string, unknown>;
     const journal = mockJournals.find(j => j.id === params.id);
@@ -1052,12 +1052,12 @@ export const handlers = [
     return HttpResponse.json({ success: true, data: updated });
   }),
 
-  http.delete('*/finance/journals/:id', async () => {
+  http.delete('/api/finance/journals/:id', async () => {
     await delay(300);
     return HttpResponse.json({ success: true, message: 'Journal deleted' });
   }),
 
-  http.post('*/finance/journals/:id/post', async ({ params }) => {
+  http.post('/api/finance/journals/:id/post', async ({ params }) => {
     await delay(500);
     return HttpResponse.json({
       success: true,
@@ -1065,7 +1065,7 @@ export const handlers = [
     });
   }),
 
-  http.post('*/finance/journals/:id/reverse', async ({ params }) => {
+  http.post('/api/finance/journals/:id/reverse', async ({ params }) => {
     await delay(500);
     return HttpResponse.json({
       success: true,
@@ -1077,7 +1077,7 @@ export const handlers = [
   // FINANCE - CHEQUES
   // ═══════════════════════════════════════════════════════════════════════════
 
-  http.get('*/finance/cheques', async ({ request }) => {
+  http.get('/api/finance/cheques', async ({ request }) => {
     await delay(300);
     const url = new URL(request.url);
     const page = parseInt(url.searchParams.get('page') || '1');
@@ -1087,7 +1087,7 @@ export const handlers = [
     return HttpResponse.json({ success: true, data: result.data, pagination: result.pagination });
   }),
 
-  http.get('*/finance/cheques/:id', async ({ params }) => {
+  http.get('/api/finance/cheques/:id', async ({ params }) => {
     await delay(200);
     const cheque = mockCheques.find(c => c.id === params.id);
     if (!cheque) {
@@ -1096,7 +1096,7 @@ export const handlers = [
     return HttpResponse.json({ success: true, data: cheque });
   }),
 
-  http.post('*/finance/cheques', async ({ request }) => {
+  http.post('/api/finance/cheques', async ({ request }) => {
     await delay(500);
     const body = await request.json() as Record<string, unknown>;
     const newCheque = {
@@ -1110,7 +1110,7 @@ export const handlers = [
     return HttpResponse.json({ success: true, data: newCheque }, { status: 201 });
   }),
 
-  http.put('*/finance/cheques/:id', async ({ params, request }) => {
+  http.put('/api/finance/cheques/:id', async ({ params, request }) => {
     await delay(300);
     const body = await request.json() as { action?: string };
     const cheque = mockCheques.find(c => c.id === params.id);
@@ -1125,12 +1125,12 @@ export const handlers = [
     return HttpResponse.json({ success: true, data: updated });
   }),
 
-  http.delete('*/finance/cheques/:id', async () => {
+  http.delete('/api/finance/cheques/:id', async () => {
     await delay(300);
     return HttpResponse.json({ success: true, message: 'Cheque deleted' });
   }),
 
-  http.get('*/finance/stats', async () => {
+  http.get('/api/finance/stats', async () => {
     await delay(200);
     return HttpResponse.json({ success: true, data: mockFinanceStats });
   }),
@@ -1139,28 +1139,28 @@ export const handlers = [
   // NOTIFICATIONS
   // ═══════════════════════════════════════════════════════════════════════════
 
-  http.get('*/notifications', async () => {
+  http.get('/api/notifications', async () => {
     await delay(200);
     return HttpResponse.json({ success: true, data: mockNotifications });
   }),
 
-  http.get('*/notifications/unread-count', async () => {
+  http.get('/api/notifications/unread-count', async () => {
     await delay(100);
     const unreadCount = mockNotifications.filter(n => !n.read).length;
     return HttpResponse.json({ success: true, data: { count: unreadCount } });
   }),
 
-  http.patch('*/notifications/:id/read', async ({ params }) => {
+  http.patch('/api/notifications/:id/read', async ({ params }) => {
     await delay(200);
     return HttpResponse.json({ success: true, data: { id: params.id, read: true } });
   }),
 
-  http.patch('*/notifications/mark-all-read', async () => {
+  http.patch('/api/notifications/mark-all-read', async () => {
     await delay(200);
     return HttpResponse.json({ success: true, message: 'All notifications marked as read' });
   }),
 
-  http.delete('*/notifications/:id', async () => {
+  http.delete('/api/notifications/:id', async () => {
     await delay(200);
     return HttpResponse.json({ success: true, message: 'Notification deleted' });
   }),
@@ -1169,22 +1169,22 @@ export const handlers = [
   // DASHBOARD
   // ═══════════════════════════════════════════════════════════════════════════
 
-  http.get('*/dashboard/stats', async () => {
+  http.get('/api/dashboard/stats', async () => {
     await delay(200);
     return HttpResponse.json({ success: true, data: mockDashboardKPIs });
   }),
 
-  http.get('*/dashboard/kpi', async () => {
+  http.get('/api/dashboard/kpi', async () => {
     await delay(200);
     return HttpResponse.json({ success: true, data: mockDashboardKPIs });
   }),
 
-  http.get('*/dashboard/kpis', async () => {
+  http.get('/api/dashboard/kpis', async () => {
     await delay(200);
     return HttpResponse.json({ success: true, data: mockDashboardKPIs });
   }),
 
-  http.get('*/dashboard/activity', async () => {
+  http.get('/api/dashboard/activity', async () => {
     await delay(200);
     return HttpResponse.json({
       success: true,
@@ -1196,17 +1196,17 @@ export const handlers = [
     });
   }),
 
-  http.get('*/dashboard/charts', async () => {
+  http.get('/api/dashboard/charts', async () => {
     await delay(300);
     return HttpResponse.json({ success: true, data: mockChartData });
   }),
 
-  http.get('*/dashboard/charts/promotions-by-status', async () => {
+  http.get('/api/dashboard/charts/promotions-by-status', async () => {
     await delay(200);
     return HttpResponse.json({ success: true, data: mockChartData.promotionsByStatus });
   }),
 
-  http.get('*/dashboard/charts/budget-utilization', async () => {
+  http.get('/api/dashboard/charts/budget-utilization', async () => {
     await delay(200);
     return HttpResponse.json({
       success: true,
@@ -1218,12 +1218,12 @@ export const handlers = [
     });
   }),
 
-  http.get('*/dashboard/charts/claims-trend', async () => {
+  http.get('/api/dashboard/charts/claims-trend', async () => {
     await delay(200);
     return HttpResponse.json({ success: true, data: mockChartData.claimsTrend });
   }),
 
-  http.get('*/dashboard/charts/spend-trend', async () => {
+  http.get('/api/dashboard/charts/spend-trend', async () => {
     await delay(200);
     return HttpResponse.json({
       success: true,
@@ -1238,12 +1238,12 @@ export const handlers = [
     });
   }),
 
-  http.get('*/dashboard/charts/status-distribution', async () => {
+  http.get('/api/dashboard/charts/status-distribution', async () => {
     await delay(200);
     return HttpResponse.json({ success: true, data: mockChartData.promotionsByStatus });
   }),
 
-  http.get('*/dashboard/charts/top-customers', async () => {
+  http.get('/api/dashboard/charts/top-customers', async () => {
     await delay(200);
     return HttpResponse.json({ success: true, data: mockChartData.topCustomers });
   }),
@@ -1252,7 +1252,7 @@ export const handlers = [
   // PLANNING - TEMPLATES
   // ═══════════════════════════════════════════════════════════════════════════
 
-  http.get('*/planning/templates', async ({ request }) => {
+  http.get('/api/planning/templates', async ({ request }) => {
     await delay(300);
     const url = new URL(request.url);
     const page = parseInt(url.searchParams.get('page') || '1');
@@ -1261,13 +1261,13 @@ export const handlers = [
     return HttpResponse.json({ success: true, data: result.data, pagination: result.pagination });
   }),
 
-  http.get('*/planning/templates/:id', async ({ params }) => {
+  http.get('/api/planning/templates/:id', async ({ params }) => {
     await delay(200);
     const template = mockTemplates.find(t => t.id === params.id) || mockTemplates[0];
     return HttpResponse.json({ success: true, data: { ...template, id: params.id } });
   }),
 
-  http.get('*/planning/templates/:id/versions', async () => {
+  http.get('/api/planning/templates/:id/versions', async () => {
     await delay(200);
     return HttpResponse.json({
       success: true,
@@ -1279,7 +1279,7 @@ export const handlers = [
     });
   }),
 
-  http.post('*/planning/templates', async ({ request }) => {
+  http.post('/api/planning/templates', async ({ request }) => {
     await delay(500);
     const body = await request.json() as Record<string, unknown>;
     const newTemplate = {
@@ -1292,7 +1292,7 @@ export const handlers = [
     return HttpResponse.json({ success: true, data: newTemplate }, { status: 201 });
   }),
 
-  http.put('*/planning/templates/:id', async ({ params, request }) => {
+  http.put('/api/planning/templates/:id', async ({ params, request }) => {
     await delay(300);
     const body = await request.json() as Record<string, unknown>;
     const template = mockTemplates.find(t => t.id === params.id) || mockTemplates[0];
@@ -1300,12 +1300,12 @@ export const handlers = [
     return HttpResponse.json({ success: true, data: updated });
   }),
 
-  http.delete('*/planning/templates/:id', async () => {
+  http.delete('/api/planning/templates/:id', async () => {
     await delay(300);
     return HttpResponse.json({ success: true, message: 'Template deleted' });
   }),
 
-  http.post('*/planning/templates/:id/apply', async ({ params, request }) => {
+  http.post('/api/planning/templates/:id/apply', async ({ params, request }) => {
     await delay(500);
     const body = await request.json() as { promotionId?: string };
     return HttpResponse.json({
@@ -1322,7 +1322,7 @@ export const handlers = [
   // PLANNING - SCENARIOS
   // ═══════════════════════════════════════════════════════════════════════════
 
-  http.get('*/planning/scenarios', async ({ request }) => {
+  http.get('/api/planning/scenarios', async ({ request }) => {
     await delay(300);
     const url = new URL(request.url);
     const page = parseInt(url.searchParams.get('page') || '1');
@@ -1331,13 +1331,13 @@ export const handlers = [
     return HttpResponse.json({ success: true, data: result.data, pagination: result.pagination });
   }),
 
-  http.get('*/planning/scenarios/:id', async ({ params }) => {
+  http.get('/api/planning/scenarios/:id', async ({ params }) => {
     await delay(200);
     const scenario = mockScenarios.find(s => s.id === params.id) || mockScenarios[0];
     return HttpResponse.json({ success: true, data: { ...scenario, id: params.id, promotions: mockPromotions.slice(0, 3) } });
   }),
 
-  http.get('*/planning/scenarios/:id/versions', async () => {
+  http.get('/api/planning/scenarios/:id/versions', async () => {
     await delay(200);
     return HttpResponse.json({
       success: true,
@@ -1348,7 +1348,7 @@ export const handlers = [
     });
   }),
 
-  http.post('*/planning/scenarios', async ({ request }) => {
+  http.post('/api/planning/scenarios', async ({ request }) => {
     await delay(500);
     const body = await request.json() as Record<string, unknown>;
     const newScenario = {
@@ -1362,7 +1362,7 @@ export const handlers = [
     return HttpResponse.json({ success: true, data: newScenario }, { status: 201 });
   }),
 
-  http.put('*/planning/scenarios/:id', async ({ params, request }) => {
+  http.put('/api/planning/scenarios/:id', async ({ params, request }) => {
     await delay(300);
     const body = await request.json() as Record<string, unknown>;
     const scenario = mockScenarios.find(s => s.id === params.id) || mockScenarios[0];
@@ -1370,12 +1370,12 @@ export const handlers = [
     return HttpResponse.json({ success: true, data: updated });
   }),
 
-  http.delete('*/planning/scenarios/:id', async () => {
+  http.delete('/api/planning/scenarios/:id', async () => {
     await delay(300);
     return HttpResponse.json({ success: true, message: 'Scenario deleted' });
   }),
 
-  http.post('*/planning/scenarios/:id/run', async ({ params }) => {
+  http.post('/api/planning/scenarios/:id/run', async ({ params }) => {
     await delay(1000);
     const scenario = mockScenarios.find(s => s.id === params.id) || mockScenarios[0];
     // Return comprehensive results matching ScenarioResults component
@@ -1408,7 +1408,7 @@ export const handlers = [
     });
   }),
 
-  http.post('*/planning/scenarios/:id/clone', async ({ params }) => {
+  http.post('/api/planning/scenarios/:id/clone', async ({ params }) => {
     await delay(500);
     return HttpResponse.json({
       success: true,
@@ -1422,7 +1422,7 @@ export const handlers = [
     });
   }),
 
-  http.post('*/planning/scenarios/:id/versions', async ({ params }) => {
+  http.post('/api/planning/scenarios/:id/versions', async ({ params }) => {
     await delay(500);
     return HttpResponse.json({
       success: true,
@@ -1430,7 +1430,7 @@ export const handlers = [
     });
   }),
 
-  http.post('*/planning/scenarios/compare', async ({ request }) => {
+  http.post('/api/planning/scenarios/compare', async ({ request }) => {
     await delay(500);
     const body = await request.json() as { scenarioIds?: string[] };
     return HttpResponse.json({
@@ -1455,7 +1455,7 @@ export const handlers = [
   // PLANNING - CLASHES
   // ═══════════════════════════════════════════════════════════════════════════
 
-  http.get('*/planning/clashes/stats', async () => {
+  http.get('/api/planning/clashes/stats', async () => {
     await delay(200);
     return HttpResponse.json({
       success: true,
@@ -1463,7 +1463,7 @@ export const handlers = [
     });
   }),
 
-  http.get('*/planning/clashes', async ({ request }) => {
+  http.get('/api/planning/clashes', async ({ request }) => {
     await delay(300);
     const url = new URL(request.url);
     const page = parseInt(url.searchParams.get('page') || '1');
@@ -1472,7 +1472,7 @@ export const handlers = [
     return HttpResponse.json({ success: true, data: result.data, pagination: result.pagination });
   }),
 
-  http.get('*/planning/clashes/:id', async ({ params }) => {
+  http.get('/api/planning/clashes/:id', async ({ params }) => {
     await delay(200);
     const clash = mockClashes.find(c => c.id === params.id) || mockClashes[0];
     // Enrich with full promotion details for ClashDetail page
@@ -1514,7 +1514,7 @@ export const handlers = [
     return HttpResponse.json({ success: true, data: enrichedClash });
   }),
 
-  http.patch('*/planning/clashes/:id', async ({ params, request }) => {
+  http.patch('/api/planning/clashes/:id', async ({ params, request }) => {
     await delay(300);
     const body = await request.json() as Record<string, unknown>;
     const clash = mockClashes.find(c => c.id === params.id) || mockClashes[0];
@@ -1522,7 +1522,7 @@ export const handlers = [
     return HttpResponse.json({ success: true, data: updated });
   }),
 
-  http.post('*/planning/clashes/:id/resolve', async ({ params }) => {
+  http.post('/api/planning/clashes/:id/resolve', async ({ params }) => {
     await delay(500);
     return HttpResponse.json({
       success: true,
@@ -1534,7 +1534,7 @@ export const handlers = [
   // OPERATIONS - DELIVERY
   // ═══════════════════════════════════════════════════════════════════════════
 
-  http.get('*/operations/delivery', async ({ request }) => {
+  http.get('/api/operations/delivery', async ({ request }) => {
     await delay(300);
     const url = new URL(request.url);
     const page = parseInt(url.searchParams.get('page') || '1');
@@ -1552,7 +1552,7 @@ export const handlers = [
     return HttpResponse.json({ success: true, data: result.data, pagination: result.pagination });
   }),
 
-  http.get('*/operations/deliveries', async ({ request }) => {
+  http.get('/api/operations/deliveries', async ({ request }) => {
     await delay(300);
     const url = new URL(request.url);
     const page = parseInt(url.searchParams.get('page') || '1');
@@ -1570,7 +1570,7 @@ export const handlers = [
     return HttpResponse.json({ success: true, data: result.data, pagination: result.pagination });
   }),
 
-  http.get('*/operations/delivery/:id', async ({ params }) => {
+  http.get('/api/operations/delivery/:id', async ({ params }) => {
     await delay(200);
     const delivery = mockDeliveries.find(d => d.id === params.id) || mockDeliveries[0];
     // Transform to match DeliveryOrder interface
@@ -1585,7 +1585,7 @@ export const handlers = [
     return HttpResponse.json({ success: true, data: transformed });
   }),
 
-  http.get('*/operations/delivery/:id/tracking', async () => {
+  http.get('/api/operations/delivery/:id/tracking', async () => {
     await delay(200);
     return HttpResponse.json({
       success: true,
@@ -1597,7 +1597,7 @@ export const handlers = [
     });
   }),
 
-  http.get('*/operations/delivery/calendar', async () => {
+  http.get('/api/operations/delivery/calendar', async () => {
     await delay(200);
     return HttpResponse.json({
       success: true,
@@ -1610,7 +1610,7 @@ export const handlers = [
     });
   }),
 
-  http.get('*/operations/delivery/stats', async () => {
+  http.get('/api/operations/delivery/stats', async () => {
     await delay(200);
     return HttpResponse.json({
       success: true,
@@ -1624,7 +1624,7 @@ export const handlers = [
     });
   }),
 
-  http.post('*/operations/delivery', async ({ request }) => {
+  http.post('/api/operations/delivery', async ({ request }) => {
     await delay(500);
     const body = await request.json() as Record<string, unknown>;
     const newDelivery = {
@@ -1637,7 +1637,7 @@ export const handlers = [
     return HttpResponse.json({ success: true, data: newDelivery }, { status: 201 });
   }),
 
-  http.put('*/operations/delivery/:id', async ({ params, request }) => {
+  http.put('/api/operations/delivery/:id', async ({ params, request }) => {
     await delay(300);
     const body = await request.json() as Record<string, unknown>;
     const delivery = mockDeliveries.find(d => d.id === params.id) || mockDeliveries[0];
@@ -1645,7 +1645,7 @@ export const handlers = [
     return HttpResponse.json({ success: true, data: updated });
   }),
 
-  http.put('*/operations/delivery/:id/status', async ({ params, request }) => {
+  http.put('/api/operations/delivery/:id/status', async ({ params, request }) => {
     await delay(300);
     const body = await request.json() as { status?: string };
     return HttpResponse.json({
@@ -1654,7 +1654,7 @@ export const handlers = [
     });
   }),
 
-  http.delete('*/operations/delivery/:id', async () => {
+  http.delete('/api/operations/delivery/:id', async () => {
     await delay(300);
     return HttpResponse.json({ success: true, message: 'Delivery deleted' });
   }),
@@ -1663,7 +1663,7 @@ export const handlers = [
   // OPERATIONS - SELL TRACKING
   // ═══════════════════════════════════════════════════════════════════════════
 
-  http.get('*/operations/sell-tracking', async () => {
+  http.get('/api/operations/sell-tracking', async () => {
     await delay(300);
     const transformedData = mockSellData.map(item => ({
       ...item,
@@ -1680,13 +1680,13 @@ export const handlers = [
     return HttpResponse.json({ success: true, data: transformedData });
   }),
 
-  http.get('*/operations/sell-tracking/:id', async ({ params }) => {
+  http.get('/api/operations/sell-tracking/:id', async ({ params }) => {
     await delay(200);
     const item = mockSellData.find(s => s.id === params.id) || mockSellData[0];
     return HttpResponse.json({ success: true, data: { ...item, id: params.id } });
   }),
 
-  http.get('*/operations/sell-tracking/summary', async () => {
+  http.get('/api/operations/sell-tracking/summary', async () => {
     await delay(200);
     return HttpResponse.json({
       success: true,
@@ -1699,7 +1699,7 @@ export const handlers = [
     });
   }),
 
-  http.get('*/operations/sell-tracking/trends', async () => {
+  http.get('/api/operations/sell-tracking/trends', async () => {
     await delay(200);
     return HttpResponse.json({
       success: true,
@@ -1712,7 +1712,7 @@ export const handlers = [
     });
   }),
 
-  http.post('*/operations/sell-tracking', async ({ request }) => {
+  http.post('/api/operations/sell-tracking', async ({ request }) => {
     await delay(500);
     const body = await request.json() as Record<string, unknown>;
     const newRecord = {
@@ -1723,7 +1723,7 @@ export const handlers = [
     return HttpResponse.json({ success: true, data: newRecord }, { status: 201 });
   }),
 
-  http.put('*/operations/sell-tracking/:id', async ({ params, request }) => {
+  http.put('/api/operations/sell-tracking/:id', async ({ params, request }) => {
     await delay(300);
     const body = await request.json() as Record<string, unknown>;
     const item = mockSellData.find(s => s.id === params.id) || mockSellData[0];
@@ -1731,12 +1731,12 @@ export const handlers = [
     return HttpResponse.json({ success: true, data: updated });
   }),
 
-  http.delete('*/operations/sell-tracking/:id', async () => {
+  http.delete('/api/operations/sell-tracking/:id', async () => {
     await delay(300);
     return HttpResponse.json({ success: true, message: 'Record deleted' });
   }),
 
-  http.post('*/operations/sell-tracking/bulk', async ({ request }) => {
+  http.post('/api/operations/sell-tracking/bulk', async ({ request }) => {
     await delay(500);
     const body = await request.json() as { action?: string; ids?: string[] };
     return HttpResponse.json({
@@ -1745,7 +1745,7 @@ export const handlers = [
     });
   }),
 
-  http.post('*/operations/sell-tracking/import', async () => {
+  http.post('/api/operations/sell-tracking/import', async () => {
     await delay(1000);
     return HttpResponse.json({
       success: true,
@@ -1753,7 +1753,7 @@ export const handlers = [
     });
   }),
 
-  http.get('*/operations/sell-tracking/export', async () => {
+  http.get('/api/operations/sell-tracking/export', async () => {
     await delay(500);
     return HttpResponse.json({
       success: true,
@@ -1765,18 +1765,18 @@ export const handlers = [
   // OPERATIONS - INVENTORY
   // ═══════════════════════════════════════════════════════════════════════════
 
-  http.get('*/operations/inventory', async () => {
+  http.get('/api/operations/inventory', async () => {
     await delay(300);
     return HttpResponse.json({ success: true, data: mockInventory });
   }),
 
-  http.get('*/operations/inventory/:id', async ({ params }) => {
+  http.get('/api/operations/inventory/:id', async ({ params }) => {
     await delay(200);
     const item = mockInventory.find(i => i.id === params.id) || mockInventory[0];
     return HttpResponse.json({ success: true, data: { ...item, id: params.id } });
   }),
 
-  http.get('*/operations/inventory/summary', async () => {
+  http.get('/api/operations/inventory/summary', async () => {
     await delay(200);
     return HttpResponse.json({
       success: true,
@@ -1789,7 +1789,7 @@ export const handlers = [
     });
   }),
 
-  http.get('*/operations/inventory/history', async () => {
+  http.get('/api/operations/inventory/history', async () => {
     await delay(200);
     return HttpResponse.json({
       success: true,
@@ -1801,7 +1801,7 @@ export const handlers = [
     });
   }),
 
-  http.post('*/operations/inventory', async ({ request }) => {
+  http.post('/api/operations/inventory', async ({ request }) => {
     await delay(500);
     const body = await request.json() as Record<string, unknown>;
     const newItem = {
@@ -1812,7 +1812,7 @@ export const handlers = [
     return HttpResponse.json({ success: true, data: newItem }, { status: 201 });
   }),
 
-  http.put('*/operations/inventory/:id', async ({ params, request }) => {
+  http.put('/api/operations/inventory/:id', async ({ params, request }) => {
     await delay(300);
     const body = await request.json() as Record<string, unknown>;
     const item = mockInventory.find(i => i.id === params.id) || mockInventory[0];
@@ -1820,12 +1820,12 @@ export const handlers = [
     return HttpResponse.json({ success: true, data: updated });
   }),
 
-  http.delete('*/operations/inventory/:id', async () => {
+  http.delete('/api/operations/inventory/:id', async () => {
     await delay(300);
     return HttpResponse.json({ success: true, message: 'Inventory item deleted' });
   }),
 
-  http.post('*/operations/inventory/bulk', async ({ request }) => {
+  http.post('/api/operations/inventory/bulk', async ({ request }) => {
     await delay(500);
     const body = await request.json() as { action?: string; ids?: string[] };
     return HttpResponse.json({
@@ -1834,7 +1834,7 @@ export const handlers = [
     });
   }),
 
-  http.post('*/operations/inventory/import', async () => {
+  http.post('/api/operations/inventory/import', async () => {
     await delay(1000);
     return HttpResponse.json({
       success: true,
@@ -1842,7 +1842,7 @@ export const handlers = [
     });
   }),
 
-  http.get('*/operations/inventory/export', async () => {
+  http.get('/api/operations/inventory/export', async () => {
     await delay(500);
     return HttpResponse.json({
       success: true,
@@ -1854,7 +1854,7 @@ export const handlers = [
   // BI & ANALYTICS
   // ═══════════════════════════════════════════════════════════════════════════
 
-  http.get('*/bi/analytics/dashboard', async () => {
+  http.get('/api/bi/analytics/dashboard', async () => {
     await delay(300);
     return HttpResponse.json({
       success: true,
@@ -1878,7 +1878,7 @@ export const handlers = [
     });
   }),
 
-  http.get('*/bi/analytics/kpis', async () => {
+  http.get('/api/bi/analytics/kpis', async () => {
     await delay(200);
     return HttpResponse.json({
       success: true,
@@ -1891,7 +1891,7 @@ export const handlers = [
     });
   }),
 
-  http.get('*/bi/analytics/trends', async () => {
+  http.get('/api/bi/analytics/trends', async () => {
     await delay(300);
     return HttpResponse.json({
       success: true,
@@ -1906,7 +1906,7 @@ export const handlers = [
     });
   }),
 
-  http.get('*/bi/analytics', async () => {
+  http.get('/api/bi/analytics', async () => {
     await delay(300);
     return HttpResponse.json({
       success: true,
@@ -1914,7 +1914,7 @@ export const handlers = [
     });
   }),
 
-  http.post('*/bi/export', async ({ request }) => {
+  http.post('/api/bi/export', async ({ request }) => {
     await delay(1000);
     const body = await request.json() as { format?: string; reportType?: string };
     return HttpResponse.json({
@@ -1929,18 +1929,18 @@ export const handlers = [
     });
   }),
 
-  http.get('*/bi/reports', async () => {
+  http.get('/api/bi/reports', async () => {
     await delay(300);
     return HttpResponse.json({ success: true, data: mockReports });
   }),
 
-  http.get('*/bi/reports/:id', async ({ params }) => {
+  http.get('/api/bi/reports/:id', async ({ params }) => {
     await delay(200);
     const report = mockReports.find(r => r.id === params.id) || mockReports[0];
     return HttpResponse.json({ success: true, data: { ...report, id: params.id } });
   }),
 
-  http.post('*/bi/reports', async ({ request }) => {
+  http.post('/api/bi/reports', async ({ request }) => {
     await delay(500);
     const body = await request.json() as Record<string, unknown>;
     const newReport = {
@@ -1953,7 +1953,7 @@ export const handlers = [
     return HttpResponse.json({ success: true, data: newReport }, { status: 201 });
   }),
 
-  http.put('*/bi/reports/:id', async ({ params, request }) => {
+  http.put('/api/bi/reports/:id', async ({ params, request }) => {
     await delay(300);
     const body = await request.json() as Record<string, unknown>;
     const report = mockReports.find(r => r.id === params.id) || mockReports[0];
@@ -1961,12 +1961,12 @@ export const handlers = [
     return HttpResponse.json({ success: true, data: updated });
   }),
 
-  http.delete('*/bi/reports/:id', async () => {
+  http.delete('/api/bi/reports/:id', async () => {
     await delay(300);
     return HttpResponse.json({ success: true, message: 'Report deleted' });
   }),
 
-  http.get('*/bi/reports/:id/execute', async ({ params }) => {
+  http.get('/api/bi/reports/:id/execute', async ({ params }) => {
     await delay(1000);
     return HttpResponse.json({
       success: true,
@@ -1979,7 +1979,7 @@ export const handlers = [
     });
   }),
 
-  http.post('*/bi/reports/generate', async ({ request }) => {
+  http.post('/api/bi/reports/generate', async ({ request }) => {
     await delay(1000);
     const body = await request.json() as Record<string, unknown>;
     return HttpResponse.json({
@@ -1999,7 +1999,7 @@ export const handlers = [
   // AI - INSIGHTS & RECOMMENDATIONS
   // ═══════════════════════════════════════════════════════════════════════════
 
-  http.get('*/ai/insights', async ({ request }) => {
+  http.get('/api/ai/insights', async ({ request }) => {
     await delay(300);
     const url = new URL(request.url);
     const type = url.searchParams.get('type');
@@ -2010,13 +2010,13 @@ export const handlers = [
     return HttpResponse.json({ success: true, data: filtered });
   }),
 
-  http.get('*/ai/insights/:id', async ({ params }) => {
+  http.get('/api/ai/insights/:id', async ({ params }) => {
     await delay(200);
     const insight = mockInsights.find(i => i.id === params.id) || mockInsights[0];
     return HttpResponse.json({ success: true, data: { ...insight, id: params.id } });
   }),
 
-  http.post('*/ai/insights/generate', async () => {
+  http.post('/api/ai/insights/generate', async () => {
     await delay(2000);
     return HttpResponse.json({
       success: true,
@@ -2028,7 +2028,7 @@ export const handlers = [
     });
   }),
 
-  http.post('*/ai/insights/:id/dismiss', async ({ params }) => {
+  http.post('/api/ai/insights/:id/dismiss', async ({ params }) => {
     await delay(300);
     return HttpResponse.json({
       success: true,
@@ -2036,7 +2036,7 @@ export const handlers = [
     });
   }),
 
-  http.post('*/ai/insights/:id/action', async ({ params, request }) => {
+  http.post('/api/ai/insights/:id/action', async ({ params, request }) => {
     await delay(500);
     const body = await request.json() as { action?: string };
     return HttpResponse.json({
@@ -2045,7 +2045,7 @@ export const handlers = [
     });
   }),
 
-  http.get('*/ai/recommendations', async () => {
+  http.get('/api/ai/recommendations', async () => {
     await delay(300);
     // Transform to add uplift field for RecommendationCard
     const transformed = mockRecommendations.map(rec => ({
@@ -2061,7 +2061,7 @@ export const handlers = [
     return HttpResponse.json({ success: true, data: transformed });
   }),
 
-  http.get('*/ai/recommendations/:id', async ({ params }) => {
+  http.get('/api/ai/recommendations/:id', async ({ params }) => {
     await delay(200);
     const rec = mockRecommendations.find(r => r.id === params.id) || mockRecommendations[0];
     // Transform to add uplift field
@@ -2079,7 +2079,7 @@ export const handlers = [
     return HttpResponse.json({ success: true, data: transformed });
   }),
 
-  http.post('*/ai/recommendations/generate', async () => {
+  http.post('/api/ai/recommendations/generate', async () => {
     await delay(2000);
     return HttpResponse.json({
       success: true,
@@ -2091,7 +2091,7 @@ export const handlers = [
     });
   }),
 
-  http.post('*/ai/recommendations/:id/accept', async ({ params }) => {
+  http.post('/api/ai/recommendations/:id/accept', async ({ params }) => {
     await delay(500);
     const rec = mockRecommendations.find(r => r.id === params.id);
     if (rec) {
@@ -2100,7 +2100,7 @@ export const handlers = [
     return HttpResponse.json({ success: false, error: { message: 'Not found' } }, { status: 404 });
   }),
 
-  http.post('*/ai/recommendations/:id/reject', async ({ params }) => {
+  http.post('/api/ai/recommendations/:id/reject', async ({ params }) => {
     await delay(500);
     const rec = mockRecommendations.find(r => r.id === params.id);
     if (rec) {
@@ -2109,7 +2109,7 @@ export const handlers = [
     return HttpResponse.json({ success: false, error: { message: 'Not found' } }, { status: 404 });
   }),
 
-  http.post('*/ai/predict', async ({ request }) => {
+  http.post('/api/ai/predict', async ({ request }) => {
     await delay(1500);
     const body = await request.json() as { type?: string };
     return HttpResponse.json({
@@ -2130,18 +2130,18 @@ export const handlers = [
   // INTEGRATION - WEBHOOKS
   // ═══════════════════════════════════════════════════════════════════════════
 
-  http.get('*/integration/webhooks', async () => {
+  http.get('/api/integration/webhooks', async () => {
     await delay(300);
     return HttpResponse.json({ success: true, data: mockWebhooks });
   }),
 
-  http.get('*/integration/webhooks/:id', async ({ params }) => {
+  http.get('/api/integration/webhooks/:id', async ({ params }) => {
     await delay(200);
     const webhook = mockWebhooks.find(w => w.id === params.id) || mockWebhooks[0];
     return HttpResponse.json({ success: true, data: { ...webhook, id: params.id } });
   }),
 
-  http.post('*/integration/webhooks', async ({ request }) => {
+  http.post('/api/integration/webhooks', async ({ request }) => {
     await delay(500);
     const body = await request.json() as Record<string, unknown>;
     const newWebhook = {
@@ -2153,7 +2153,7 @@ export const handlers = [
     return HttpResponse.json({ success: true, data: newWebhook }, { status: 201 });
   }),
 
-  http.put('*/integration/webhooks/:id', async ({ params, request }) => {
+  http.put('/api/integration/webhooks/:id', async ({ params, request }) => {
     await delay(300);
     const body = await request.json() as Record<string, unknown>;
     const webhook = mockWebhooks.find(w => w.id === params.id) || mockWebhooks[0];
@@ -2161,12 +2161,12 @@ export const handlers = [
     return HttpResponse.json({ success: true, data: updated });
   }),
 
-  http.delete('*/integration/webhooks/:id', async () => {
+  http.delete('/api/integration/webhooks/:id', async () => {
     await delay(300);
     return HttpResponse.json({ success: true, message: 'Webhook deleted' });
   }),
 
-  http.post('*/integration/webhooks/:id/test', async ({ params }) => {
+  http.post('/api/integration/webhooks/:id/test', async ({ params }) => {
     await delay(1000);
     return HttpResponse.json({
       success: true,
@@ -2180,7 +2180,7 @@ export const handlers = [
     });
   }),
 
-  http.get('*/integration/webhooks/:id/deliveries', async () => {
+  http.get('/api/integration/webhooks/:id/deliveries', async () => {
     await delay(200);
     return HttpResponse.json({
       success: true,
@@ -2192,7 +2192,7 @@ export const handlers = [
     });
   }),
 
-  http.post('*/integration/webhooks/:id/retry', async ({ params }) => {
+  http.post('/api/integration/webhooks/:id/retry', async ({ params }) => {
     await delay(500);
     return HttpResponse.json({
       success: true,
@@ -2204,18 +2204,18 @@ export const handlers = [
   // INTEGRATION - SECURITY
   // ═══════════════════════════════════════════════════════════════════════════
 
-  http.get('*/integration/security/api-keys', async () => {
+  http.get('/api/integration/security/api-keys', async () => {
     await delay(300);
     return HttpResponse.json({ success: true, data: mockAPIKeys });
   }),
 
-  http.get('*/integration/security/api-keys/:id', async ({ params }) => {
+  http.get('/api/integration/security/api-keys/:id', async ({ params }) => {
     await delay(200);
     const key = mockAPIKeys.find(k => k.id === params.id) || mockAPIKeys[0];
     return HttpResponse.json({ success: true, data: { ...key, id: params.id } });
   }),
 
-  http.post('*/integration/security/api-keys', async ({ request }) => {
+  http.post('/api/integration/security/api-keys', async ({ request }) => {
     await delay(500);
     const body = await request.json() as { name?: string };
     const newKey = {
@@ -2229,12 +2229,12 @@ export const handlers = [
     return HttpResponse.json({ success: true, data: newKey }, { status: 201 });
   }),
 
-  http.delete('*/integration/security/api-keys/:id', async () => {
+  http.delete('/api/integration/security/api-keys/:id', async () => {
     await delay(300);
     return HttpResponse.json({ success: true, message: 'API key revoked' });
   }),
 
-  http.get('*/integration/security/audit-logs', async ({ request }) => {
+  http.get('/api/integration/security/audit-logs', async ({ request }) => {
     await delay(300);
     const url = new URL(request.url);
     const page = parseInt(url.searchParams.get('page') || '1');
@@ -2243,13 +2243,13 @@ export const handlers = [
     return HttpResponse.json({ success: true, data: result.data, pagination: result.pagination });
   }),
 
-  http.get('*/integration/security/audit-logs/:entityType/:entityId', async ({ params }) => {
+  http.get('/api/integration/security/audit-logs/:entityType/:entityId', async ({ params }) => {
     await delay(200);
     const logs = mockAuditLogs.filter(l => l.entityType === String(params.entityType).toUpperCase() && l.entityId === params.entityId);
     return HttpResponse.json({ success: true, data: logs.length > 0 ? logs : mockAuditLogs.slice(0, 2) });
   }),
 
-  http.get('*/integration/security/dashboard', async () => {
+  http.get('/api/integration/security/dashboard', async () => {
     await delay(300);
     return HttpResponse.json({
       success: true,
@@ -2267,18 +2267,18 @@ export const handlers = [
   // INTEGRATION - ERP & DMS
   // ═══════════════════════════════════════════════════════════════════════════
 
-  http.get('*/integration/erp/syncs', async () => {
+  http.get('/api/integration/erp/syncs', async () => {
     await delay(300);
     return HttpResponse.json({ success: true, data: mockERPSyncs });
   }),
 
-  http.get('*/integration/erp/:id', async ({ params }) => {
+  http.get('/api/integration/erp/:id', async ({ params }) => {
     await delay(200);
     const sync = mockERPSyncs.find(s => s.id === params.id) || mockERPSyncs[0];
     return HttpResponse.json({ success: true, data: { ...sync, id: params.id } });
   }),
 
-  http.post('*/integration/erp/sync', async () => {
+  http.post('/api/integration/erp/sync', async () => {
     await delay(1000);
     return HttpResponse.json({
       success: true,
@@ -2286,12 +2286,12 @@ export const handlers = [
     });
   }),
 
-  http.get('*/integration/dms/syncs', async () => {
+  http.get('/api/integration/dms/syncs', async () => {
     await delay(300);
     return HttpResponse.json({ success: true, data: mockDMSSyncs });
   }),
 
-  http.get('*/integration/dms/:id', async ({ params }) => {
+  http.get('/api/integration/dms/:id', async ({ params }) => {
     await delay(200);
     const sync = mockDMSSyncs.find(s => s.id === params.id) || mockDMSSyncs[0];
     return HttpResponse.json({ success: true, data: { ...sync, id: params.id } });
@@ -2301,12 +2301,12 @@ export const handlers = [
   // USERS
   // ═══════════════════════════════════════════════════════════════════════════
 
-  http.get('*/users', async () => {
+  http.get('/api/users', async () => {
     await delay(300);
     return HttpResponse.json({ success: true, data: mockUsers });
   }),
 
-  http.get('*/users/:id', async ({ params }) => {
+  http.get('/api/users/:id', async ({ params }) => {
     await delay(200);
     const user = mockUsers.find(u => u.id === params.id);
     if (!user) {
@@ -2319,7 +2319,7 @@ export const handlers = [
   // VOICE COMMANDS (stub)
   // ═══════════════════════════════════════════════════════════════════════════
 
-  http.post('*/voice/command', async ({ request }) => {
+  http.post('/api/voice/command', async ({ request }) => {
     await delay(500);
     const body = await request.json() as { command?: string };
     return HttpResponse.json({
@@ -2333,7 +2333,7 @@ export const handlers = [
     });
   }),
 
-  http.get('*/voice/history', async () => {
+  http.get('/api/voice/history', async () => {
     await delay(200);
     return HttpResponse.json({
       success: true,

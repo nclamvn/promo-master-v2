@@ -165,7 +165,12 @@ export function DataTable<TData, TValue>({
           <div className="h-8 w-64 rounded bg-surface-hover animate-pulse" />
           <div className="h-8 w-24 rounded bg-surface-hover animate-pulse" />
         </div>
-        <div className="border border-surface-border rounded overflow-hidden">
+        <div className={cn(
+          "overflow-hidden rounded-2xl",
+          "bg-card",
+          "border border-surface-border",
+          "shadow-sm"
+        )}>
           <Table>
             <TableHeader>
               <TableRow>
@@ -276,7 +281,12 @@ export function DataTable<TData, TValue>({
       </div>
 
       {/* Table */}
-      <div className="border border-surface-border rounded overflow-hidden">
+      <div className={cn(
+        "overflow-hidden rounded-2xl",
+        "bg-card",
+        "border border-surface-border",
+        "shadow-sm"
+      )}>
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (

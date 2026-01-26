@@ -359,10 +359,10 @@ export default function DeliveryDetail() {
                         <span
                           className={`text-sm px-2 py-1 rounded ${
                             line.status === 'DELIVERED'
-                              ? 'bg-success-muted text-success'
+                              ? 'bg-emerald-600 text-white dark:bg-emerald-500'
                               : line.status === 'PARTIAL'
-                                ? 'bg-warning-muted text-warning'
-                                : 'bg-surface-hover text-foreground-muted'
+                                ? 'bg-amber-500 text-white dark:bg-amber-600'
+                                : 'bg-slate-500 text-white dark:bg-slate-600'
                           }`}
                         >
                           {line.status}

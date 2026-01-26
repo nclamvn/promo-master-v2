@@ -70,10 +70,10 @@ const demoTargets: Target[] = [
 ];
 
 const statusColors: Record<string, string> = {
-  DRAFT: 'bg-surface-hover text-foreground-muted border border-surface-border',
-  ACTIVE: 'bg-primary-muted text-primary border border-primary/30',
-  ACHIEVED: 'bg-success-muted text-success border border-success/30',
-  MISSED: 'bg-danger-muted text-danger border border-danger/30',
+  DRAFT: 'bg-slate-500 text-white border border-slate-600 dark:bg-slate-600 dark:border-slate-700',
+  ACTIVE: 'bg-blue-500 text-white border border-blue-600 dark:bg-blue-600 dark:border-blue-700',
+  ACHIEVED: 'bg-emerald-600 text-white border border-emerald-700 dark:bg-emerald-500 dark:border-emerald-600',
+  MISSED: 'bg-red-500 text-white border border-red-600 dark:bg-red-600 dark:border-red-700',
 };
 
 const typeLabels: Record<string, string> = {

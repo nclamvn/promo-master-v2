@@ -35,16 +35,16 @@ const statusIcons: Record<DeliveryStatus, React.ReactNode> = {
 };
 
 const statusColors: Record<DeliveryStatus, string> = {
-  PENDING: 'bg-surface-hover text-foreground-muted',
-  CONFIRMED: 'bg-primary-muted text-primary',
-  SCHEDULED: 'bg-primary-muted text-primary',
-  PICKING: 'bg-warning-muted text-warning',
-  PACKED: 'bg-warning-muted text-warning',
-  IN_TRANSIT: 'bg-warning-muted text-warning',
-  DELIVERED: 'bg-success-muted text-success',
-  PARTIAL: 'bg-warning-muted text-warning',
-  RETURNED: 'bg-danger-muted text-danger',
-  CANCELLED: 'bg-surface-hover text-foreground-subtle',
+  PENDING: 'bg-slate-500 text-white dark:bg-slate-600',
+  CONFIRMED: 'bg-blue-500 text-white dark:bg-blue-600',
+  SCHEDULED: 'bg-blue-500 text-white dark:bg-blue-600',
+  PICKING: 'bg-amber-500 text-white dark:bg-amber-600',
+  PACKED: 'bg-amber-500 text-white dark:bg-amber-600',
+  IN_TRANSIT: 'bg-amber-500 text-white dark:bg-amber-600',
+  DELIVERED: 'bg-emerald-600 text-white dark:bg-emerald-500',
+  PARTIAL: 'bg-amber-500 text-white dark:bg-amber-600',
+  RETURNED: 'bg-red-500 text-white dark:bg-red-600',
+  CANCELLED: 'bg-slate-500 text-white dark:bg-slate-600',
 };
 
 export function DeliveryTimeline({ timeline, currentStatus }: DeliveryTimelineProps) {

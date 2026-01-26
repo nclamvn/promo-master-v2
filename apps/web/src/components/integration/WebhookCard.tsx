@@ -81,9 +81,9 @@ interface DeliveryStatusBadgeProps {
 
 export function DeliveryStatusBadge({ status }: DeliveryStatusBadgeProps) {
   const config = {
-    PENDING: { label: 'Pending', className: 'bg-surface-hover text-foreground-muted', icon: Clock },
-    DELIVERED: { label: 'Delivered', className: 'bg-success-muted text-success', icon: CheckCircle },
-    FAILED: { label: 'Failed', className: 'bg-danger-muted text-danger', icon: XCircle },
+    PENDING: { label: 'Pending', className: 'bg-slate-500 text-white dark:bg-slate-600', icon: Clock },
+    DELIVERED: { label: 'Delivered', className: 'bg-emerald-600 text-white dark:bg-emerald-500', icon: CheckCircle },
+    FAILED: { label: 'Failed', className: 'bg-red-500 text-white dark:bg-red-600', icon: XCircle },
   };
 
   const { label, className, icon: Icon } = config[status];

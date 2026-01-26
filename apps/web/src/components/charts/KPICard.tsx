@@ -1,5 +1,5 @@
 /**
- * KPICard Component - Industrial Design System
+ * KPICard Component - Modern Enterprise Design with Watermark Icons
  */
 
 import { ReactNode, isValidElement, createElement } from 'react';
@@ -46,17 +46,17 @@ export function KPICard({
 
   const getTrendColor = () => {
     if (!trend) return 'text-foreground-muted';
-    if (trend.value > 0) return 'text-success';
-    if (trend.value < 0) return 'text-danger';
+    if (trend.value > 0) return 'text-cyan-600'; // Brand blue
+    if (trend.value < 0) return 'text-red-600';
     return 'text-foreground-muted';
   };
 
   const getStatusIndicator = () => {
     const colors = {
-      success: 'status-dot-success',
-      warning: 'status-dot-warning',
-      danger: 'status-dot-danger',
-      neutral: 'status-dot-neutral',
+      success: 'bg-cyan-500', // Brand blue
+      warning: 'bg-amber-500',
+      danger: 'bg-red-500',
+      neutral: 'bg-slate-400',
     };
     return colors[status];
   };
@@ -93,16 +93,45 @@ export function KPICard({
     );
   };
 
-  // Render icon - handle both LucideIcon and ReactNode
-  const renderIcon = () => {
+  // Render large watermark icon
+  const renderWatermarkIcon = () => {
     if (!Icon) return null;
-    // Already a valid React element (e.g., <DollarSign className="..." />)
+
+    const iconProps = {
+      className: 'h-28 w-28 absolute -right-4 -bottom-4 pointer-events-none',
+      strokeWidth: 1,
+      style: {
+        opacity: 0.06,
+        color: 'var(--color-foreground)'
+      }
+    };
+
     if (isValidElement(Icon)) {
       return Icon;
     }
-    // It's a component (function or forwardRef object), render it
+
     try {
-      return createElement(Icon as any, { className: 'h-5 w-5 text-foreground-subtle' });
+      return createElement(Icon as any, iconProps);
+    } catch {
+      return null;
+    }
+  };
+
+  // Render small header icon
+  const renderHeaderIcon = () => {
+    if (!Icon) return null;
+
+    const iconProps = {
+      className: 'h-4 w-4 text-foreground-subtle',
+      strokeWidth: 1.75,
+    };
+
+    if (isValidElement(Icon)) {
+      return Icon;
+    }
+
+    try {
+      return createElement(Icon as any, iconProps);
     } catch {
       return null;
     }
@@ -113,13 +142,13 @@ export function KPICard({
       <div
         className={cn(
           'flex items-center justify-between',
-          'px-4 py-3 rounded border border-surface-border bg-card',
+          'px-4 py-3 rounded-lg border border-surface-border bg-card',
           className
         )}
         data-testid="kpi-card"
       >
         <div className="flex items-center gap-3">
-          <div className={`status-dot ${getStatusIndicator()}`} />
+          <div className={cn('w-2 h-2 rounded-full', getStatusIndicator())} />
           <span className="text-xs text-foreground-muted uppercase tracking-wide">{title}</span>
         </div>
         <div className="flex items-center gap-3">
@@ -139,61 +168,89 @@ export function KPICard({
   return (
     <div
       className={cn(
-        'p-4 rounded border border-surface-border bg-card',
+        'relative overflow-hidden',
+        'p-5 rounded-2xl',
+        // Clean modern design
+        'bg-card',
+        'border border-surface-border',
+        // Soft shadow
+        'shadow-sm',
+        // Hover effect
+        'hover:shadow-md dark:hover:shadow-xl',
+        'hover:-translate-y-1 hover:scale-[1.01]',
+        'transition-all duration-300 ease-out',
+        'cursor-pointer',
         className
       )}
       data-testid="kpi-card"
     >
-      {/* Header */}
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-2">
-          <div className={`status-dot ${getStatusIndicator()}`} />
-          <span className="text-2xs font-semibold text-foreground-subtle uppercase tracking-wider">
-            {title}
-          </span>
-        </div>
-        {renderIcon()}
-      </div>
+      {/* Watermark Icon */}
+      {renderWatermarkIcon()}
 
-      {/* Value */}
-      <div className="flex items-end justify-between">
-        <div>
-          <div className="flex items-baseline gap-1">
-            <span className="text-2xl font-bold text-foreground font-mono tabular-nums tracking-tight">
-              {value}
+      {/* Subtle gradient overlay - only visible in dark mode */}
+      <div className="absolute inset-0 pointer-events-none dark:bg-gradient-to-br dark:from-white/[0.03] dark:to-transparent" />
+
+      {/* Content */}
+      <div className="relative z-10">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2.5">
+            <div className={cn('w-2 h-2 rounded-full', getStatusIndicator())} />
+            <span className="text-[11px] font-semibold text-foreground-subtle uppercase tracking-wider">
+              {title}
             </span>
-            {unit && (
-              <span className="text-sm text-foreground-muted ml-1">{unit}</span>
-            )}
           </div>
-
-          {/* Subtitle */}
-          {subtitle && (
-            <p className="text-xs text-foreground-muted mt-0.5">{subtitle}</p>
-          )}
-
-          {/* Trend & Previous */}
-          <div className="flex items-center gap-3 mt-1">
-            {trend && (
-              <span className={cn('flex items-center gap-1 text-xs font-medium', getTrendColor())}>
-                {getTrendIcon()}
-                <span>{trend.value > 0 ? '+' : ''}{trend.value}%</span>
-                {(trend.label || trend.period) && (
-                  <span className="text-foreground-subtle font-normal">{trend.label || trend.period}</span>
-                )}
-              </span>
-            )}
-            {previousValue && (
-              <span className="flex items-center gap-1 text-xs text-foreground-subtle">
-                <ArrowRight className="h-3 w-3" />
-                <span className="font-mono">{previousValue}</span>
-              </span>
-            )}
-          </div>
+          {renderHeaderIcon()}
         </div>
 
-        {/* Sparkline */}
-        {renderSparkline()}
+        {/* Value */}
+        <div className="flex items-end justify-between">
+          <div>
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-3xl font-bold text-foreground font-mono tabular-nums tracking-tight">
+                {value}
+              </span>
+              {unit && (
+                <span className="text-sm font-medium text-foreground-muted ml-1">{unit}</span>
+              )}
+            </div>
+
+            {/* Subtitle */}
+            {subtitle && (
+              <p className="text-xs text-foreground-muted mt-1">{subtitle}</p>
+            )}
+
+            {/* Trend & Previous */}
+            <div className="flex items-center gap-3 mt-2">
+              {trend && (
+                <span
+                  className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-semibold"
+                  style={{
+                    backgroundColor: trend.value > 0 ? 'rgba(125, 211, 232, 0.15)' : trend.value < 0 ? 'rgba(239, 68, 68, 0.1)' : 'rgba(100, 116, 139, 0.1)',
+                    color: trend.value > 0 ? '#0891B2' : trend.value < 0 ? '#DC2626' : '#64748B'
+                  }}
+                >
+                  {getTrendIcon()}
+                  <span>{trend.value > 0 ? '+' : ''}{trend.value}%</span>
+                  {(trend.label || trend.period) && (
+                    <span className="text-foreground-subtle font-normal ml-0.5">
+                      {trend.label || trend.period}
+                    </span>
+                  )}
+                </span>
+              )}
+              {previousValue && (
+                <span className="flex items-center gap-1 text-xs text-foreground-subtle">
+                  <ArrowRight className="h-3 w-3" />
+                  <span className="font-mono">{previousValue}</span>
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Sparkline */}
+          {renderSparkline()}
+        </div>
       </div>
     </div>
   );

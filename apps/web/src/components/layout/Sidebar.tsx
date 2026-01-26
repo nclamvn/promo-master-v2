@@ -50,28 +50,28 @@ import { cn } from '@/lib/utils';
 import { useUIStore } from '@/stores/uiStore';
 
 // ============================================================================
-// WAVE PATTERN SVG - Subtle, Professional (opacity 4%)
+// WAVE PATTERN SVG - Theme-aware
 // ============================================================================
-const WavePattern = () => (
+const WavePattern = ({ isDark }: { isDark: boolean }) => (
   <svg
     className="absolute inset-0 w-full h-full pointer-events-none"
     preserveAspectRatio="xMidYMid slice"
-    style={{ opacity: 0.04 }}
+    style={{ opacity: isDark ? 0.04 : 0.05 }}
   >
     <defs>
       <pattern id="wave-pattern" x="0" y="0" width="120" height="24" patternUnits="userSpaceOnUse">
         <path
           d="M0 12 Q 30 4, 60 12 T 120 12"
           fill="none"
-          stroke="white"
-          strokeWidth="1"
+          stroke={isDark ? 'white' : '#1E4A6E'}
+          strokeWidth={isDark ? 1 : 1}
         />
         <path
           d="M0 20 Q 30 12, 60 20 T 120 20"
           fill="none"
-          stroke="white"
-          strokeWidth="0.5"
-          opacity="0.5"
+          stroke={isDark ? 'white' : '#1E4A6E'}
+          strokeWidth={isDark ? 0.5 : 0.5}
+          opacity={isDark ? 0.5 : 0.3}
         />
       </pattern>
     </defs>
@@ -181,7 +181,31 @@ interface SidebarProps {
 
 export function Sidebar({ isMobileOpen = false, onMobileClose }: SidebarProps) {
   const location = useLocation();
-  const { sidebarOpen, toggleSidebar } = useUIStore();
+  const { sidebarOpen, toggleSidebar, theme } = useUIStore();
+
+  // Theme-aware sidebar colors
+  const isDark = theme === 'dark';
+  const sidebarBgColor = isDark ? '#0A2744' : '#8DD8E8';
+
+  // Color palette based on theme
+  const colors = {
+    text: isDark ? '#FFFFFF' : '#0A2744',
+    textMuted: isDark ? 'rgba(255,255,255,0.8)' : '#1E3A5F',
+    textSubtle: isDark ? 'rgba(255,255,255,0.55)' : 'rgba(10,39,68,0.7)',
+    textHover: isDark ? '#FFFFFF' : '#0A2744',
+    border: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(10,39,68,0.12)',
+    borderAccent: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(10,39,68,0.25)',
+    bgHover: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(10,39,68,0.08)',
+    bgActive: isDark ? 'rgba(255,255,255,0.15)' : 'rgba(10,39,68,0.15)',
+    bgSubtle: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(10,39,68,0.1)',
+    bgGradient: isDark
+      ? 'linear-gradient(90deg, rgba(255,255,255,0.06) 0%, transparent 100%)'
+      : 'linear-gradient(90deg, rgba(10,39,68,0.08) 0%, transparent 100%)',
+    overlayGradient: isDark
+      ? 'linear-gradient(180deg, rgba(10,39,68,0.3) 0%, transparent 30%, rgba(10,39,68,0.4) 100%)'
+      : 'linear-gradient(180deg, rgba(10,39,68,0.1) 0%, transparent 30%, rgba(10,39,68,0.15) 100%)',
+  };
+
   const [expandedGroups, setExpandedGroups] = useState<string[]>(['TỔNG QUAN', 'QUẢN LÝ', 'TÀI CHÍNH', 'KẾ HOẠCH']);
 
   const sidebarCollapsed = !sidebarOpen;
@@ -198,37 +222,37 @@ export function Sidebar({ isMobileOpen = false, onMobileClose }: SidebarProps) {
     <>
       {/* Wave Pattern Background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <WavePattern />
+        <WavePattern isDark={isDark} />
         {/* Gradient overlay for depth */}
         <div
           className="absolute inset-0"
           style={{
-            background: 'linear-gradient(180deg, rgba(0,45,77,0.3) 0%, transparent 30%, rgba(0,29,61,0.5) 100%)'
+            background: colors.overlayGradient
           }}
         />
       </div>
 
       {/* Header - Logo & Brand */}
       <div
-        className="relative z-10 h-14 flex items-center justify-between px-4"
-        style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}
+        className="relative z-10 h-12 flex items-center justify-between px-3"
+        style={{ borderBottom: `1px solid ${colors.border}` }}
       >
         {!sidebarCollapsed ? (
           <>
-            <div className="flex items-center gap-3 min-w-0 flex-1">
+            <div className="flex items-center gap-2.5 min-w-0 flex-1">
               <div
-                className="flex h-8 w-8 shrink-0 items-center justify-center rounded"
-                style={{ backgroundColor: 'rgba(255,255,255,0.1)' }}
+                className="flex h-7 w-7 shrink-0 items-center justify-center rounded"
+                style={{ backgroundColor: colors.bgSubtle }}
               >
-                <Package className="h-5 w-5 text-white" strokeWidth={1.5} />
+                <Package className="h-4 w-4" style={{ color: colors.text }} strokeWidth={1.5} />
               </div>
               <div className="flex flex-col min-w-0">
-                <span className="text-sm font-semibold text-white tracking-tight">
+                <span className="text-xs font-semibold tracking-tight" style={{ color: colors.text }}>
                   Promo Master
                 </span>
                 <span
-                  className="text-[10px] uppercase tracking-wider"
-                  style={{ color: 'rgba(255,255,255,0.4)' }}
+                  className="text-[9px] uppercase tracking-wider"
+                  style={{ color: colors.textSubtle }}
                 >
                   Suntory PepsiCo
                 </span>
@@ -237,17 +261,17 @@ export function Sidebar({ isMobileOpen = false, onMobileClose }: SidebarProps) {
             {/* Collapse button - Desktop only */}
             <button
               onClick={toggleSidebar}
-              className="hidden lg:flex h-7 w-7 shrink-0 items-center justify-center rounded transition-colors"
+              className="hidden lg:flex h-6 w-6 shrink-0 items-center justify-center rounded transition-colors"
               style={{
-                color: 'rgba(255,255,255,0.5)',
+                color: colors.textMuted,
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)';
-                e.currentTarget.style.color = '#FFFFFF';
+                e.currentTarget.style.backgroundColor = colors.bgSubtle;
+                e.currentTarget.style.color = colors.text;
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.backgroundColor = 'transparent';
-                e.currentTarget.style.color = 'rgba(255,255,255,0.5)';
+                e.currentTarget.style.color = colors.textMuted;
               }}
             >
               <ChevronLeft className="h-4 w-4" strokeWidth={1.75} />
@@ -256,7 +280,7 @@ export function Sidebar({ isMobileOpen = false, onMobileClose }: SidebarProps) {
             {onMobileClose && (
               <button
                 className="lg:hidden p-1.5 rounded"
-                style={{ color: 'rgba(255,255,255,0.5)' }}
+                style={{ color: colors.textMuted }}
                 onClick={onMobileClose}
               >
                 <X className="h-4 w-4" strokeWidth={1.75} />
@@ -266,30 +290,40 @@ export function Sidebar({ isMobileOpen = false, onMobileClose }: SidebarProps) {
         ) : (
           <button
             onClick={toggleSidebar}
-            className="flex h-8 w-8 items-center justify-center rounded mx-auto transition-opacity"
-            style={{ backgroundColor: 'rgba(255,255,255,0.1)' }}
+            className="flex h-7 w-7 items-center justify-center rounded mx-auto transition-opacity"
+            style={{ backgroundColor: colors.bgSubtle }}
           >
-            <ChevronRight className="h-4 w-4 text-white" strokeWidth={1.75} />
+            <ChevronRight className="h-4 w-4" style={{ color: colors.text }} strokeWidth={1.75} />
           </button>
         )}
       </div>
 
       {/* Navigation */}
-      <nav className="relative z-10 flex-1 overflow-y-auto py-3 px-3 scrollbar-hide">
+      <nav className="relative z-10 flex-1 overflow-y-auto py-2 px-2 scrollbar-hide">
         {navigation.map((group, idx) => (
-          <div key={group.title} className={idx > 0 ? 'mt-5' : ''}>
+          <div key={group.title} className={idx > 0 ? 'mt-3' : ''}>
             {/* Group Header */}
             {!sidebarCollapsed && (
               <button
                 onClick={() => toggleGroup(group.title)}
                 className={cn(
-                  'flex w-full items-center justify-between px-3 py-1.5',
-                  'text-[10px] font-semibold uppercase tracking-wider',
-                  'transition-colors'
+                  'flex w-full items-center justify-between px-2.5 py-1.5 mb-1 rounded',
+                  'text-[11px] font-semibold uppercase tracking-wide',
+                  'transition-all duration-150'
                 )}
-                style={{ color: 'rgba(255,255,255,0.35)' }}
-                onMouseEnter={(e) => e.currentTarget.style.color = 'rgba(255,255,255,0.55)'}
-                onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(255,255,255,0.35)'}
+                style={{
+                  color: colors.textMuted,
+                  background: colors.bgGradient,
+                  borderLeft: `2px solid ${colors.borderAccent}`
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.color = colors.text;
+                  e.currentTarget.style.borderLeftColor = isDark ? 'rgba(255,255,255,0.4)' : 'rgba(10,39,68,0.5)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.color = colors.textMuted;
+                  e.currentTarget.style.borderLeftColor = colors.borderAccent;
+                }}
               >
                 <span>{group.title}</span>
                 <ChevronDown
@@ -304,7 +338,7 @@ export function Sidebar({ isMobileOpen = false, onMobileClose }: SidebarProps) {
 
             {/* Group Items */}
             {(expandedGroups.includes(group.title) || sidebarCollapsed) && (
-              <ul className="mt-1 space-y-0.5">
+              <ul className="mt-0.5 space-y-0">
                 {group.items.map((item) => (
                   <li key={item.href}>
                     <Link
@@ -313,23 +347,23 @@ export function Sidebar({ isMobileOpen = false, onMobileClose }: SidebarProps) {
                       className={cn(
                         'flex items-center rounded transition-all duration-100',
                         sidebarCollapsed
-                          ? 'justify-center px-2 py-2.5'
-                          : 'gap-3 px-3 py-2.5 text-sm font-medium'
+                          ? 'justify-center px-2 py-1.5'
+                          : 'gap-2.5 px-2.5 py-1.5 text-sm font-medium'
                       )}
                       style={{
-                        backgroundColor: isActive(item.href) ? 'rgba(255,255,255,0.12)' : 'transparent',
-                        color: isActive(item.href) ? '#FFFFFF' : 'rgba(255,255,255,0.55)',
+                        backgroundColor: isActive(item.href) ? colors.bgActive : 'transparent',
+                        color: isActive(item.href) ? colors.text : colors.textMuted,
                       }}
                       onMouseEnter={(e) => {
                         if (!isActive(item.href)) {
-                          e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)';
-                          e.currentTarget.style.color = '#FFFFFF';
+                          e.currentTarget.style.backgroundColor = colors.bgHover;
+                          e.currentTarget.style.color = colors.text;
                         }
                       }}
                       onMouseLeave={(e) => {
                         if (!isActive(item.href)) {
                           e.currentTarget.style.backgroundColor = 'transparent';
-                          e.currentTarget.style.color = 'rgba(255,255,255,0.55)';
+                          e.currentTarget.style.color = colors.textMuted;
                         }
                       }}
                       title={sidebarCollapsed ? item.title : undefined}
@@ -337,7 +371,7 @@ export function Sidebar({ isMobileOpen = false, onMobileClose }: SidebarProps) {
                       <item.icon
                         className={cn(
                           'shrink-0',
-                          sidebarCollapsed ? 'h-5 w-5' : 'h-[18px] w-[18px]'
+                          sidebarCollapsed ? 'h-[18px] w-[18px]' : 'h-4 w-4'
                         )}
                         strokeWidth={1.75}
                       />
@@ -348,7 +382,8 @@ export function Sidebar({ isMobileOpen = false, onMobileClose }: SidebarProps) {
                             <span
                               className="px-1.5 py-0.5 text-[10px] font-semibold rounded"
                               style={{
-                                backgroundColor: 'rgba(255,255,255,0.15)',
+                                backgroundColor: colors.bgActive,
+                                color: colors.text,
                               }}
                             >
                               {item.badge}
@@ -368,36 +403,36 @@ export function Sidebar({ isMobileOpen = false, onMobileClose }: SidebarProps) {
       {/* System Status - Bottom */}
       {!sidebarCollapsed && (
         <div
-          className="relative z-10 p-4"
-          style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}
+          className="relative z-10 px-3 py-2"
+          style={{ borderTop: `1px solid ${colors.border}` }}
         >
-          <div className="flex items-center gap-2 mb-3">
-            <Activity className="h-4 w-4" strokeWidth={1.75} style={{ color: 'rgba(255,255,255,0.4)' }} />
+          <div className="flex items-center gap-2 mb-2">
+            <Activity className="h-4 w-4" strokeWidth={1.75} style={{ color: colors.textSubtle }} />
             <span
               className="text-[10px] font-semibold uppercase tracking-wider"
-              style={{ color: 'rgba(255,255,255,0.4)' }}
+              style={{ color: colors.textSubtle }}
             >
               Trạng thái
             </span>
           </div>
-          <div className="space-y-2">
+          <div className="space-y-1">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-medium" style={{ color: 'rgba(255,255,255,0.55)' }}>API</span>
-              <div className="flex items-center gap-1.5">
-                <div className="w-2 h-2 rounded-full bg-green-500" />
-                <span className="text-xs font-medium text-green-400">Online</span>
+              <span className="text-xs font-medium" style={{ color: colors.textMuted }}>API</span>
+              <div className="flex items-center gap-1">
+                <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: isDark ? '#4ade80' : '#15803D' }} />
+                <span className="text-[11px] font-medium" style={{ color: isDark ? '#4ade80' : '#15803D' }}>Online</span>
               </div>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-xs font-medium" style={{ color: 'rgba(255,255,255,0.55)' }}>Database</span>
-              <div className="flex items-center gap-1.5">
-                <div className="w-2 h-2 rounded-full bg-green-500" />
-                <span className="text-xs font-medium text-green-400">Online</span>
+              <span className="text-xs font-medium" style={{ color: colors.textMuted }}>Database</span>
+              <div className="flex items-center gap-1">
+                <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: isDark ? '#4ade80' : '#15803D' }} />
+                <span className="text-[11px] font-medium" style={{ color: isDark ? '#4ade80' : '#15803D' }}>Online</span>
               </div>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-xs font-medium" style={{ color: 'rgba(255,255,255,0.55)' }}>Sync</span>
-              <span className="text-xs font-mono font-medium" style={{ color: 'rgba(255,255,255,0.4)' }}>2 phút trước</span>
+              <span className="text-xs font-medium" style={{ color: colors.textMuted }}>Sync</span>
+              <span className="text-[11px] font-mono font-medium" style={{ color: colors.textSubtle }}>2 phút trước</span>
             </div>
           </div>
         </div>
@@ -405,44 +440,26 @@ export function Sidebar({ isMobileOpen = false, onMobileClose }: SidebarProps) {
 
       {/* User Section */}
       <div
-        className="relative z-10 flex items-center gap-3 px-4 py-3"
+        className="relative z-10 flex items-center gap-2 px-3 py-2"
         style={{
-          borderTop: '1px solid rgba(255,255,255,0.08)',
+          borderTop: `1px solid ${colors.border}`,
           justifyContent: sidebarCollapsed ? 'center' : 'flex-start'
         }}
       >
         <div
-          className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold text-white"
-          style={{ backgroundColor: 'rgba(255,255,255,0.1)' }}
+          className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold"
+          style={{ backgroundColor: colors.bgSubtle, color: colors.text }}
         >
           QN
         </div>
         {!sidebarCollapsed && (
           <div className="flex-1 min-w-0">
-            <div className="text-sm font-medium text-white truncate">Quỳnh Nguyễn</div>
-            <div className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>Admin</div>
+            <div className="text-xs font-semibold truncate" style={{ color: colors.text }}>Quỳnh Nguyễn</div>
+            <div className="text-[10px]" style={{ color: colors.textSubtle }}>Admin</div>
           </div>
         )}
       </div>
 
-      {/* Collapse Toggle Button - Outside sidebar */}
-      <button
-        onClick={toggleSidebar}
-        className="absolute top-16 -right-3 w-6 h-6 bg-white rounded-full border border-gray-200 hidden lg:flex items-center justify-center hover:bg-gray-50 z-50"
-        style={{
-          boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-          transition: 'background 0.1s ease'
-        }}
-      >
-        <ChevronRight
-          className="w-3.5 h-3.5 text-gray-500"
-          strokeWidth={2}
-          style={{
-            transform: sidebarCollapsed ? 'rotate(0deg)' : 'rotate(180deg)',
-            transition: 'transform 0.2s ease'
-          }}
-        />
-      </button>
     </>
   );
 
@@ -456,7 +473,7 @@ export function Sidebar({ isMobileOpen = false, onMobileClose }: SidebarProps) {
         )}
         style={{
           width: sidebarCollapsed ? 64 : 256,
-          backgroundColor: '#001D3D',
+          backgroundColor: sidebarBgColor,
         }}
       >
         {sidebarContent}
@@ -469,7 +486,7 @@ export function Sidebar({ isMobileOpen = false, onMobileClose }: SidebarProps) {
           'transition-transform duration-300'
         )}
         style={{
-          backgroundColor: '#001D3D',
+          backgroundColor: sidebarBgColor,
           transform: isMobileOpen ? 'translateX(0)' : 'translateX(-100%)'
         }}
       >

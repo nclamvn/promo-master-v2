@@ -15,7 +15,7 @@ describe('StatusBadge', () => {
   it('should render with correct variant for ACTIVE', () => {
     render(<StatusBadge status="ACTIVE" />);
     const badge = screen.getByText('Active');
-    expect(badge).toHaveClass('bg-success-muted');
+    expect(badge).toHaveClass('bg-emerald-600');
   });
 
   it('should render with correct variant for DRAFT', () => {

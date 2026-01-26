@@ -128,9 +128,9 @@ export function Header({ onMobileMenuClick }: HeaderProps) {
           'fixed top-0 right-0 z-30 h-12',
           'bg-background/95 backdrop-blur-sm',
           'border-b border-surface-border',
-          'flex items-center justify-between px-4',
+          'flex items-center justify-between px-6',
           'transition-all duration-200',
-          sidebarCollapsed ? 'lg:left-14' : 'lg:left-56',
+          sidebarCollapsed ? 'lg:left-16' : 'lg:left-64',
           'left-0'
         )}
       >
@@ -239,7 +239,7 @@ export function Header({ onMobileMenuClick }: HeaderProps) {
                     {user?.name?.charAt(0)?.toUpperCase() || 'U'}
                   </span>
                 </div>
-                <div className="hidden md:flex flex-col items-start min-w-0 flex-1">
+                <div className="hidden xl:flex flex-col items-start min-w-0 flex-1">
                   <span className="text-xs font-medium text-foreground truncate max-w-full">
                     {user?.name || 'User'}
                   </span>
@@ -247,7 +247,7 @@ export function Header({ onMobileMenuClick }: HeaderProps) {
                     {user?.role || 'Manager'}
                   </span>
                 </div>
-                <ChevronDown className="h-3 w-3 text-foreground-subtle shrink-0" />
+                <ChevronDown className="h-3 w-3 text-foreground-subtle shrink-0 hidden xl:block" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">

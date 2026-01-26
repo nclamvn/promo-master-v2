@@ -313,16 +313,16 @@ export const DELIVERY_STATUS_CONFIG: Record<
   DeliveryStatus,
   { label: string; color: string; bgColor: string }
 > = {
-  PENDING: { label: 'Pending', color: 'text-foreground-muted', bgColor: 'bg-surface-hover' },
-  CONFIRMED: { label: 'Confirmed', color: 'text-primary', bgColor: 'bg-primary-muted' },
-  SCHEDULED: { label: 'Scheduled', color: 'text-primary', bgColor: 'bg-primary-muted' },
-  PICKING: { label: 'Picking', color: 'text-warning', bgColor: 'bg-warning-muted' },
-  PACKED: { label: 'Packed', color: 'text-warning', bgColor: 'bg-warning-muted' },
-  IN_TRANSIT: { label: 'In Transit', color: 'text-warning', bgColor: 'bg-warning-muted' },
-  DELIVERED: { label: 'Delivered', color: 'text-success', bgColor: 'bg-success-muted' },
-  PARTIAL: { label: 'Partial', color: 'text-warning', bgColor: 'bg-warning-muted' },
-  RETURNED: { label: 'Returned', color: 'text-danger', bgColor: 'bg-danger-muted' },
-  CANCELLED: { label: 'Cancelled', color: 'text-foreground-subtle', bgColor: 'bg-surface-hover' },
+  PENDING: { label: 'Pending', color: 'text-white', bgColor: 'bg-slate-500 dark:bg-slate-600' },
+  CONFIRMED: { label: 'Confirmed', color: 'text-white', bgColor: 'bg-blue-500 dark:bg-blue-600' },
+  SCHEDULED: { label: 'Scheduled', color: 'text-white', bgColor: 'bg-blue-500 dark:bg-blue-600' },
+  PICKING: { label: 'Picking', color: 'text-white', bgColor: 'bg-amber-500 dark:bg-amber-600' },
+  PACKED: { label: 'Packed', color: 'text-white', bgColor: 'bg-amber-500 dark:bg-amber-600' },
+  IN_TRANSIT: { label: 'In Transit', color: 'text-white', bgColor: 'bg-amber-500 dark:bg-amber-600' },
+  DELIVERED: { label: 'Delivered', color: 'text-white', bgColor: 'bg-emerald-600 dark:bg-emerald-500' },
+  PARTIAL: { label: 'Partial', color: 'text-white', bgColor: 'bg-amber-500 dark:bg-amber-600' },
+  RETURNED: { label: 'Returned', color: 'text-white', bgColor: 'bg-red-500 dark:bg-red-600' },
+  CANCELLED: { label: 'Cancelled', color: 'text-white', bgColor: 'bg-slate-500 dark:bg-slate-600' },
 };
 
 export const DELIVERY_STATUS_TRANSITIONS: Record<DeliveryStatus, DeliveryStatus[]> = {

@@ -15,26 +15,26 @@ const badgeVariants = cva(
       variant: {
         default: "bg-surface text-foreground border-surface-border",
 
-        // Status variants
-        draft: "bg-surface-hover text-foreground-muted border-surface-border",
-        pending: "bg-warning-muted text-warning border-warning/30",
-        approved: "bg-primary-muted text-primary border-primary/30",
-        active: "bg-success-muted text-success border-success/30",
-        completed: "bg-accent-muted text-accent border-accent/30",
-        cancelled: "bg-danger-muted text-danger border-danger/30",
-        rejected: "bg-danger-muted text-danger border-danger/30",
-        paid: "bg-success-muted text-success border-success/30",
+        // Status variants - Solid colors for better readability
+        draft: "bg-slate-500 text-white border-slate-600 dark:bg-slate-600 dark:border-slate-700",
+        pending: "bg-amber-500 text-white border-amber-600 dark:bg-amber-600 dark:border-amber-700",
+        approved: "bg-blue-500 text-white border-blue-600 dark:bg-blue-600 dark:border-blue-700",
+        active: "bg-emerald-600 text-white border-emerald-700 dark:bg-emerald-500 dark:border-emerald-600",
+        completed: "bg-violet-500 text-white border-violet-600 dark:bg-violet-600 dark:border-violet-700",
+        cancelled: "bg-red-500 text-white border-red-600 dark:bg-red-600 dark:border-red-700",
+        rejected: "bg-red-500 text-white border-red-600 dark:bg-red-600 dark:border-red-700",
+        paid: "bg-emerald-600 text-white border-emerald-700 dark:bg-emerald-500 dark:border-emerald-600",
 
-        // Semantic variants
-        success: "bg-success-muted text-success border-success/30",
-        warning: "bg-warning-muted text-warning border-warning/30",
-        danger: "bg-danger-muted text-danger border-danger/30",
-        info: "bg-primary-muted text-primary border-primary/30",
+        // Semantic variants - Solid colors for better readability
+        success: "bg-emerald-600 text-white border-emerald-700 dark:bg-emerald-500 dark:border-emerald-600",
+        warning: "bg-amber-500 text-white border-amber-600 dark:bg-amber-600 dark:border-amber-700",
+        danger: "bg-red-500 text-white border-red-600 dark:bg-red-600 dark:border-red-700",
+        info: "bg-blue-500 text-white border-blue-600 dark:bg-blue-600 dark:border-blue-700",
 
-        // Legacy variants for compatibility
-        secondary: "bg-surface text-foreground-muted border-surface-border",
-        destructive: "bg-danger-muted text-danger border-danger/30",
-        error: "bg-danger-muted text-danger border-danger/30",
+        // Legacy variants for compatibility - Solid colors
+        secondary: "bg-slate-500 text-white border-slate-600 dark:bg-slate-600 dark:border-slate-700",
+        destructive: "bg-red-500 text-white border-red-600 dark:bg-red-600 dark:border-red-700",
+        error: "bg-red-500 text-white border-red-600 dark:bg-red-600 dark:border-red-700",
 
         // Outline variants
         outline: "bg-transparent text-foreground border-surface-border",

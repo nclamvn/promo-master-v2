@@ -80,7 +80,7 @@ export function SellAlertCard({ alert, onClick }: SellAlertCardProps) {
           <div
             className={cn(
               'p-2 rounded-full',
-              alert.severity === 'CRITICAL' ? 'bg-danger-muted' : 'bg-surface-hover'
+              alert.severity === 'CRITICAL' ? 'bg-red-500/20 dark:bg-red-500/30' : 'bg-surface-hover'
             )}
           >
             <Icon className={cn('h-5 w-5', config.color)} />

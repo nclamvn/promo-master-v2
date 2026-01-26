@@ -11,6 +11,7 @@ interface ThemeProviderProps {
 
 export function ThemeProvider({ children }: ThemeProviderProps) {
   const theme = useUIStore((state) => state.theme);
+  const setTheme = useUIStore((state) => state.setTheme);
 
   useEffect(() => {
     const root = window.document.documentElement;
@@ -18,32 +19,16 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
     // Remove previous theme classes
     root.classList.remove('light', 'dark');
 
-    if (theme === 'system') {
-      // Check system preference
-      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches
-        ? 'dark'
-        : 'light';
-      root.classList.add(systemTheme);
-    } else {
-      root.classList.add(theme);
+    // Handle legacy 'system' value from localStorage - convert to 'light'
+    const effectiveTheme = (theme === 'light' || theme === 'dark') ? theme : 'light';
+
+    // Update store if we had to convert from legacy value
+    if (effectiveTheme !== theme) {
+      setTheme(effectiveTheme);
     }
-  }, [theme]);
 
-  // Listen for system theme changes when using 'system' preference
-  useEffect(() => {
-    if (theme !== 'system') return;
-
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-
-    const handleChange = (e: MediaQueryListEvent) => {
-      const root = window.document.documentElement;
-      root.classList.remove('light', 'dark');
-      root.classList.add(e.matches ? 'dark' : 'light');
-    };
-
-    mediaQuery.addEventListener('change', handleChange);
-    return () => mediaQuery.removeEventListener('change', handleChange);
-  }, [theme]);
+    root.classList.add(effectiveTheme);
+  }, [theme, setTheme]);
 
   return <>{children}</>;
 }
