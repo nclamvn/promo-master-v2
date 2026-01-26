@@ -92,13 +92,13 @@ export default function Login() {
       </Button>
 
       {/* Demo credentials hint */}
-      <div className="rounded-lg bg-blue-50 p-3 text-sm">
-        <p className="font-medium text-blue-800">Test Accounts:</p>
-        <p className="text-blue-600">Admin: admin@promomaster.com / admin123</p>
-        <p className="text-blue-600">Manager: manager@promomaster.com / manager123</p>
+      <div className="rounded-lg border border-primary/30 bg-primary/10 p-3 text-sm">
+        <p className="font-medium text-primary">Test Accounts:</p>
+        <p className="text-primary/80">Admin: admin@promomaster.com / admin123</p>
+        <p className="text-primary/80">Manager: manager@promomaster.com / manager123</p>
         <Button
           type="button"
-          variant="outline"
+          variant="secondary"
           size="sm"
           className="mt-2 w-full"
           onClick={fillDemo}
