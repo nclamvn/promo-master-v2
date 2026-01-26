@@ -721,4 +721,232 @@ export const handlers = [
     });
   }),
 
+  // ═══════════════════════════════════════════════════════════════════════
+  // PLANNING - TEMPLATES
+  // ═══════════════════════════════════════════════════════════════════════
+
+  http.get('*/planning/templates', async ({ request }) => {
+    await delay(300);
+    const url = new URL(request.url);
+    const page = parseInt(url.searchParams.get('page') || '1');
+    const pageSize = parseInt(url.searchParams.get('pageSize') || url.searchParams.get('limit') || '10');
+
+    const mockTemplates = [
+      { id: 'tpl-1', name: 'Summer Sale Template', description: 'Standard summer promotion template', type: 'DISCOUNT', status: 'ACTIVE', createdAt: '2026-01-01T00:00:00Z', updatedAt: '2026-01-15T00:00:00Z' },
+      { id: 'tpl-2', name: 'BOGO Template', description: 'Buy one get one free template', type: 'BOGO', status: 'ACTIVE', createdAt: '2026-01-02T00:00:00Z', updatedAt: '2026-01-16T00:00:00Z' },
+      { id: 'tpl-3', name: 'Rebate Template', description: 'Standard rebate promotion', type: 'REBATE', status: 'DRAFT', createdAt: '2026-01-03T00:00:00Z', updatedAt: '2026-01-17T00:00:00Z' },
+    ];
+
+    const result = paginate(mockTemplates, page, pageSize);
+    return HttpResponse.json({ success: true, data: result.data, templates: result.data, pagination: result.pagination });
+  }),
+
+  http.get('*/planning/templates/:id', async ({ params }) => {
+    await delay(200);
+    const template = {
+      id: params.id,
+      name: 'Sample Template',
+      description: 'A sample promotion template',
+      type: 'DISCOUNT',
+      status: 'ACTIVE',
+      config: { discountType: 'PERCENTAGE', discountValue: 10 },
+      createdAt: '2026-01-01T00:00:00Z',
+      updatedAt: '2026-01-15T00:00:00Z',
+    };
+    return HttpResponse.json({ success: true, data: template });
+  }),
+
+  http.post('*/planning/templates', async ({ request }) => {
+    await delay(500);
+    const body = await request.json() as any;
+    const newTemplate = {
+      id: `tpl-${Date.now()}`,
+      ...body,
+      status: 'DRAFT',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    return HttpResponse.json({ success: true, data: newTemplate }, { status: 201 });
+  }),
+
+  http.delete('*/planning/templates/:id', async () => {
+    await delay(300);
+    return HttpResponse.json({ success: true, message: 'Template deleted' });
+  }),
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // PLANNING - SCENARIOS
+  // ═══════════════════════════════════════════════════════════════════════
+
+  http.get('*/planning/scenarios', async ({ request }) => {
+    await delay(300);
+    const url = new URL(request.url);
+    const page = parseInt(url.searchParams.get('page') || '1');
+    const pageSize = parseInt(url.searchParams.get('pageSize') || url.searchParams.get('limit') || '12');
+
+    const mockScenarios = [
+      { id: 'scn-1', name: 'Q1 2026 Budget Scenario', description: 'Planning for Q1 budget allocation', status: 'ACTIVE', type: 'BUDGET', totalBudget: 500000000, projectedROI: 12.5, createdAt: '2026-01-01T00:00:00Z', updatedAt: '2026-01-20T00:00:00Z' },
+      { id: 'scn-2', name: 'Summer Campaign Scenario', description: 'Summer promotion planning', status: 'DRAFT', type: 'CAMPAIGN', totalBudget: 300000000, projectedROI: 15.2, createdAt: '2026-01-05T00:00:00Z', updatedAt: '2026-01-21T00:00:00Z' },
+      { id: 'scn-3', name: 'New Product Launch', description: 'New product promotion scenario', status: 'APPROVED', type: 'LAUNCH', totalBudget: 200000000, projectedROI: 18.0, createdAt: '2026-01-10T00:00:00Z', updatedAt: '2026-01-22T00:00:00Z' },
+    ];
+
+    const result = paginate(mockScenarios, page, pageSize);
+    return HttpResponse.json({ success: true, data: result.data, scenarios: result.data, pagination: result.pagination });
+  }),
+
+  http.get('*/planning/scenarios/:id', async ({ params }) => {
+    await delay(200);
+    const scenario = {
+      id: params.id,
+      name: 'Sample Scenario',
+      description: 'A sample planning scenario',
+      status: 'ACTIVE',
+      type: 'BUDGET',
+      totalBudget: 500000000,
+      projectedROI: 12.5,
+      promotions: [],
+      createdAt: '2026-01-01T00:00:00Z',
+      updatedAt: '2026-01-20T00:00:00Z',
+    };
+    return HttpResponse.json({ success: true, data: scenario });
+  }),
+
+  http.post('*/planning/scenarios', async ({ request }) => {
+    await delay(500);
+    const body = await request.json() as any;
+    const newScenario = {
+      id: `scn-${Date.now()}`,
+      ...body,
+      status: 'DRAFT',
+      projectedROI: 0,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    return HttpResponse.json({ success: true, data: newScenario }, { status: 201 });
+  }),
+
+  http.delete('*/planning/scenarios/:id', async () => {
+    await delay(300);
+    return HttpResponse.json({ success: true, message: 'Scenario deleted' });
+  }),
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // PLANNING - CLASHES
+  // ═══════════════════════════════════════════════════════════════════════
+
+  http.get('*/planning/clashes/stats', async () => {
+    await delay(200);
+    return HttpResponse.json({
+      success: true,
+      data: {
+        total: 5,
+        critical: 1,
+        warning: 3,
+        info: 1,
+        resolved: 2,
+        pending: 3,
+      }
+    });
+  }),
+
+  http.get('*/planning/clashes', async ({ request }) => {
+    await delay(300);
+    const url = new URL(request.url);
+    const page = parseInt(url.searchParams.get('page') || '1');
+    const pageSize = parseInt(url.searchParams.get('pageSize') || url.searchParams.get('limit') || '10');
+
+    const mockClashes = [
+      { id: 'clash-1', type: 'OVERLAP', severity: 'CRITICAL', status: 'PENDING', promotionIds: ['promo-1', 'promo-2'], description: 'Two promotions overlap on same products', detectedAt: '2026-01-20T00:00:00Z' },
+      { id: 'clash-2', type: 'BUDGET', severity: 'WARNING', status: 'PENDING', promotionIds: ['promo-3'], description: 'Budget exceeds allocated limit', detectedAt: '2026-01-21T00:00:00Z' },
+      { id: 'clash-3', type: 'TIMING', severity: 'INFO', status: 'RESOLVED', promotionIds: ['promo-4', 'promo-5'], description: 'Promotions run at similar times', detectedAt: '2026-01-19T00:00:00Z', resolvedAt: '2026-01-20T00:00:00Z' },
+    ];
+
+    const result = paginate(mockClashes, page, pageSize);
+    return HttpResponse.json({ success: true, data: result.data, clashes: result.data, pagination: result.pagination });
+  }),
+
+  http.post('*/planning/clashes/:id/resolve', async ({ params }) => {
+    await delay(500);
+    return HttpResponse.json({
+      success: true,
+      data: {
+        id: params.id,
+        status: 'RESOLVED',
+        resolvedAt: new Date().toISOString(),
+      }
+    });
+  }),
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // BUDGETS
+  // ═══════════════════════════════════════════════════════════════════════
+
+  http.get('*/budgets', async ({ request }) => {
+    await delay(300);
+    const url = new URL(request.url);
+    const page = parseInt(url.searchParams.get('page') || '1');
+    const pageSize = parseInt(url.searchParams.get('pageSize') || '10');
+
+    const mockBudgets = [
+      { id: 'bud-1', name: 'Q1 2026 Marketing', totalAmount: 500000000, allocatedAmount: 350000000, spentAmount: 120000000, status: 'ACTIVE', period: 'Q1-2026', createdAt: '2026-01-01T00:00:00Z' },
+      { id: 'bud-2', name: 'Summer Campaign', totalAmount: 300000000, allocatedAmount: 200000000, spentAmount: 50000000, status: 'ACTIVE', period: 'Q2-2026', createdAt: '2026-01-15T00:00:00Z' },
+    ];
+
+    const result = paginate(mockBudgets, page, pageSize);
+    return HttpResponse.json({ success: true, data: result.data, budgets: result.data, pagination: result.pagination });
+  }),
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // FUNDS
+  // ═══════════════════════════════════════════════════════════════════════
+
+  http.get('*/funds', async ({ request }) => {
+    await delay(300);
+    const url = new URL(request.url);
+    const page = parseInt(url.searchParams.get('page') || '1');
+    const pageSize = parseInt(url.searchParams.get('pageSize') || '10');
+
+    const mockFunds = [
+      { id: 'fund-1', code: 'MKT-001', name: 'Marketing Fund 2026', type: 'MARKETING', totalAmount: 1000000000, availableAmount: 700000000, status: 'ACTIVE', createdAt: '2026-01-01T00:00:00Z' },
+      { id: 'fund-2', code: 'TRD-001', name: 'Trade Fund Q1', type: 'TRADE', totalAmount: 500000000, availableAmount: 400000000, status: 'ACTIVE', createdAt: '2026-01-01T00:00:00Z' },
+    ];
+
+    const result = paginate(mockFunds, page, pageSize);
+    return HttpResponse.json({ success: true, data: result.data, funds: result.data, pagination: result.pagination });
+  }),
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // TARGETS & BASELINES
+  // ═══════════════════════════════════════════════════════════════════════
+
+  http.get('*/targets', async ({ request }) => {
+    await delay(300);
+    const url = new URL(request.url);
+    const page = parseInt(url.searchParams.get('page') || '1');
+    const pageSize = parseInt(url.searchParams.get('pageSize') || '10');
+
+    const mockTargets = [
+      { id: 'tgt-1', name: 'Q1 Sales Target', type: 'SALES', targetValue: 5000000000, currentValue: 2500000000, progress: 50, period: 'Q1-2026', status: 'IN_PROGRESS', createdAt: '2026-01-01T00:00:00Z' },
+      { id: 'tgt-2', name: 'Customer Acquisition', type: 'ACQUISITION', targetValue: 100, currentValue: 45, progress: 45, period: 'Q1-2026', status: 'IN_PROGRESS', createdAt: '2026-01-01T00:00:00Z' },
+    ];
+
+    const result = paginate(mockTargets, page, pageSize);
+    return HttpResponse.json({ success: true, data: result.data, targets: result.data, pagination: result.pagination });
+  }),
+
+  http.get('*/baselines', async ({ request }) => {
+    await delay(300);
+    const url = new URL(request.url);
+    const page = parseInt(url.searchParams.get('page') || '1');
+    const pageSize = parseInt(url.searchParams.get('pageSize') || '10');
+
+    const mockBaselines = [
+      { id: 'bsl-1', name: '2025 Q4 Baseline', type: 'QUARTERLY', period: 'Q4-2025', salesVolume: 4500000000, margin: 18.5, status: 'APPROVED', createdAt: '2025-10-01T00:00:00Z' },
+      { id: 'bsl-2', name: '2025 Annual Baseline', type: 'ANNUAL', period: '2025', salesVolume: 18000000000, margin: 17.8, status: 'APPROVED', createdAt: '2025-01-01T00:00:00Z' },
+    ];
+
+    const result = paginate(mockBaselines, page, pageSize);
+    return HttpResponse.json({ success: true, data: result.data, baselines: result.data, pagination: result.pagination });
+  }),
+
 ];
