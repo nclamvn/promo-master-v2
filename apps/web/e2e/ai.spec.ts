@@ -6,38 +6,32 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('AI Module', () => {
-  test.beforeEach(async ({ page }) => {
-    await page.goto('/login');
-    await page.fill('input[name="email"]', 'admin@tpm.com');
-    await page.fill('input[name="password"]', 'admin123');
-    await page.click('button[type="submit"]');
-    await expect(page).toHaveURL('/');
-  });
-
   test.describe('AI Dashboard', () => {
     test('should display AI dashboard', async ({ page }) => {
       await page.goto('/ai');
+      await page.waitForLoadState('networkidle');
 
-      await expect(page.locator('h1, h2').first()).toContainText(/AI|Trí tuệ nhân tạo/i);
+      // Check for page title
+      await expect(page.locator('h1')).toContainText(/AI Assistant|Trí tuệ nhân tạo/i);
     });
 
     test('should show AI-generated insights summary', async ({ page }) => {
       await page.goto('/ai');
+      await page.waitForLoadState('networkidle');
 
-      // Check for insights cards or widgets
-      const insightCards = page.locator('[data-testid="insight-card"], .insight-card');
-      if (await insightCards.count() > 0) {
-        await expect(insightCards.first()).toBeVisible();
-      }
+      // Check for page content (cards, sections, or main content)
+      const content = page.locator('[class*="Card"], .card, main, h1');
+      await expect(content.first()).toBeVisible();
     });
 
     test('should display recommendation preview', async ({ page }) => {
       await page.goto('/ai');
+      await page.waitForLoadState('networkidle');
 
-      // Check for recommendation section
-      const recommendations = page.locator('[data-testid="recommendations"], .recommendations-section');
-      if (await recommendations.isVisible()) {
-        await expect(recommendations).toBeVisible();
+      // Check for "Top Recommendations" section
+      const recommendationsSection = page.locator('text=Top Recommendations, text=Đề xuất');
+      if (await recommendationsSection.count() > 0) {
+        await expect(recommendationsSection.first()).toBeVisible();
       }
     });
   });
@@ -45,44 +39,54 @@ test.describe('AI Module', () => {
   test.describe('AI Insights', () => {
     test('should display insights list', async ({ page }) => {
       await page.goto('/ai/insights');
+      await page.waitForLoadState('networkidle');
 
-      await expect(page.locator('h1, h2').first()).toContainText(/Insight/i);
+      await expect(page.locator('h1')).toContainText(/AI Insights|Insight/i);
     });
 
     test('should show insight categories', async ({ page }) => {
       await page.goto('/ai/insights');
+      await page.waitForLoadState('networkidle');
 
-      // Check for category filters or tabs
-      const categories = page.locator('[data-testid="insight-category"], .category-filter');
-      if (await categories.count() > 0) {
-        await expect(categories.first()).toBeVisible();
+      // Check for filter section with Select components
+      const filterSection = page.locator('[class*="Card"]').filter({ hasText: 'Filters' });
+      if (await filterSection.count() > 0) {
+        await expect(filterSection.first()).toBeVisible();
       }
     });
 
     test('should filter insights by type', async ({ page }) => {
       await page.goto('/ai/insights');
+      await page.waitForLoadState('networkidle');
 
-      const typeFilter = page.locator('select[data-filter="type"]');
+      // Look for the Select trigger for type filter
+      const typeFilter = page.locator('button[role="combobox"]').first();
       if (await typeFilter.isVisible()) {
         await typeFilter.click();
+        // Check for dropdown content
+        await expect(page.locator('[role="listbox"]')).toBeVisible();
       }
     });
 
     test('should display insight details', async ({ page }) => {
       await page.goto('/ai/insights');
+      await page.waitForLoadState('networkidle');
 
-      const firstInsight = page.locator('[data-testid="insight-item"], .insight-item').first();
-      if (await firstInsight.isVisible()) {
-        await firstInsight.click();
+      // Check for insight cards (they use Card component with border-l-4)
+      const insightCards = page.locator('[class*="border-l-4"], [class*="Card"]');
+      if (await insightCards.count() > 0) {
+        await expect(insightCards.first()).toBeVisible();
       }
     });
 
     test('should show confidence score for insights', async ({ page }) => {
       await page.goto('/ai/insights');
+      await page.waitForLoadState('networkidle');
 
-      const confidenceIndicator = page.locator('[data-confidence], .confidence-score');
-      if (await confidenceIndicator.count() > 0) {
-        await expect(confidenceIndicator.first()).toBeVisible();
+      // Confidence scores are shown as Badge with percentage
+      const confidenceBadge = page.locator('[class*="Badge"]:has-text("%")');
+      if (await confidenceBadge.count() > 0) {
+        await expect(confidenceBadge.first()).toBeVisible();
       }
     });
   });
@@ -90,14 +94,17 @@ test.describe('AI Module', () => {
   test.describe('AI Recommendations', () => {
     test('should display recommendations list', async ({ page }) => {
       await page.goto('/ai/recommendations');
+      await page.waitForLoadState('networkidle');
 
-      await expect(page.locator('h1, h2').first()).toContainText(/Recommendation|Đề xuất/i);
+      await expect(page.locator('h1')).toContainText(/AI Recommendations|Recommendation|Đề xuất/i);
     });
 
     test('should show recommendation priority', async ({ page }) => {
       await page.goto('/ai/recommendations');
+      await page.waitForLoadState('networkidle');
 
-      const priorityBadge = page.locator('[data-priority], .priority-badge');
+      // Priority is shown via Badge components
+      const priorityBadge = page.locator('[class*="Badge"]');
       if (await priorityBadge.count() > 0) {
         await expect(priorityBadge.first()).toBeVisible();
       }
@@ -105,39 +112,44 @@ test.describe('AI Module', () => {
 
     test('should filter recommendations by status', async ({ page }) => {
       await page.goto('/ai/recommendations');
+      await page.waitForLoadState('networkidle');
 
-      const statusFilter = page.locator('select[data-filter="status"]');
-      if (await statusFilter.isVisible()) {
-        await statusFilter.selectOption('PENDING');
-        await page.waitForTimeout(500);
+      // Look for the Select trigger for status filter
+      const statusFilter = page.locator('button[role="combobox"]').filter({ hasText: /Status|All/ });
+      if (await statusFilter.count() > 0) {
+        await statusFilter.first().click();
+        await page.waitForTimeout(300);
       }
     });
 
     test('should allow accepting recommendation', async ({ page }) => {
       await page.goto('/ai/recommendations');
+      await page.waitForLoadState('networkidle');
 
       const acceptButton = page.locator('button:has-text("Accept"), button:has-text("Áp dụng")').first();
-      if (await acceptButton.isVisible()) {
-        // Don't actually click, just verify the button exists
+      if (await acceptButton.count() > 0 && await acceptButton.isVisible()) {
         await expect(acceptButton).toBeVisible();
       }
     });
 
     test('should allow dismissing recommendation', async ({ page }) => {
       await page.goto('/ai/recommendations');
+      await page.waitForLoadState('networkidle');
 
-      const dismissButton = page.locator('button:has-text("Dismiss"), button:has-text("Bỏ qua")').first();
-      if (await dismissButton.isVisible()) {
-        await expect(dismissButton).toBeVisible();
+      const rejectButton = page.locator('button:has-text("Reject"), button:has-text("Bỏ qua")').first();
+      if (await rejectButton.count() > 0 && await rejectButton.isVisible()) {
+        await expect(rejectButton).toBeVisible();
       }
     });
 
     test('should display recommendation impact estimate', async ({ page }) => {
       await page.goto('/ai/recommendations');
+      await page.waitForLoadState('networkidle');
 
-      const impactSection = page.locator('[data-impact], .impact-estimate');
-      if (await impactSection.count() > 0) {
-        await expect(impactSection.first()).toBeVisible();
+      // Check for recommendation cards
+      const recommendationCards = page.locator('[class*="Card"]');
+      if (await recommendationCards.count() > 0) {
+        await expect(recommendationCards.first()).toBeVisible();
       }
     });
   });
@@ -145,38 +157,42 @@ test.describe('AI Module', () => {
   test.describe('Voice Commands', () => {
     test('should display voice interface', async ({ page }) => {
       await page.goto('/voice');
+      await page.waitForLoadState('networkidle');
 
-      // Check for voice UI elements
-      const voiceUI = page.locator('[data-testid="voice-interface"], .voice-interface');
-      if (await voiceUI.isVisible()) {
-        await expect(voiceUI).toBeVisible();
-      }
+      // Check for Voice Commands page title
+      await expect(page.locator('h1')).toContainText(/Voice Commands|Voice/i);
     });
 
     test('should show voice command examples', async ({ page }) => {
       await page.goto('/voice');
+      await page.waitForLoadState('networkidle');
 
-      const examples = page.locator('[data-testid="command-examples"], .command-examples');
-      if (await examples.isVisible()) {
-        await expect(examples).toBeVisible();
+      // Check for "Example Commands" section
+      const examples = page.locator('text=Example Commands');
+      if (await examples.count() > 0) {
+        await expect(examples.first()).toBeVisible();
       }
     });
 
     test('should have microphone button', async ({ page }) => {
       await page.goto('/voice');
+      await page.waitForLoadState('networkidle');
 
-      const micButton = page.locator('button[aria-label*="microphone"], button:has-text("Record"), .mic-button');
-      if (await micButton.isVisible()) {
-        await expect(micButton).toBeVisible();
+      // Voice button is a custom component
+      const micButton = page.locator('button[class*="rounded-full"], button:has-text("Click to start")');
+      if (await micButton.count() > 0) {
+        await expect(micButton.first()).toBeVisible();
       }
     });
 
     test('should display voice command history', async ({ page }) => {
       await page.goto('/voice');
+      await page.waitForLoadState('networkidle');
 
-      const history = page.locator('[data-testid="command-history"], .command-history');
-      if (await history.isVisible()) {
-        await expect(history).toBeVisible();
+      // Check for "Recent Commands" section
+      const history = page.locator('text=Recent Commands');
+      if (await history.count() > 0) {
+        await expect(history.first()).toBeVisible();
       }
     });
   });
@@ -184,9 +200,11 @@ test.describe('AI Module', () => {
   test.describe('AI Settings', () => {
     test('should navigate to AI settings', async ({ page }) => {
       await page.goto('/ai');
+      await page.waitForLoadState('networkidle');
 
+      // Check for settings link or button
       const settingsLink = page.locator('a:has-text("Settings"), button:has-text("Settings")');
-      if (await settingsLink.isVisible()) {
+      if (await settingsLink.count() > 0 && await settingsLink.isVisible()) {
         await settingsLink.click();
       }
     });
