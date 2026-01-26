@@ -591,15 +591,4 @@ export const handlers = [
     return HttpResponse.json({ success: true, data: user });
   }),
 
-  // ═══════════════════════════════════════════════════════════════════════
-  // CATCH-ALL FOR UNHANDLED ROUTES
-  // ═══════════════════════════════════════════════════════════════════════
-
-  http.all('*/*', ({ request }) => {
-    console.warn(`[MSW] Unhandled ${request.method} request to ${request.url}`);
-    return HttpResponse.json(
-      { success: false, error: 'Endpoint not implemented in mock' },
-      { status: 501 }
-    );
-  }),
 ];
