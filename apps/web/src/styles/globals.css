@@ -1,140 +1,243 @@
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
 @import "tailwindcss";
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   ENTERPRISE INDUSTRIAL DESIGN SYSTEM
-   Tailwind CSS v4 Theme Configuration
+   SUNTORY PEPSICO ENTERPRISE DESIGN SYSTEM
+   Trade Promotion Management - Production Grade UI
+   Philosophy: Chuyên nghiệp • Đáng tin cậy • Hiệu quả
 ═══════════════════════════════════════════════════════════════════════════ */
 
 @theme {
-  --radius: 3px;
+  --radius: 6px;
 
-  /* Base - Dark Industrial */
-  --color-background: hsl(220 20% 7%);
-  --color-background-elevated: hsl(220 18% 10%);
-  --color-background-muted: hsl(220 16% 14%);
+  /* ─────────────────────────────────────────────────────────────────────────
+     LIGHT THEME (DEFAULT - Enterprise Standard)
+     High contrast, data-focused, production-ready
+  ───────────────────────────────────────────────────────────────────────── */
+
+  /* Base - Clean, Professional */
+  --color-background: #F9FAFB;
+  --color-background-elevated: #FFFFFF;
+  --color-background-muted: #F3F4F6;
 
   /* Surface layers */
-  --color-surface: hsl(220 15% 12%);
-  --color-surface-hover: hsl(220 14% 16%);
-  --color-surface-active: hsl(220 13% 20%);
-  --color-surface-border: hsl(220 12% 22%);
+  --color-surface: #FFFFFF;
+  --color-surface-hover: #F9FAFB;
+  --color-surface-active: #F3F4F6;
+  --color-surface-border: #E5E7EB;
 
-  /* Foreground / Text hierarchy */
-  --color-foreground: hsl(210 40% 98%);
-  --color-foreground-muted: hsl(215 20% 65%);
-  --color-foreground-subtle: hsl(215 15% 45%);
+  /* Foreground / Text hierarchy - HIGH CONTRAST */
+  --color-foreground: #111827;
+  --color-foreground-muted: #374151;
+  --color-foreground-subtle: #6B7280;
 
   /* Card/Popover */
-  --color-card: hsl(220 18% 10%);
-  --color-card-foreground: hsl(210 40% 98%);
-  --color-popover: hsl(220 18% 10%);
-  --color-popover-foreground: hsl(210 40% 98%);
+  --color-card: #FFFFFF;
+  --color-card-foreground: #111827;
+  --color-popover: #FFFFFF;
+  --color-popover-foreground: #111827;
 
-  /* Primary - Industrial Blue */
-  --color-primary: hsl(217 91% 60%);
-  --color-primary-hover: hsl(217 91% 55%);
-  --color-primary-muted: hsl(217 91% 20%);
-  --color-primary-foreground: hsl(0 0% 100%);
+  /* Primary - SPVB Deep Navy Blue */
+  --color-primary: #0047AB;
+  --color-primary-hover: #003D91;
+  --color-primary-muted: #F0F5FF;
+  --color-primary-foreground: #FFFFFF;
 
   /* Secondary */
-  --color-secondary: hsl(220 16% 14%);
-  --color-secondary-foreground: hsl(210 40% 98%);
+  --color-secondary: #F3F4F6;
+  --color-secondary-foreground: #374151;
 
   /* Muted */
-  --color-muted: hsl(220 16% 14%);
-  --color-muted-foreground: hsl(215 20% 65%);
+  --color-muted: #F3F4F6;
+  --color-muted-foreground: #6B7280;
 
   /* Accent - Cyan */
-  --color-accent: hsl(188 94% 43%);
-  --color-accent-hover: hsl(188 94% 38%);
-  --color-accent-muted: hsl(188 94% 15%);
-  --color-accent-foreground: hsl(0 0% 100%);
+  --color-accent: #0891B2;
+  --color-accent-hover: #0E7490;
+  --color-accent-muted: #ECFEFF;
+  --color-accent-foreground: #FFFFFF;
 
-  /* Success - Emerald */
-  --color-success: hsl(160 84% 39%);
-  --color-success-hover: hsl(160 84% 34%);
-  --color-success-muted: hsl(160 84% 15%);
-  --color-success-foreground: hsl(0 0% 100%);
+  /* Success - Green (Clear, not too bright) */
+  --color-success: #15803D;
+  --color-success-hover: #166534;
+  --color-success-muted: #DCFCE7;
+  --color-success-foreground: #FFFFFF;
 
-  /* Warning - Amber */
-  --color-warning: hsl(38 92% 50%);
-  --color-warning-hover: hsl(38 92% 45%);
-  --color-warning-muted: hsl(38 92% 15%);
-  --color-warning-foreground: hsl(0 0% 0%);
+  /* Warning - Amber (Clear, not too bright) */
+  --color-warning: #A16207;
+  --color-warning-hover: #854D0E;
+  --color-warning-muted: #FEF3C7;
+  --color-warning-foreground: #FFFFFF;
 
-  /* Danger - Red */
-  --color-danger: hsl(0 84% 60%);
-  --color-danger-hover: hsl(0 84% 55%);
-  --color-danger-muted: hsl(0 84% 15%);
-  --color-danger-foreground: hsl(0 0% 100%);
+  /* Danger - Red (Clear, not too bright) */
+  --color-danger: #B91C1C;
+  --color-danger-hover: #991B1B;
+  --color-danger-muted: #FEE2E2;
+  --color-danger-foreground: #FFFFFF;
 
-  /* Destructive (alias for danger) */
-  --color-destructive: hsl(0 84% 60%);
-  --color-destructive-foreground: hsl(0 0% 100%);
+  /* Destructive */
+  --color-destructive: #B91C1C;
+  --color-destructive-foreground: #FFFFFF;
 
   /* Border/Input/Ring */
-  --color-border: hsl(220 12% 22%);
-  --color-input: hsl(220 12% 22%);
-  --color-ring: hsl(217 91% 60%);
+  --color-border: #E5E7EB;
+  --color-input: #E5E7EB;
+  --color-ring: #0047AB;
 
-  /* Chart colors */
-  --color-chart-1: hsl(217 91% 60%);
-  --color-chart-2: hsl(160 84% 39%);
-  --color-chart-3: hsl(38 92% 50%);
-  --color-chart-4: hsl(280 65% 60%);
-  --color-chart-5: hsl(188 94% 43%);
-  --color-chart-6: hsl(0 84% 60%);
+  /* Chart colors - Professional palette */
+  --color-chart-1: #0047AB;
+  --color-chart-2: #15803D;
+  --color-chart-3: #A16207;
+  --color-chart-4: #7C3AED;
+  --color-chart-5: #0891B2;
+  --color-chart-6: #B91C1C;
 
   /* Chart cursor */
-  --chart-cursor-fill: rgba(255, 255, 255, 0.05);
+  --chart-cursor-fill: rgba(0, 71, 171, 0.05);
 
-  /* Sidebar */
-  --color-sidebar-background: hsl(220 20% 7%);
-  --color-sidebar-foreground: hsl(215 20% 65%);
-  --color-sidebar-primary: hsl(217 91% 60%);
-  --color-sidebar-primary-foreground: hsl(0 0% 100%);
-  --color-sidebar-accent: hsl(220 16% 14%);
-  --color-sidebar-accent-foreground: hsl(210 40% 98%);
-  --color-sidebar-border: hsl(220 12% 18%);
-  --color-sidebar-ring: hsl(217 91% 60%);
+  /* Sidebar - SPVB Deep Navy */
+  --color-sidebar-background: #001D3D;
+  --color-sidebar-foreground: rgba(255, 255, 255, 0.55);
+  --color-sidebar-primary: #FFFFFF;
+  --color-sidebar-primary-foreground: #001D3D;
+  --color-sidebar-accent: rgba(255, 255, 255, 0.12);
+  --color-sidebar-accent-foreground: #FFFFFF;
+  --color-sidebar-border: rgba(255, 255, 255, 0.08);
+  --color-sidebar-ring: #FFFFFF;
 
-  /* Typography */
-  --font-family-sans: 'IBM Plex Sans', 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-family-mono: 'JetBrains Mono', 'IBM Plex Mono', 'SF Mono', Consolas, monospace;
-  --font-family-display: 'IBM Plex Sans', 'SF Pro Display', sans-serif;
+  /* Typography - System fonts for performance */
+  --font-family-sans: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-family-mono: 'SF Mono', SFMono-Regular, ui-monospace, Menlo, Monaco, Consolas, monospace;
+  --font-family-display: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
 
-  /* Compact font sizes */
+  /* Font sizes - Clear hierarchy */
   --font-size-2xs: 0.625rem;
-  --font-size-xs: 0.6875rem;
-  --font-size-sm: 0.75rem;
-  --font-size-base: 0.8125rem;
-  --font-size-lg: 0.875rem;
-  --font-size-xl: 1rem;
-  --font-size-2xl: 1.125rem;
-  --font-size-3xl: 1.25rem;
-  --font-size-4xl: 1.5rem;
-  --font-size-5xl: 1.875rem;
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 0.875rem;
+  --font-size-lg: 1rem;
+  --font-size-xl: 1.125rem;
+  --font-size-2xl: 1.25rem;
+  --font-size-3xl: 1.5rem;
+  --font-size-4xl: 1.875rem;
+  --font-size-5xl: 2.25rem;
 
   /* Shadows - Subtle, functional */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-default: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+
+  /* Animations - Fast, purposeful */
+  --animate-fade-in: fade-in 0.15s ease;
+  --animate-slide-up: slide-up 0.15s ease;
+  --animate-pulse-subtle: pulse-subtle 2s ease-in-out infinite;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   DARK THEME
+───────────────────────────────────────────────────────────────────────── */
+
+.dark {
+  color-scheme: dark;
+
+  /* Base - Dark */
+  --color-background: #0F172A;
+  --color-background-elevated: #1E293B;
+  --color-background-muted: #1E293B;
+
+  /* Surface layers */
+  --color-surface: #1E293B;
+  --color-surface-hover: #334155;
+  --color-surface-active: #475569;
+  --color-surface-border: #334155;
+
+  /* Foreground / Text hierarchy */
+  --color-foreground: #F8FAFC;
+  --color-foreground-muted: #CBD5E1;
+  --color-foreground-subtle: #94A3B8;
+
+  /* Card/Popover */
+  --color-card: #1E293B;
+  --color-card-foreground: #F8FAFC;
+  --color-popover: #1E293B;
+  --color-popover-foreground: #F8FAFC;
+
+  /* Primary */
+  --color-primary: #3B82F6;
+  --color-primary-hover: #2563EB;
+  --color-primary-muted: rgba(59, 130, 246, 0.15);
+  --color-primary-foreground: #FFFFFF;
+
+  /* Secondary */
+  --color-secondary: #334155;
+  --color-secondary-foreground: #F8FAFC;
+
+  /* Muted */
+  --color-muted: #334155;
+  --color-muted-foreground: #94A3B8;
+
+  /* Accent */
+  --color-accent: #22D3EE;
+  --color-accent-hover: #06B6D4;
+  --color-accent-muted: rgba(34, 211, 238, 0.15);
+  --color-accent-foreground: #0F172A;
+
+  /* Success */
+  --color-success: #22C55E;
+  --color-success-hover: #16A34A;
+  --color-success-muted: rgba(34, 197, 94, 0.15);
+  --color-success-foreground: #FFFFFF;
+
+  /* Warning */
+  --color-warning: #F59E0B;
+  --color-warning-hover: #D97706;
+  --color-warning-muted: rgba(245, 158, 11, 0.15);
+  --color-warning-foreground: #0F172A;
+
+  /* Danger */
+  --color-danger: #EF4444;
+  --color-danger-hover: #DC2626;
+  --color-danger-muted: rgba(239, 68, 68, 0.15);
+  --color-danger-foreground: #FFFFFF;
+
+  /* Destructive */
+  --color-destructive: #EF4444;
+  --color-destructive-foreground: #FFFFFF;
+
+  /* Border/Input/Ring */
+  --color-border: #334155;
+  --color-input: #334155;
+  --color-ring: #3B82F6;
+
+  /* Chart colors */
+  --color-chart-1: #3B82F6;
+  --color-chart-2: #22C55E;
+  --color-chart-3: #F59E0B;
+  --color-chart-4: #A855F7;
+  --color-chart-5: #22D3EE;
+  --color-chart-6: #EF4444;
+
+  /* Chart cursor */
+  --chart-cursor-fill: rgba(59, 130, 246, 0.1);
+
+  /* Sidebar - Darker */
+  --color-sidebar-background: #0F172A;
+  --color-sidebar-foreground: #94A3B8;
+  --color-sidebar-primary: #3B82F6;
+  --color-sidebar-primary-foreground: #FFFFFF;
+  --color-sidebar-accent: #1E293B;
+  --color-sidebar-accent-foreground: #F8FAFC;
+  --color-sidebar-border: #334155;
+  --color-sidebar-ring: #3B82F6;
+
+  /* Shadows - Darker */
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
   --shadow-default: 0 1px 3px 0 rgb(0 0 0 / 0.3), 0 1px 2px -1px rgb(0 0 0 / 0.3);
   --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.3), 0 2px 4px -2px rgb(0 0 0 / 0.3);
   --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.3), 0 4px 6px -4px rgb(0 0 0 / 0.3);
-
-  /* Glow effects for status */
-  --shadow-glow-success: 0 0 12px 0 hsl(160 84% 39% / 0.4);
-  --shadow-glow-warning: 0 0 12px 0 hsl(38 92% 50% / 0.4);
-  --shadow-glow-danger: 0 0 12px 0 hsl(0 84% 60% / 0.4);
-  --shadow-glow-primary: 0 0 12px 0 hsl(217 91% 60% / 0.4);
-
-  /* Animations */
-  --animate-fade-in: fade-in 0.15s ease-out;
-  --animate-slide-up: slide-up 0.15s ease-out;
-  --animate-pulse-subtle: pulse-subtle 2s ease-in-out infinite;
-  --animate-status-blink: status-blink 1.5s ease-in-out infinite;
 }
 
+/* Keyframes */
 @keyframes fade-in {
   0% { opacity: 0; }
   100% { opacity: 1; }
@@ -150,132 +253,17 @@
   50% { opacity: 0.7; }
 }
 
-@keyframes status-blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
-}
-
 /* ═══════════════════════════════════════════════════════════════════════════
    BASE LAYER
 ═══════════════════════════════════════════════════════════════════════════ */
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   LIGHT THEME
-═══════════════════════════════════════════════════════════════════════════ */
-
-.light {
-  color-scheme: light;
-
-  /* Base - Light Industrial */
-  --color-background: hsl(210 20% 98%);
-  --color-background-elevated: hsl(0 0% 100%);
-  --color-background-muted: hsl(210 20% 96%);
-
-  /* Surface layers */
-  --color-surface: hsl(0 0% 100%);
-  --color-surface-hover: hsl(210 20% 96%);
-  --color-surface-active: hsl(210 18% 92%);
-  --color-surface-border: hsl(214 20% 88%);
-
-  /* Foreground / Text hierarchy - darker for better readability */
-  --color-foreground: hsl(222 47% 8%);
-  --color-foreground-muted: hsl(215 20% 35%);
-  --color-foreground-subtle: hsl(215 16% 50%);
-
-  /* Card/Popover - darker text */
-  --color-card: hsl(0 0% 100%);
-  --color-card-foreground: hsl(222 47% 8%);
-  --color-popover: hsl(0 0% 100%);
-  --color-popover-foreground: hsl(222 47% 8%);
-
-  /* Primary - Industrial Blue */
-  --color-primary: hsl(217 91% 50%);
-  --color-primary-hover: hsl(217 91% 45%);
-  --color-primary-muted: hsl(217 91% 95%);
-  --color-primary-foreground: hsl(0 0% 100%);
-
-  /* Secondary */
-  --color-secondary: hsl(210 20% 96%);
-  --color-secondary-foreground: hsl(222 47% 11%);
-
-  /* Muted - darker for readability */
-  --color-muted: hsl(210 20% 96%);
-  --color-muted-foreground: hsl(215 20% 35%);
-
-  /* Accent - Cyan */
-  --color-accent: hsl(188 94% 40%);
-  --color-accent-hover: hsl(188 94% 35%);
-  --color-accent-muted: hsl(188 94% 95%);
-  --color-accent-foreground: hsl(0 0% 100%);
-
-  /* Success - Emerald */
-  --color-success: hsl(160 84% 35%);
-  --color-success-hover: hsl(160 84% 30%);
-  --color-success-muted: hsl(160 84% 94%);
-  --color-success-foreground: hsl(0 0% 100%);
-
-  /* Warning - Amber */
-  --color-warning: hsl(38 92% 45%);
-  --color-warning-hover: hsl(38 92% 40%);
-  --color-warning-muted: hsl(38 92% 95%);
-  --color-warning-foreground: hsl(0 0% 0%);
-
-  /* Danger - Red */
-  --color-danger: hsl(0 84% 55%);
-  --color-danger-hover: hsl(0 84% 50%);
-  --color-danger-muted: hsl(0 84% 95%);
-  --color-danger-foreground: hsl(0 0% 100%);
-
-  /* Destructive */
-  --color-destructive: hsl(0 84% 55%);
-  --color-destructive-foreground: hsl(0 0% 100%);
-
-  /* Border/Input/Ring */
-  --color-border: hsl(214 20% 88%);
-  --color-input: hsl(214 20% 88%);
-  --color-ring: hsl(217 91% 50%);
-
-  /* Chart colors - adjusted for light mode */
-  --color-chart-1: hsl(217 91% 50%);
-  --color-chart-2: hsl(160 84% 35%);
-  --color-chart-3: hsl(38 92% 45%);
-  --color-chart-4: hsl(280 65% 55%);
-  --color-chart-5: hsl(188 94% 40%);
-  --color-chart-6: hsl(0 84% 55%);
-
-  /* Chart cursor */
-  --chart-cursor-fill: rgba(0, 0, 0, 0.05);
-
-  /* Sidebar - darker text for readability */
-  --color-sidebar-background: hsl(210 20% 96%);
-  --color-sidebar-foreground: hsl(215 20% 35%);
-  --color-sidebar-primary: hsl(217 91% 50%);
-  --color-sidebar-primary-foreground: hsl(0 0% 100%);
-  --color-sidebar-accent: hsl(210 20% 92%);
-  --color-sidebar-accent-foreground: hsl(222 47% 8%);
-  --color-sidebar-border: hsl(214 20% 82%);
-  --color-sidebar-ring: hsl(217 91% 50%);
-
-  /* Shadows - lighter */
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow-default: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-
-  /* Glow effects - lighter */
-  --shadow-glow-success: 0 0 12px 0 hsl(160 84% 39% / 0.25);
-  --shadow-glow-warning: 0 0 12px 0 hsl(38 92% 50% / 0.25);
-  --shadow-glow-danger: 0 0 12px 0 hsl(0 84% 60% / 0.25);
-  --shadow-glow-primary: 0 0 12px 0 hsl(217 91% 60% / 0.25);
-}
-
 @layer base {
   :root {
-    color-scheme: dark;
+    color-scheme: light;
   }
 
-  :root.light {
-    color-scheme: light;
+  :root.dark {
+    color-scheme: dark;
   }
 
   * {
@@ -286,47 +274,46 @@
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-family-sans);
-    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    font-size: var(--font-size-base);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 
-  /* Scrollbar - Industrial style */
+  /* Scrollbar - Minimal */
   ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
   }
 
   ::-webkit-scrollbar-track {
-    background: var(--color-background);
+    background: transparent;
   }
 
   ::-webkit-scrollbar-thumb {
-    background: hsl(220 12% 25%);
+    background: #D1D5DB;
     border-radius: 4px;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: hsl(220 12% 35%);
+    background: #9CA3AF;
   }
 
-  /* Light theme scrollbar */
-  .light ::-webkit-scrollbar-thumb {
-    background: hsl(214 20% 75%);
+  .dark ::-webkit-scrollbar-thumb {
+    background: #475569;
   }
 
-  .light ::-webkit-scrollbar-thumb:hover {
-    background: hsl(214 20% 65%);
+  .dark ::-webkit-scrollbar-thumb:hover {
+    background: #64748B;
   }
 
   /* Selection */
   ::selection {
-    background: hsl(217 91% 60% / 0.3);
+    background: rgba(0, 71, 171, 0.2);
     color: var(--color-foreground);
   }
 
-  .light ::selection {
-    background: hsl(217 91% 50% / 0.2);
+  .dark ::selection {
+    background: rgba(59, 130, 246, 0.3);
   }
 
   /* Focus visible - High contrast */
@@ -341,31 +328,29 @@
 ═══════════════════════════════════════════════════════════════════════════ */
 
 @layer components {
-  /* Panel - Industrial container */
+  /* Panel - Clean container */
   .panel {
     background-color: var(--color-card);
-    border: 1px solid var(--color-surface-border);
+    border: 1px solid var(--color-border);
     border-radius: var(--radius);
   }
 
   .panel-header {
-    padding: 12px 16px;
-    border-bottom: 1px solid var(--color-surface-border);
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--color-border);
     display: flex;
     align-items: center;
     justify-content: space-between;
   }
 
   .panel-title {
-    font-size: var(--font-size-sm);
+    font-size: var(--font-size-base);
     font-weight: 600;
     color: var(--color-foreground);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
   }
 
   .panel-content {
-    padding: 16px;
+    padding: 20px;
   }
 
   /* Status indicators */
@@ -377,55 +362,53 @@
 
   .status-dot-success {
     background-color: var(--color-success);
-    box-shadow: var(--shadow-glow-success);
   }
 
   .status-dot-warning {
     background-color: var(--color-warning);
-    box-shadow: var(--shadow-glow-warning);
-    animation: var(--animate-pulse-subtle);
   }
 
   .status-dot-danger {
     background-color: var(--color-danger);
-    box-shadow: var(--shadow-glow-danger);
-    animation: var(--animate-status-blink);
   }
 
   .status-dot-neutral {
     background-color: var(--color-foreground-subtle);
   }
 
-  /* Data display */
+  /* Data display - CRITICAL: tabular-nums for alignment */
   .data-label {
-    font-size: var(--font-size-2xs);
+    font-size: var(--font-size-xs);
     font-weight: 500;
     color: var(--color-foreground-subtle);
     text-transform: uppercase;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.05em;
   }
 
   .data-value {
     font-size: var(--font-size-lg);
     font-weight: 600;
     color: var(--color-foreground);
-    font-family: var(--font-family-mono);
     font-variant-numeric: tabular-nums;
   }
 
   /* KPI Card */
   .kpi-card {
     background-color: var(--color-card);
-    border: 1px solid var(--color-surface-border);
+    border: 1px solid var(--color-border);
     border-radius: var(--radius);
-    padding: 16px;
+    padding: 20px;
+  }
+
+  .kpi-card:hover {
+    border-color: #D1D5DB;
+    transition: border-color 0.15s ease;
   }
 
   .kpi-card-value {
-    font-size: 1.5rem;
-    font-weight: 700;
+    font-size: 1.75rem;
+    font-weight: 600;
     color: var(--color-foreground);
-    font-family: var(--font-family-mono);
     font-variant-numeric: tabular-nums;
     letter-spacing: -0.025em;
   }
@@ -435,19 +418,17 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
-    padding: 6px 12px;
-    font-size: var(--font-size-xs);
+    gap: 8px;
+    padding: 8px 16px;
+    font-size: var(--font-size-sm);
     font-weight: 500;
     border-radius: var(--radius);
-    border: 1px solid;
-    transition: all 0.15s;
+    transition: all 0.1s ease;
   }
 
   .btn-action-primary {
     background-color: var(--color-primary);
     color: var(--color-primary-foreground);
-    border-color: var(--color-primary);
   }
 
   .btn-action-primary:hover {
@@ -455,9 +436,9 @@
   }
 
   .btn-action-secondary {
-    background-color: transparent;
+    background-color: var(--color-surface);
     color: var(--color-foreground-muted);
-    border-color: var(--color-surface-border);
+    border: 1px solid var(--color-border);
   }
 
   .btn-action-secondary:hover {
@@ -465,30 +446,71 @@
     color: var(--color-foreground);
   }
 
+  /* Status Badge - Enterprise standard */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 10px;
+    font-size: var(--font-size-xs);
+    font-weight: 500;
+    border-radius: 4px;
+    border: 1px solid;
+  }
+
+  .badge-success {
+    background-color: #ECFDF5;
+    color: #15803D;
+    border-color: #BBF7D0;
+  }
+
+  .badge-warning {
+    background-color: #FFFBEB;
+    color: #A16207;
+    border-color: #FDE68A;
+  }
+
+  .badge-danger {
+    background-color: #FEF2F2;
+    color: #B91C1C;
+    border-color: #FECACA;
+  }
+
+  .badge-info {
+    background-color: #EFF6FF;
+    color: #1D4ED8;
+    border-color: #BFDBFE;
+  }
+
+  .badge-neutral {
+    background-color: #F9FAFB;
+    color: #4B5563;
+    border-color: #E5E7EB;
+  }
+
   /* Nav item */
   .nav-item {
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 8px 12px;
+    padding: 10px 12px;
     font-size: var(--font-size-sm);
+    font-weight: 500;
     border-radius: var(--radius);
-    transition: all 0.15s;
+    transition: all 0.1s ease;
   }
 
   .nav-item-default {
-    color: var(--color-foreground-muted);
+    color: rgba(255, 255, 255, 0.55);
   }
 
   .nav-item-default:hover {
-    color: var(--color-foreground);
-    background-color: var(--color-surface-hover);
+    color: #FFFFFF;
+    background-color: rgba(255, 255, 255, 0.05);
   }
 
   .nav-item-active {
-    color: var(--color-foreground);
-    background-color: var(--color-primary-muted);
-    border-left: 2px solid var(--color-primary);
+    color: #FFFFFF;
+    background-color: rgba(255, 255, 255, 0.12);
   }
 
   /* Kbd */
@@ -499,30 +521,20 @@
     min-width: 20px;
     height: 20px;
     padding: 0 6px;
-    font-size: var(--font-size-2xs);
+    font-size: var(--font-size-xs);
     font-family: var(--font-family-mono);
     font-weight: 500;
     color: var(--color-foreground-muted);
-    background-color: var(--color-surface);
-    border: 1px solid var(--color-surface-border);
-    border-radius: var(--radius);
+    background-color: var(--color-surface-hover);
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
   }
 
-  /* Loading skeleton - Industrial */
+  /* Loading skeleton */
   .skeleton {
     background-color: var(--color-surface-hover);
     animation: var(--animate-pulse-subtle);
     border-radius: var(--radius);
-  }
-
-  /* Tooltip */
-  .tooltip {
-    padding: 4px 8px;
-    font-size: var(--font-size-xs);
-    background-color: var(--color-surface-active);
-    border: 1px solid var(--color-surface-border);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow-lg);
   }
 }
 
@@ -535,6 +547,7 @@
     text-wrap: balance;
   }
 
+  /* CRITICAL: Tabular nums for data alignment */
   .tabular-nums {
     font-variant-numeric: tabular-nums;
   }
@@ -563,12 +576,16 @@
 
   .grid-kpi {
     display: grid;
-    gap: 12px;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   }
 
-  .industrial-line {
-    height: 1px;
-    background: linear-gradient(to right, transparent, var(--color-surface-border), transparent);
+  /* Fast transitions - Enterprise standard */
+  .transition-fast {
+    transition: all 0.1s ease;
+  }
+
+  .transition-normal {
+    transition: all 0.15s ease;
   }
 }
