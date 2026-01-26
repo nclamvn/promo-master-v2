@@ -77,9 +77,48 @@ const mockTemplates = [
 ];
 
 const mockScenarios = [
-  { id: 'scn-1', name: 'Q1 2026 Budget Scenario', description: 'Planning for Q1 budget allocation', status: 'ACTIVE', type: 'BUDGET', totalBudget: 500000000, projectedROI: 12.5, createdAt: '2026-01-01T00:00:00Z', updatedAt: '2026-01-20T00:00:00Z' },
-  { id: 'scn-2', name: 'Summer Campaign Scenario', description: 'Summer promotion planning', status: 'DRAFT', type: 'CAMPAIGN', totalBudget: 300000000, projectedROI: 15.2, createdAt: '2026-01-05T00:00:00Z', updatedAt: '2026-01-21T00:00:00Z' },
-  { id: 'scn-3', name: 'New Product Launch', description: 'New product promotion scenario', status: 'APPROVED', type: 'LAUNCH', totalBudget: 200000000, projectedROI: 18.0, createdAt: '2026-01-10T00:00:00Z', updatedAt: '2026-01-22T00:00:00Z' },
+  {
+    id: 'scn-1',
+    name: 'Q1 2026 Budget Scenario',
+    description: 'Planning for Q1 budget allocation',
+    status: 'COMPLETED',
+    type: 'BUDGET',
+    totalBudget: 500000000,
+    projectedROI: 12.5,
+    parameters: { duration: 90, budget: 500000000, expectedLiftPercent: 15 },
+    results: { roi: 12.5, netMargin: 75000000, salesLiftPercent: 18.2, paybackDays: 45 },
+    baseline: { id: 'bsl-1', name: '2025 Q4 Baseline', code: 'BSL-Q4-2025' },
+    createdAt: '2026-01-01T00:00:00Z',
+    updatedAt: '2026-01-20T00:00:00Z'
+  },
+  {
+    id: 'scn-2',
+    name: 'Summer Campaign Scenario',
+    description: 'Summer promotion planning',
+    status: 'DRAFT',
+    type: 'CAMPAIGN',
+    totalBudget: 300000000,
+    projectedROI: 15.2,
+    parameters: { duration: 60, budget: 300000000, expectedLiftPercent: 20 },
+    results: null,
+    baseline: { id: 'bsl-2', name: '2025 Annual Baseline', code: 'BSL-2025' },
+    createdAt: '2026-01-05T00:00:00Z',
+    updatedAt: '2026-01-21T00:00:00Z'
+  },
+  {
+    id: 'scn-3',
+    name: 'New Product Launch',
+    description: 'New product promotion scenario',
+    status: 'COMPLETED',
+    type: 'LAUNCH',
+    totalBudget: 200000000,
+    projectedROI: 18.0,
+    parameters: { duration: 30, budget: 200000000, expectedLiftPercent: 25 },
+    results: { roi: 18.0, netMargin: 36000000, salesLiftPercent: 28.5, paybackDays: 21 },
+    baseline: null,
+    createdAt: '2026-01-10T00:00:00Z',
+    updatedAt: '2026-01-22T00:00:00Z'
+  },
 ];
 
 const mockClashes = [
