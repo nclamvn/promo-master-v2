@@ -74,17 +74,19 @@ export const handlers = [
   http.post('/api/auth/login', async ({ request }) => {
     await delay(500);
     const { email, password } = await request.json() as any;
-    
+
     if (email && password) {
+      const timestamp = Date.now();
       return HttpResponse.json({
         success: true,
         data: {
           user: currentUser,
-          token: 'mock-jwt-token-' + Date.now(),
+          accessToken: 'mock-access-token-' + timestamp,
+          refreshToken: 'mock-refresh-token-' + timestamp,
         },
       });
     }
-    
+
     return HttpResponse.json(
       { success: false, error: 'Invalid credentials' },
       { status: 401 }
