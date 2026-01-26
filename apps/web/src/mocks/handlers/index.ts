@@ -561,12 +561,43 @@ export const handlers = [
 
   http.get('http://localhost:4000/bi/analytics', async () => {
     await delay(300);
-    return HttpResponse.json({ 
-      success: true, 
+    return HttpResponse.json({
+      success: true,
       data: {
         kpis: mockDashboardKPIs,
         charts: mockChartData,
         insights: mockInsights.slice(0, 3),
+      }
+    });
+  }),
+
+  http.get('http://localhost:4000/bi/analytics/dashboard', async () => {
+    await delay(300);
+    return HttpResponse.json({
+      success: true,
+      data: {
+        kpis: mockDashboardKPIs,
+        charts: mockChartData,
+        summary: {
+          totalPromotions: 45,
+          activePromotions: 12,
+          totalBudget: 5000000000,
+          spentBudget: 2500000000,
+        }
+      }
+    });
+  }),
+
+  http.get('http://localhost:4000/bi/analytics/trends', async () => {
+    await delay(300);
+    return HttpResponse.json({
+      success: true,
+      data: {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+        datasets: [
+          { label: 'Promotions', data: [12, 15, 18, 14, 20, 22] },
+          { label: 'Claims', data: [8, 10, 12, 9, 15, 18] },
+        ]
       }
     });
   }),
