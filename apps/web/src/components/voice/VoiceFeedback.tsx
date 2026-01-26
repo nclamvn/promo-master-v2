@@ -32,15 +32,15 @@ export function VoiceFeedback({ response, isProcessing = false, onNavigate }: Vo
       className={cn(
         'rounded-lg p-4 border',
         response.success
-          ? 'bg-green-50 border-green-200'
-          : 'bg-red-50 border-red-200'
+          ? 'bg-green-500/10 dark:bg-green-500/20 border-green-500/30'
+          : 'bg-red-500/10 dark:bg-red-500/20 border-red-500/30'
       )}
     >
       <div className="flex items-start gap-3">
         {response.success ? (
-          <CheckCircle className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
+          <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400 shrink-0 mt-0.5" />
         ) : (
-          <XCircle className="h-5 w-5 text-red-600 shrink-0 mt-0.5" />
+          <XCircle className="h-5 w-5 text-red-600 dark:text-red-400 shrink-0 mt-0.5" />
         )}
         <div className="flex-1">
           <p

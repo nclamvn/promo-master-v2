@@ -22,14 +22,14 @@ export function VoiceTranscript({
       <div
         className={cn(
           'rounded-lg p-4 transition-colors',
-          isListening ? 'bg-red-50 border border-red-200' : 'bg-muted'
+          isListening ? 'bg-red-500/10 dark:bg-red-500/20 border border-red-500/30' : 'bg-muted'
         )}
       >
         <div className="flex items-start gap-3">
           <div
             className={cn(
               'p-2 rounded-full shrink-0',
-              isListening ? 'bg-red-100' : 'bg-primary/10'
+              isListening ? 'bg-red-500/20' : 'bg-primary/10'
             )}
           >
             <Mic className={cn('h-4 w-4', isListening ? 'text-red-600' : 'text-primary')} />

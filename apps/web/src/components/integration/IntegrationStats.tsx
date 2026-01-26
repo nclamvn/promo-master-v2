@@ -25,16 +25,16 @@ export function StatCard({
 }: StatCardProps) {
   const variantStyles = {
     default: '',
-    success: 'border-green-200 bg-green-50/50',
-    warning: 'border-yellow-200 bg-yellow-50/50',
-    danger: 'border-red-200 bg-red-50/50',
+    success: 'border-green-500/30 bg-green-500/10 dark:bg-green-500/20',
+    warning: 'border-yellow-500/30 bg-yellow-500/10 dark:bg-yellow-500/20',
+    danger: 'border-red-500/30 bg-red-500/10 dark:bg-red-500/20',
   };
 
   const iconColors = {
     default: 'text-muted-foreground',
-    success: 'text-green-600',
-    warning: 'text-yellow-600',
-    danger: 'text-red-600',
+    success: 'text-green-600 dark:text-green-400',
+    warning: 'text-yellow-600 dark:text-yellow-400',
+    danger: 'text-red-600 dark:text-red-400',
   };
 
   return (

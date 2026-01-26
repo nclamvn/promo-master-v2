@@ -56,9 +56,9 @@ const ALERT_CONFIG: Record<
 };
 
 const SEVERITY_CONFIG: Record<AlertSeverity, { bgColor: string; textColor: string }> = {
-  INFO: { bgColor: 'bg-blue-50', textColor: 'text-blue-700' },
-  WARNING: { bgColor: 'bg-yellow-50', textColor: 'text-yellow-700' },
-  CRITICAL: { bgColor: 'bg-red-50', textColor: 'text-red-700' },
+  INFO: { bgColor: 'bg-blue-500/10 dark:bg-blue-500/20', textColor: 'text-blue-700 dark:text-blue-300' },
+  WARNING: { bgColor: 'bg-yellow-500/10 dark:bg-yellow-500/20', textColor: 'text-yellow-700 dark:text-yellow-300' },
+  CRITICAL: { bgColor: 'bg-red-500/10 dark:bg-red-500/20', textColor: 'text-red-700 dark:text-red-300' },
 };
 
 export function SellAlertCard({ alert, onClick }: SellAlertCardProps) {

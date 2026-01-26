@@ -32,9 +32,9 @@ const insightTypeIcons: Record<InsightType, React.ElementType> = {
 };
 
 const severityStyles: Record<Severity, string> = {
-  CRITICAL: 'border-l-red-500 bg-red-50',
-  WARNING: 'border-l-yellow-500 bg-yellow-50',
-  INFO: 'border-l-blue-500 bg-blue-50',
+  CRITICAL: 'border-l-red-500 bg-red-500/10 dark:bg-red-500/20',
+  WARNING: 'border-l-yellow-500 bg-yellow-500/10 dark:bg-yellow-500/20',
+  INFO: 'border-l-blue-500 bg-blue-500/10 dark:bg-blue-500/20',
 };
 
 const severityBadgeVariant: Record<Severity, 'destructive' | 'secondary' | 'outline'> = {

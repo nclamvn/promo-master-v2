@@ -364,10 +364,10 @@ export default function ClashDetail() {
 
       {/* Recommendations */}
       {analysis?.recommendations && analysis.recommendations.length > 0 && (
-        <Card className="bg-blue-50 border-blue-200">
+        <Card className="bg-blue-500/10 dark:bg-blue-500/20 border-blue-500/30">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Lightbulb className="h-5 w-5 text-blue-600" />
+              <Lightbulb className="h-5 w-5 text-blue-600 dark:text-blue-400" />
               Recommendations
             </CardTitle>
           </CardHeader>
@@ -375,7 +375,7 @@ export default function ClashDetail() {
             <ul className="space-y-2">
               {analysis.recommendations.map((rec, idx) => (
                 <li key={idx} className="flex items-start gap-2">
-                  <ArrowRight className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                  <ArrowRight className="h-4 w-4 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
                   <span>{rec}</span>
                 </li>
               ))}
@@ -386,10 +386,10 @@ export default function ClashDetail() {
 
       {/* Resolution Info */}
       {isResolved && (
-        <Card className="bg-green-50 border-green-200">
+        <Card className="bg-green-500/10 dark:bg-green-500/20 border-green-500/30">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <CheckCircle className="h-5 w-5 text-green-600" />
+              <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
               Resolution
             </CardTitle>
           </CardHeader>

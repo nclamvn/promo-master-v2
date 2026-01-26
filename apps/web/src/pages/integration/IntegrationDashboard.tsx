@@ -66,13 +66,13 @@ export default function IntegrationDashboard() {
 
       {/* Error Alert */}
       {hasErrors && (
-        <Card className="border-red-200 bg-red-50">
+        <Card className="border-red-500/50 bg-red-500/10 dark:bg-red-500/20">
           <CardContent className="py-4">
             <div className="flex items-center gap-3">
-              <AlertTriangle className="h-5 w-5 text-red-600" />
+              <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400" />
               <div>
-                <p className="font-medium text-red-800">Connection Issues Detected</p>
-                <p className="text-sm text-red-700">
+                <p className="font-medium text-red-800 dark:text-red-300">Connection Issues Detected</p>
+                <p className="text-sm text-red-700 dark:text-red-400">
                   Some integrations have errors. Check the connections below for details.
                 </p>
               </div>

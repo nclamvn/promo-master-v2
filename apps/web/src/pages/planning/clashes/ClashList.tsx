@@ -136,7 +136,7 @@ export default function ClashList() {
               </div>
             </CardContent>
           </Card>
-          <Card className={stats.unresolvedHigh > 0 ? 'border-red-300 bg-red-50' : ''}>
+          <Card className={stats.unresolvedHigh > 0 ? 'border-red-500/50 bg-red-500/10 dark:bg-red-500/20' : ''}>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
                 High Severity
