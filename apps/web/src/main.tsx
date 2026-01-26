@@ -26,9 +26,9 @@ const queryClient = new QueryClient({
   },
 });
 
-// Enable MSW mocking in development
+// Enable MSW mocking (works in both dev and production for demo)
 async function enableMocking() {
-  if (import.meta.env.PROD || !ENABLE_MOCKING) {
+  if (!ENABLE_MOCKING) {
     return;
   }
 
