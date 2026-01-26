@@ -27,14 +27,15 @@ interface RecommendationCardProps {
   isRejecting?: boolean;
 }
 
-const recommendationTypeIcons: Record<RecommendationType, React.ElementType> = {
+const recommendationTypeIcons: Record<string, React.ElementType> = {
   PROMOTION_OPTIMIZATION: TrendingUp,
   BUDGET_ALLOCATION: Lightbulb,
+  BUDGET_OPTIMIZATION: Lightbulb,
   CUSTOMER_TARGETING: Users,
   TIMING_SUGGESTION: Clock,
 };
 
-const statusColors: Record<RecommendationStatus, string> = {
+const statusColors: Record<string, string> = {
   PENDING: 'bg-warning-muted text-warning',
   ACCEPTED: 'bg-success-muted text-success',
   REJECTED: 'bg-danger-muted text-danger',
@@ -49,7 +50,7 @@ export function RecommendationCard({
   isAccepting = false,
   isRejecting = false,
 }: RecommendationCardProps) {
-  const Icon = recommendationTypeIcons[recommendation.type];
+  const Icon = recommendationTypeIcons[recommendation.type] || Lightbulb;
 
   return (
     <Card>
@@ -63,7 +64,7 @@ export function RecommendationCard({
               <span className={cn('font-medium', compact && 'text-sm')}>
                 {recommendation.title}
               </span>
-              <Badge className={cn('shrink-0', statusColors[recommendation.status])}>
+              <Badge className={cn('shrink-0', statusColors[recommendation.status] || 'bg-surface-hover text-foreground-muted')}>
                 {recommendation.status}
               </Badge>
             </div>
