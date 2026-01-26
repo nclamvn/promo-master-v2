@@ -71,7 +71,7 @@ export const handlers = [
   // AUTH
   // ═══════════════════════════════════════════════════════════════════════
   
-  http.post('*/auth/login', async ({ request }) => {
+  http.post('http://localhost:4000/auth/login', async ({ request }) => {
     await delay(500);
     const { email, password } = await request.json() as any;
 
@@ -93,12 +93,12 @@ export const handlers = [
     );
   }),
 
-  http.post('*/auth/logout', async () => {
+  http.post('http://localhost:4000/auth/logout', async () => {
     await delay(200);
     return HttpResponse.json({ success: true });
   }),
 
-  http.get('*/auth/me', async () => {
+  http.get('http://localhost:4000/auth/me', async () => {
     await delay(200);
     return HttpResponse.json({ success: true, data: currentUser });
   }),
@@ -107,7 +107,7 @@ export const handlers = [
   // PROMOTIONS
   // ═══════════════════════════════════════════════════════════════════════
 
-  http.get('*/promotions', async ({ request }) => {
+  http.get('http://localhost:4000/promotions', async ({ request }) => {
     await delay(300);
     const url = new URL(request.url);
     const page = parseInt(url.searchParams.get('page') || '1');
@@ -119,12 +119,12 @@ export const handlers = [
     return HttpResponse.json({ success: true, ...result });
   }),
 
-  http.get('*/promotions/stats', async () => {
+  http.get('http://localhost:4000/promotions/stats', async () => {
     await delay(200);
     return HttpResponse.json({ success: true, data: mockPromotionStats });
   }),
 
-  http.get('*/promotions/:id', async ({ params }) => {
+  http.get('http://localhost:4000/promotions/:id', async ({ params }) => {
     await delay(200);
     const promotion = mockPromotions.find(p => p.id === params.id);
     
@@ -138,7 +138,7 @@ export const handlers = [
     return HttpResponse.json({ success: true, data: promotion });
   }),
 
-  http.post('*/promotions', async ({ request }) => {
+  http.post('http://localhost:4000/promotions', async ({ request }) => {
     await delay(500);
     const body = await request.json() as any;
     
@@ -156,7 +156,7 @@ export const handlers = [
     return HttpResponse.json({ success: true, data: newPromotion }, { status: 201 });
   }),
 
-  http.put('*/promotions/:id', async ({ params, request }) => {
+  http.put('http://localhost:4000/promotions/:id', async ({ params, request }) => {
     await delay(300);
     const body = await request.json() as any;
     const promotion = mockPromotions.find(p => p.id === params.id);
@@ -172,12 +172,12 @@ export const handlers = [
     return HttpResponse.json({ success: true, data: updated });
   }),
 
-  http.delete('*/promotions/:id', async () => {
+  http.delete('http://localhost:4000/promotions/:id', async () => {
     await delay(300);
     return HttpResponse.json({ success: true, message: 'Promotion deleted' });
   }),
 
-  http.post('*/promotions/:id/submit', async ({ params }) => {
+  http.post('http://localhost:4000/promotions/:id/submit', async ({ params }) => {
     await delay(500);
     const promotion = mockPromotions.find(p => p.id === params.id);
     if (promotion) {
@@ -189,7 +189,7 @@ export const handlers = [
     return HttpResponse.json({ success: false, error: 'Not found' }, { status: 404 });
   }),
 
-  http.post('*/promotions/:id/approve', async ({ params }) => {
+  http.post('http://localhost:4000/promotions/:id/approve', async ({ params }) => {
     await delay(500);
     const promotion = mockPromotions.find(p => p.id === params.id);
     if (promotion) {
@@ -207,7 +207,7 @@ export const handlers = [
     return HttpResponse.json({ success: false, error: 'Not found' }, { status: 404 });
   }),
 
-  http.post('*/promotions/:id/reject', async ({ params, request }) => {
+  http.post('http://localhost:4000/promotions/:id/reject', async ({ params, request }) => {
     await delay(500);
     const body = await request.json() as any;
     const promotion = mockPromotions.find(p => p.id === params.id);
@@ -230,7 +230,7 @@ export const handlers = [
   // CLAIMS
   // ═══════════════════════════════════════════════════════════════════════
 
-  http.get('*/claims', async ({ request }) => {
+  http.get('http://localhost:4000/claims', async ({ request }) => {
     await delay(300);
     const url = new URL(request.url);
     const page = parseInt(url.searchParams.get('page') || '1');
@@ -242,12 +242,12 @@ export const handlers = [
     return HttpResponse.json({ success: true, ...result });
   }),
 
-  http.get('*/claims/stats', async () => {
+  http.get('http://localhost:4000/claims/stats', async () => {
     await delay(200);
     return HttpResponse.json({ success: true, data: mockClaimStats });
   }),
 
-  http.get('*/claims/:id', async ({ params }) => {
+  http.get('http://localhost:4000/claims/:id', async ({ params }) => {
     await delay(200);
     const claim = mockClaims.find(c => c.id === params.id);
     
@@ -258,7 +258,7 @@ export const handlers = [
     return HttpResponse.json({ success: true, data: claim });
   }),
 
-  http.post('*/claims', async ({ request }) => {
+  http.post('http://localhost:4000/claims', async ({ request }) => {
     await delay(500);
     const body = await request.json() as any;
     
@@ -275,7 +275,7 @@ export const handlers = [
     return HttpResponse.json({ success: true, data: newClaim }, { status: 201 });
   }),
 
-  http.post('*/claims/:id/approve', async ({ params }) => {
+  http.post('http://localhost:4000/claims/:id/approve', async ({ params }) => {
     await delay(500);
     const claim = mockClaims.find(c => c.id === params.id);
     if (claim) {
@@ -293,7 +293,7 @@ export const handlers = [
     return HttpResponse.json({ success: false, error: 'Not found' }, { status: 404 });
   }),
 
-  http.post('*/claims/:id/reject', async ({ params, request }) => {
+  http.post('http://localhost:4000/claims/:id/reject', async ({ params, request }) => {
     await delay(500);
     const body = await request.json() as any;
     const claim = mockClaims.find(c => c.id === params.id);
@@ -315,7 +315,7 @@ export const handlers = [
   // CUSTOMERS
   // ═══════════════════════════════════════════════════════════════════════
 
-  http.get('*/customers', async ({ request }) => {
+  http.get('http://localhost:4000/customers', async ({ request }) => {
     await delay(300);
     const url = new URL(request.url);
     const page = parseInt(url.searchParams.get('page') || '1');
@@ -327,7 +327,7 @@ export const handlers = [
     return HttpResponse.json({ success: true, ...result });
   }),
 
-  http.get('*/customers/:id', async ({ params }) => {
+  http.get('http://localhost:4000/customers/:id', async ({ params }) => {
     await delay(200);
     const customer = mockCustomers.find(c => c.id === params.id);
     
@@ -342,7 +342,7 @@ export const handlers = [
   // PRODUCTS
   // ═══════════════════════════════════════════════════════════════════════
 
-  http.get('*/products', async ({ request }) => {
+  http.get('http://localhost:4000/products', async ({ request }) => {
     await delay(300);
     const url = new URL(request.url);
     const page = parseInt(url.searchParams.get('page') || '1');
@@ -354,7 +354,7 @@ export const handlers = [
     return HttpResponse.json({ success: true, ...result });
   }),
 
-  http.get('*/products/:id', async ({ params }) => {
+  http.get('http://localhost:4000/products/:id', async ({ params }) => {
     await delay(200);
     const product = mockProducts.find(p => p.id === params.id);
     
@@ -369,12 +369,12 @@ export const handlers = [
   // FINANCE
   // ═══════════════════════════════════════════════════════════════════════
 
-  http.get('*/finance/stats', async () => {
+  http.get('http://localhost:4000/finance/stats', async () => {
     await delay(200);
     return HttpResponse.json({ success: true, data: mockFinanceStats });
   }),
 
-  http.get('*/finance/accruals', async ({ request }) => {
+  http.get('http://localhost:4000/finance/accruals', async ({ request }) => {
     await delay(300);
     const url = new URL(request.url);
     const page = parseInt(url.searchParams.get('page') || '1');
@@ -386,7 +386,7 @@ export const handlers = [
     return HttpResponse.json({ success: true, ...result });
   }),
 
-  http.get('*/finance/deductions', async ({ request }) => {
+  http.get('http://localhost:4000/finance/deductions', async ({ request }) => {
     await delay(300);
     const url = new URL(request.url);
     const page = parseInt(url.searchParams.get('page') || '1');
@@ -398,7 +398,7 @@ export const handlers = [
     return HttpResponse.json({ success: true, ...result });
   }),
 
-  http.get('*/finance/journals', async ({ request }) => {
+  http.get('http://localhost:4000/finance/journals', async ({ request }) => {
     await delay(300);
     const url = new URL(request.url);
     const page = parseInt(url.searchParams.get('page') || '1');
@@ -410,7 +410,7 @@ export const handlers = [
     return HttpResponse.json({ success: true, ...result });
   }),
 
-  http.get('*/finance/cheques', async ({ request }) => {
+  http.get('http://localhost:4000/finance/cheques', async ({ request }) => {
     await delay(300);
     const url = new URL(request.url);
     const page = parseInt(url.searchParams.get('page') || '1');
@@ -426,7 +426,7 @@ export const handlers = [
   // OPERATIONS
   // ═══════════════════════════════════════════════════════════════════════
 
-  http.get('*/operations/deliveries', async ({ request }) => {
+  http.get('http://localhost:4000/operations/deliveries', async ({ request }) => {
     await delay(300);
     const url = new URL(request.url);
     const page = parseInt(url.searchParams.get('page') || '1');
@@ -436,12 +436,12 @@ export const handlers = [
     return HttpResponse.json({ success: true, ...result });
   }),
 
-  http.get('*/operations/sell-tracking', async () => {
+  http.get('http://localhost:4000/operations/sell-tracking', async () => {
     await delay(300);
     return HttpResponse.json({ success: true, data: mockSellData });
   }),
 
-  http.get('*/operations/inventory', async () => {
+  http.get('http://localhost:4000/operations/inventory', async () => {
     await delay(300);
     return HttpResponse.json({ success: true, data: mockInventory });
   }),
@@ -450,22 +450,22 @@ export const handlers = [
   // INTEGRATION
   // ═══════════════════════════════════════════════════════════════════════
 
-  http.get('*/integration/erp/syncs', async () => {
+  http.get('http://localhost:4000/integration/erp/syncs', async () => {
     await delay(300);
     return HttpResponse.json({ success: true, data: mockERPSyncs });
   }),
 
-  http.get('*/integration/dms/syncs', async () => {
+  http.get('http://localhost:4000/integration/dms/syncs', async () => {
     await delay(300);
     return HttpResponse.json({ success: true, data: mockDMSSyncs });
   }),
 
-  http.get('*/integration/webhooks', async () => {
+  http.get('http://localhost:4000/integration/webhooks', async () => {
     await delay(300);
     return HttpResponse.json({ success: true, data: mockWebhooks });
   }),
 
-  http.post('*/integration/erp/sync', async () => {
+  http.post('http://localhost:4000/integration/erp/sync', async () => {
     await delay(1000);
     return HttpResponse.json({ 
       success: true, 
@@ -481,7 +481,7 @@ export const handlers = [
   // AI
   // ═══════════════════════════════════════════════════════════════════════
 
-  http.get('*/ai/insights', async ({ request }) => {
+  http.get('http://localhost:4000/ai/insights', async ({ request }) => {
     await delay(300);
     const url = new URL(request.url);
     const type = url.searchParams.get('type');
@@ -494,12 +494,12 @@ export const handlers = [
     return HttpResponse.json({ success: true, data: filtered });
   }),
 
-  http.get('*/ai/recommendations', async () => {
+  http.get('http://localhost:4000/ai/recommendations', async () => {
     await delay(300);
     return HttpResponse.json({ success: true, data: mockRecommendations });
   }),
 
-  http.post('*/ai/recommendations/:id/accept', async ({ params }) => {
+  http.post('http://localhost:4000/ai/recommendations/:id/accept', async ({ params }) => {
     await delay(500);
     const rec = mockRecommendations.find(r => r.id === params.id);
     if (rec) {
@@ -511,7 +511,7 @@ export const handlers = [
     return HttpResponse.json({ success: false, error: 'Not found' }, { status: 404 });
   }),
 
-  http.post('*/ai/recommendations/:id/reject', async ({ params }) => {
+  http.post('http://localhost:4000/ai/recommendations/:id/reject', async ({ params }) => {
     await delay(500);
     const rec = mockRecommendations.find(r => r.id === params.id);
     if (rec) {
@@ -527,22 +527,22 @@ export const handlers = [
   // BI / DASHBOARD
   // ═══════════════════════════════════════════════════════════════════════
 
-  http.get('*/dashboard/kpis', async () => {
+  http.get('http://localhost:4000/dashboard/kpis', async () => {
     await delay(200);
     return HttpResponse.json({ success: true, data: mockDashboardKPIs });
   }),
 
-  http.get('*/dashboard/charts', async () => {
+  http.get('http://localhost:4000/dashboard/charts', async () => {
     await delay(300);
     return HttpResponse.json({ success: true, data: mockChartData });
   }),
 
-  http.get('*/bi/reports', async () => {
+  http.get('http://localhost:4000/bi/reports', async () => {
     await delay(300);
     return HttpResponse.json({ success: true, data: mockReports });
   }),
 
-  http.post('*/bi/reports/generate', async ({ request }) => {
+  http.post('http://localhost:4000/bi/reports/generate', async ({ request }) => {
     await delay(1000);
     const body = await request.json() as any;
     
@@ -559,7 +559,7 @@ export const handlers = [
     });
   }),
 
-  http.get('*/bi/analytics', async () => {
+  http.get('http://localhost:4000/bi/analytics', async () => {
     await delay(300);
     return HttpResponse.json({ 
       success: true, 
@@ -575,20 +575,80 @@ export const handlers = [
   // USERS
   // ═══════════════════════════════════════════════════════════════════════
 
-  http.get('*/users', async () => {
+  http.get('http://localhost:4000/users', async () => {
     await delay(300);
     return HttpResponse.json({ success: true, data: mockUsers });
   }),
 
-  http.get('*/users/:id', async ({ params }) => {
+  http.get('http://localhost:4000/users/:id', async ({ params }) => {
     await delay(200);
     const user = mockUsers.find(u => u.id === params.id);
-    
+
     if (!user) {
       return HttpResponse.json({ success: false, error: 'User not found' }, { status: 404 });
     }
-    
+
     return HttpResponse.json({ success: true, data: user });
+  }),
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // NOTIFICATIONS
+  // ═══════════════════════════════════════════════════════════════════════
+
+  http.get('http://localhost:4000/notifications', async () => {
+    await delay(200);
+    return HttpResponse.json({
+      success: true,
+      data: [
+        { id: 'n1', type: 'INFO', title: 'Welcome!', message: 'Welcome to Promo Master', read: false, createdAt: new Date().toISOString() },
+        { id: 'n2', type: 'SUCCESS', title: 'Promotion Approved', message: 'SUMMER-2026 has been approved', read: true, createdAt: new Date().toISOString() },
+      ]
+    });
+  }),
+
+  http.get('http://localhost:4000/notifications/unread-count', async () => {
+    await delay(100);
+    return HttpResponse.json({ success: true, data: { count: 3 } });
+  }),
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // DASHBOARD STATS & CHARTS
+  // ═══════════════════════════════════════════════════════════════════════
+
+  http.get('http://localhost:4000/dashboard/stats', async () => {
+    await delay(200);
+    return HttpResponse.json({ success: true, data: mockDashboardKPIs });
+  }),
+
+  http.get('http://localhost:4000/dashboard/charts/spend-trend', async () => {
+    await delay(200);
+    return HttpResponse.json({
+      success: true,
+      data: [
+        { month: 'Jan', planned: 100, actual: 95 },
+        { month: 'Feb', planned: 120, actual: 115 },
+        { month: 'Mar', planned: 140, actual: 138 },
+        { month: 'Apr', planned: 130, actual: 142 },
+        { month: 'May', planned: 150, actual: 148 },
+        { month: 'Jun', planned: 160, actual: 155 },
+      ]
+    });
+  }),
+
+  http.get('http://localhost:4000/dashboard/charts/status-distribution', async () => {
+    await delay(200);
+    return HttpResponse.json({
+      success: true,
+      data: mockChartData.promotionsByStatus
+    });
+  }),
+
+  http.get('http://localhost:4000/dashboard/charts/top-customers', async () => {
+    await delay(200);
+    return HttpResponse.json({
+      success: true,
+      data: mockChartData.topCustomers
+    });
   }),
 
 ];
