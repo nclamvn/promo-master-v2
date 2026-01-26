@@ -22,9 +22,14 @@ interface ApiResponse<T = unknown> {
   };
 }
 
+// For demo/mock mode, always use /api to let MSW intercept
+// Set VITE_ENABLE_MOCKING=false to use real API
+const ENABLE_MOCKING = true;
+const baseURL = ENABLE_MOCKING ? '/api' : (import.meta.env.VITE_API_URL || '/api');
+
 // Create instance
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || '/api',
+  baseURL,
   timeout: 30000,
   headers: {
     'Content-Type': 'application/json',
