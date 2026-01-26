@@ -76,6 +76,29 @@ const mockTemplates = [
   { id: 'tpl-3', name: 'Rebate Template', description: 'Standard rebate promotion', type: 'REBATE', status: 'DRAFT', createdAt: '2026-01-03T00:00:00Z', updatedAt: '2026-01-17T00:00:00Z', config: { rebatePercent: 10 } },
 ];
 
+// Helper to generate daily projections
+function generateDailyProjections(days: number, baselineSales: number) {
+  const projections = [];
+  let cumulativeNetMargin = 0;
+  for (let i = 1; i <= days; i++) {
+    const baseline = baselineSales / days;
+    const projected = baseline * (1 + 0.18);
+    const cost = projected * 0.08;
+    const margin = projected * 0.25 - cost;
+    cumulativeNetMargin += margin;
+    projections.push({
+      day: i,
+      date: `2026-0${Math.floor(i / 30) + 1}-${String(i % 30 + 1).padStart(2, '0')}`,
+      baselineSales: baseline,
+      projectedSales: projected,
+      promotionCost: cost,
+      cumulativeROI: (cumulativeNetMargin / (cost * i)) * 100,
+      cumulativeNetMargin,
+    });
+  }
+  return projections;
+}
+
 const mockScenarios = [
   {
     id: 'scn-1',
@@ -85,8 +108,24 @@ const mockScenarios = [
     type: 'BUDGET',
     totalBudget: 500000000,
     projectedROI: 12.5,
-    parameters: { duration: 90, budget: 500000000, expectedLiftPercent: 15 },
-    results: { roi: 12.5, netMargin: 75000000, salesLiftPercent: 18.2, paybackDays: 45 },
+    parameters: { duration: 90, budget: 500000000, expectedLiftPercent: 15, redemptionRatePercent: 65, promotionType: 'DISCOUNT', discountPercent: 15, startDate: '2026-01-01' },
+    results: {
+      roi: 12.5,
+      netMargin: 75000000,
+      salesLiftPercent: 18.2,
+      paybackDays: 45,
+      baselineSales: 2500000000,
+      projectedSales: 2955000000,
+      incrementalSales: 455000000,
+      promotionCost: 380000000,
+      fundingRequired: 418000000,
+      costPerIncrementalUnit: 25000,
+      grossMargin: 590000000,
+      projectedUnits: 118200,
+      incrementalUnits: 18200,
+      redemptions: 76830,
+      dailyProjections: generateDailyProjections(90, 2500000000),
+    },
     baseline: { id: 'bsl-1', name: '2025 Q4 Baseline', code: 'BSL-Q4-2025' },
     createdAt: '2026-01-01T00:00:00Z',
     updatedAt: '2026-01-20T00:00:00Z'
@@ -99,7 +138,7 @@ const mockScenarios = [
     type: 'CAMPAIGN',
     totalBudget: 300000000,
     projectedROI: 15.2,
-    parameters: { duration: 60, budget: 300000000, expectedLiftPercent: 20 },
+    parameters: { duration: 60, budget: 300000000, expectedLiftPercent: 20, redemptionRatePercent: 70, promotionType: 'BOGO', discountPercent: 50, startDate: '2026-06-01' },
     results: null,
     baseline: { id: 'bsl-2', name: '2025 Annual Baseline', code: 'BSL-2025' },
     createdAt: '2026-01-05T00:00:00Z',
@@ -113,8 +152,24 @@ const mockScenarios = [
     type: 'LAUNCH',
     totalBudget: 200000000,
     projectedROI: 18.0,
-    parameters: { duration: 30, budget: 200000000, expectedLiftPercent: 25 },
-    results: { roi: 18.0, netMargin: 36000000, salesLiftPercent: 28.5, paybackDays: 21 },
+    parameters: { duration: 30, budget: 200000000, expectedLiftPercent: 25, redemptionRatePercent: 80, promotionType: 'REBATE', discountPercent: 20, startDate: '2026-02-15' },
+    results: {
+      roi: 18.0,
+      netMargin: 36000000,
+      salesLiftPercent: 28.5,
+      paybackDays: 21,
+      baselineSales: 800000000,
+      projectedSales: 1028000000,
+      incrementalSales: 228000000,
+      promotionCost: 160000000,
+      fundingRequired: 176000000,
+      costPerIncrementalUnit: 18000,
+      grossMargin: 257000000,
+      projectedUnits: 51400,
+      incrementalUnits: 11400,
+      redemptions: 41120,
+      dailyProjections: generateDailyProjections(30, 800000000),
+    },
     baseline: null,
     createdAt: '2026-01-10T00:00:00Z',
     updatedAt: '2026-01-22T00:00:00Z'
@@ -122,9 +177,54 @@ const mockScenarios = [
 ];
 
 const mockClashes = [
-  { id: 'clash-1', type: 'OVERLAP', severity: 'CRITICAL', status: 'PENDING', promotionIds: ['promo-1', 'promo-2'], description: 'Two promotions overlap on same products', detectedAt: '2026-01-20T00:00:00Z' },
-  { id: 'clash-2', type: 'BUDGET', severity: 'WARNING', status: 'PENDING', promotionIds: ['promo-3'], description: 'Budget exceeds allocated limit', detectedAt: '2026-01-21T00:00:00Z' },
-  { id: 'clash-3', type: 'TIMING', severity: 'INFO', status: 'RESOLVED', promotionIds: ['promo-4', 'promo-5'], description: 'Promotions run at similar times', detectedAt: '2026-01-19T00:00:00Z', resolvedAt: '2026-01-20T00:00:00Z' },
+  {
+    id: 'clash-1',
+    clashType: 'PRODUCT_OVERLAP',
+    severity: 'HIGH',
+    status: 'PENDING',
+    promotionA: { id: 'promo-1', name: 'Summer Sale 2026', code: 'SUMMER-2026' },
+    promotionB: { id: 'promo-2', name: 'Flash Discount Week', code: 'FLASH-2026' },
+    description: 'Both promotions target the same product category (Beverages) during overlapping periods',
+    detectedAt: '2026-01-20T00:00:00Z',
+    overlapStart: '2026-02-01T00:00:00Z',
+    overlapEnd: '2026-02-15T00:00:00Z',
+    affectedCustomers: ['cust-001', 'cust-002', 'cust-003'],
+    affectedProducts: ['prod-001', 'prod-002', 'prod-003', 'prod-004'],
+    potentialImpact: 150000000,
+  },
+  {
+    id: 'clash-2',
+    clashType: 'BUDGET_EXCEEDED',
+    severity: 'MEDIUM',
+    status: 'PENDING',
+    promotionA: { id: 'promo-3', name: 'Q1 Rebate Program', code: 'REBATE-Q1' },
+    promotionB: { id: 'promo-4', name: 'New Product Launch', code: 'NPL-2026' },
+    description: 'Combined budget allocation exceeds quarterly limit by 15%',
+    detectedAt: '2026-01-21T00:00:00Z',
+    overlapStart: '2026-01-15T00:00:00Z',
+    overlapEnd: '2026-03-31T00:00:00Z',
+    affectedCustomers: ['cust-001', 'cust-004'],
+    affectedProducts: ['prod-005', 'prod-006'],
+    potentialImpact: 75000000,
+  },
+  {
+    id: 'clash-3',
+    clashType: 'TIMING_CONFLICT',
+    severity: 'LOW',
+    status: 'RESOLVED',
+    promotionA: { id: 'promo-5', name: 'Weekend Special', code: 'WKND-001' },
+    promotionB: { id: 'promo-6', name: 'Holiday Promotion', code: 'HOLIDAY-2026' },
+    description: 'Promotions scheduled for the same weekend period',
+    detectedAt: '2026-01-19T00:00:00Z',
+    overlapStart: '2026-01-25T00:00:00Z',
+    overlapEnd: '2026-01-27T00:00:00Z',
+    affectedCustomers: ['cust-002'],
+    affectedProducts: ['prod-001'],
+    potentialImpact: 25000000,
+    resolution: 'MERGED',
+    resolvedAt: '2026-01-20T00:00:00Z',
+    resolvedBy: { id: 'user-1', name: 'Admin User' },
+  },
 ];
 
 const mockBudgets = [
@@ -698,7 +798,14 @@ export const handlers = [
     const page = parseInt(url.searchParams.get('page') || '1');
     const pageSize = parseInt(url.searchParams.get('pageSize') || url.searchParams.get('limit') || '10');
     const filtered = filterItems(mockAccruals, url.searchParams);
-    const result = paginate(filtered, page, pageSize);
+    // Transform to match AccrualEntry interface
+    const transformed = filtered.map(acc => ({
+      ...acc,
+      amount: acc.estimatedAmount,
+      promotion: { id: acc.promotionId, code: acc.promotionCode, name: acc.promotionName },
+      glJournalId: acc.journalId,
+    }));
+    const result = paginate(transformed, page, pageSize);
     return HttpResponse.json({ success: true, data: result.data, pagination: result.pagination });
   }),
 
@@ -708,7 +815,14 @@ export const handlers = [
     if (!accrual) {
       return HttpResponse.json({ success: false, error: { message: 'Accrual not found' } }, { status: 404 });
     }
-    return HttpResponse.json({ success: true, data: accrual });
+    // Transform to match AccrualEntry interface
+    const transformed = {
+      ...accrual,
+      amount: accrual.estimatedAmount,
+      promotion: { id: accrual.promotionId, code: accrual.promotionCode, name: accrual.promotionName },
+      glJournalId: accrual.journalId,
+    };
+    return HttpResponse.json({ success: true, data: transformed });
   }),
 
   http.post('*/finance/accruals/calculate', async ({ request }) => {
@@ -813,12 +927,22 @@ export const handlers = [
     await delay(300);
     return HttpResponse.json({
       success: true,
-      data: mockClaims.slice(0, 3).map(c => ({
+      data: mockClaims.slice(0, 3).map((c, idx) => ({
         claimId: c.id,
-        claimCode: c.code,
-        amount: c.amount,
-        matchScore: Math.random() * 40 + 60,
-        reason: 'Amount and date match'
+        claim: {
+          id: c.id,
+          code: c.code,
+          amount: c.amount,
+          claimDate: c.claimDate || c.createdAt,
+          status: c.status,
+          promotion: {
+            id: c.promotionId || 'promo-1',
+            code: c.promotionCode || 'SUMMER-2026',
+            name: c.promotionName || 'Summer Sale 2026',
+          },
+        },
+        confidence: 0.95 - (idx * 0.15),
+        matchReasons: ['Amount match', 'Date proximity', 'Customer match'].slice(0, 3 - idx),
       }))
     });
   }),
@@ -1253,17 +1377,32 @@ export const handlers = [
 
   http.post('*/planning/scenarios/:id/run', async ({ params }) => {
     await delay(1000);
+    const scenario = mockScenarios.find(s => s.id === params.id) || mockScenarios[0];
+    // Return comprehensive results matching ScenarioResults component
+    const results = scenario.results || {
+      roi: 15.5,
+      netMargin: 50000000,
+      salesLiftPercent: 20.0,
+      paybackDays: 35,
+      baselineSales: 1500000000,
+      projectedSales: 1800000000,
+      incrementalSales: 300000000,
+      promotionCost: 200000000,
+      fundingRequired: 220000000,
+      costPerIncrementalUnit: 22000,
+      grossMargin: 360000000,
+      projectedUnits: 72000,
+      incrementalUnits: 12000,
+      redemptions: 48000,
+      dailyProjections: generateDailyProjections(60, 1500000000),
+    };
     return HttpResponse.json({
       success: true,
       data: {
-        scenarioId: params.id,
+        ...scenario,
+        id: params.id,
         status: 'COMPLETED',
-        results: {
-          projectedRevenue: 850000000,
-          projectedROI: 15.5,
-          projectedCost: 250000000,
-          confidence: 0.85,
-        },
+        results,
         completedAt: new Date().toISOString(),
       }
     });
@@ -1333,6 +1472,56 @@ export const handlers = [
     return HttpResponse.json({ success: true, data: result.data, pagination: result.pagination });
   }),
 
+  http.get('*/planning/clashes/:id', async ({ params }) => {
+    await delay(200);
+    const clash = mockClashes.find(c => c.id === params.id) || mockClashes[0];
+    // Enrich with full promotion details for ClashDetail page
+    const enrichedClash = {
+      ...clash,
+      id: params.id,
+      promotionA: {
+        ...clash.promotionA,
+        startDate: '2026-01-15T00:00:00Z',
+        endDate: '2026-02-28T00:00:00Z',
+        customer: { id: 'cust-001', name: 'Siêu thị CoopMart' },
+        products: [
+          { id: 'prod-001', code: 'BEV-001', name: 'Nước ngọt Cola' },
+          { id: 'prod-002', code: 'BEV-002', name: 'Nước cam ép' },
+          { id: 'prod-003', code: 'BEV-003', name: 'Nước suối' },
+        ],
+      },
+      promotionB: {
+        ...clash.promotionB,
+        startDate: '2026-02-01T00:00:00Z',
+        endDate: '2026-03-15T00:00:00Z',
+        customer: { id: 'cust-002', name: 'Siêu thị Big C' },
+        products: [
+          { id: 'prod-001', code: 'BEV-001', name: 'Nước ngọt Cola' },
+          { id: 'prod-004', code: 'BEV-004', name: 'Trà xanh' },
+        ],
+      },
+      analysis: {
+        overlapDays: 14,
+        affectedCustomersCount: clash.affectedCustomers?.length || 3,
+        affectedProductsCount: clash.affectedProducts?.length || 4,
+        recommendations: [
+          'Adjust the end date of Promotion A to avoid overlap',
+          'Limit product scope for one promotion',
+          'Merge into single promotional campaign',
+        ],
+      },
+    };
+    return HttpResponse.json({ success: true, data: enrichedClash });
+  }),
+
+  http.patch('*/planning/clashes/:id', async ({ params, request }) => {
+    await delay(300);
+    const body = await request.json() as Record<string, unknown>;
+    const clash = mockClashes.find(c => c.id === params.id) || mockClashes[0];
+    const updated = { ...clash, ...body, id: params.id, updatedAt: new Date().toISOString() };
+    return HttpResponse.json({ success: true, data: updated });
+  }),
+
   http.post('*/planning/clashes/:id/resolve', async ({ params }) => {
     await delay(500);
     return HttpResponse.json({
@@ -1350,7 +1539,16 @@ export const handlers = [
     const url = new URL(request.url);
     const page = parseInt(url.searchParams.get('page') || '1');
     const pageSize = parseInt(url.searchParams.get('pageSize') || url.searchParams.get('limit') || '10');
-    const result = paginate(mockDeliveries, page, pageSize);
+    // Transform to match DeliveryOrder interface
+    const transformed = mockDeliveries.map(d => ({
+      ...d,
+      orderNumber: d.code,
+      customer: { id: d.customerId, name: d.customerName },
+      deliveryAddress: d.address,
+      totalItems: d.totalItems,
+      promotion: d.totalValue ? { id: 'promo-1', name: 'Summer Sale 2026' } : undefined,
+    }));
+    const result = paginate(transformed, page, pageSize);
     return HttpResponse.json({ success: true, data: result.data, pagination: result.pagination });
   }),
 
@@ -1359,14 +1557,32 @@ export const handlers = [
     const url = new URL(request.url);
     const page = parseInt(url.searchParams.get('page') || '1');
     const pageSize = parseInt(url.searchParams.get('pageSize') || url.searchParams.get('limit') || '10');
-    const result = paginate(mockDeliveries, page, pageSize);
+    // Transform to match DeliveryOrder interface
+    const transformed = mockDeliveries.map(d => ({
+      ...d,
+      orderNumber: d.code,
+      customer: { id: d.customerId, name: d.customerName },
+      deliveryAddress: d.address,
+      totalItems: d.totalItems,
+      promotion: d.totalValue ? { id: 'promo-1', name: 'Summer Sale 2026' } : undefined,
+    }));
+    const result = paginate(transformed, page, pageSize);
     return HttpResponse.json({ success: true, data: result.data, pagination: result.pagination });
   }),
 
   http.get('*/operations/delivery/:id', async ({ params }) => {
     await delay(200);
     const delivery = mockDeliveries.find(d => d.id === params.id) || mockDeliveries[0];
-    return HttpResponse.json({ success: true, data: { ...delivery, id: params.id } });
+    // Transform to match DeliveryOrder interface
+    const transformed = {
+      ...delivery,
+      id: params.id,
+      orderNumber: delivery.code,
+      customer: { id: delivery.customerId, name: delivery.customerName },
+      deliveryAddress: delivery.address,
+      promotion: delivery.totalValue ? { id: 'promo-1', name: 'Summer Sale 2026' } : undefined,
+    };
+    return HttpResponse.json({ success: true, data: transformed });
   }),
 
   http.get('*/operations/delivery/:id/tracking', async () => {
@@ -1831,13 +2047,36 @@ export const handlers = [
 
   http.get('*/ai/recommendations', async () => {
     await delay(300);
-    return HttpResponse.json({ success: true, data: mockRecommendations });
+    // Transform to add uplift field for RecommendationCard
+    const transformed = mockRecommendations.map(rec => ({
+      ...rec,
+      impact: {
+        ...rec.impact,
+        uplift: rec.impact.roiImprovement || rec.impact.expectedROI || 10,
+      },
+      reasoning: rec.description,
+      entityType: 'PROMOTION',
+      entityId: 'promo-1',
+    }));
+    return HttpResponse.json({ success: true, data: transformed });
   }),
 
   http.get('*/ai/recommendations/:id', async ({ params }) => {
     await delay(200);
     const rec = mockRecommendations.find(r => r.id === params.id) || mockRecommendations[0];
-    return HttpResponse.json({ success: true, data: { ...rec, id: params.id } });
+    // Transform to add uplift field
+    const transformed = {
+      ...rec,
+      id: params.id,
+      impact: {
+        ...rec.impact,
+        uplift: rec.impact.roiImprovement || rec.impact.expectedROI || 10,
+      },
+      reasoning: rec.description,
+      entityType: 'PROMOTION',
+      entityId: 'promo-1',
+    };
+    return HttpResponse.json({ success: true, data: transformed });
   }),
 
   http.post('*/ai/recommendations/generate', async () => {
