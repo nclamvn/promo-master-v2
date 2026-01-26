@@ -201,7 +201,7 @@ export default function ReportBuilder() {
                       <Badge variant="outline">{report.type}</Badge>
                     </TableCell>
                     <TableCell>
-                      <Badge variant="secondary">{report.config.dataSource}</Badge>
+                      <Badge variant="secondary">{report.config?.dataSource || report.type || 'N/A'}</Badge>
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">
                       {report.lastRunAt ? formatDate(report.lastRunAt) : 'Never'}
