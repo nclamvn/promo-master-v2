@@ -1,32 +1,47 @@
 /**
  * Industrial chart theme configuration
- * Supports both light and dark themes using CSS variables
+ * Using solid colors that work in both light and dark modes
  */
 
-// Helper to get CSS variable value
+// Helper to get CSS variable value (for non-fill properties)
 const getCSSVar = (name: string) => `var(--color-${name})`;
 
-export const chartTheme = {
-  // Colors - using CSS variables for theme support
-  colors: {
-    primary: getCSSVar('chart-1'),
-    secondary: getCSSVar('chart-5'),
-    success: getCSSVar('chart-2'),
-    warning: getCSSVar('chart-3'),
-    danger: getCSSVar('chart-6'),
-    purple: getCSSVar('chart-4'),
+// Chart colors - using solid values that work in SVG fills
+// These are bright colors that work well on both light and dark backgrounds
+const CHART_COLORS = {
+  blue: '#3b82f6',      // Blue 500
+  emerald: '#10b981',   // Emerald 500
+  amber: '#f59e0b',     // Amber 500
+  purple: '#a855f7',    // Purple 500
+  cyan: '#06b6d4',      // Cyan 500
+  red: '#ef4444',       // Red 500
+  pink: '#ec4899',      // Pink 500
+  indigo: '#6366f1',    // Indigo 500
+};
 
-    // Chart series - using CSS variables
+export const chartTheme = {
+  // Colors for chart fills - using solid hex values for Recharts compatibility
+  colors: {
+    primary: CHART_COLORS.blue,
+    secondary: CHART_COLORS.cyan,
+    success: CHART_COLORS.emerald,
+    warning: CHART_COLORS.amber,
+    danger: CHART_COLORS.red,
+    purple: CHART_COLORS.purple,
+
+    // Chart series - solid colors for bar/pie/line fills
     series: [
-      getCSSVar('chart-1'),   // Blue
-      getCSSVar('chart-2'),   // Emerald
-      getCSSVar('chart-3'),   // Amber
-      getCSSVar('chart-4'),   // Purple
-      getCSSVar('chart-5'),   // Cyan
-      getCSSVar('chart-6'),   // Red
+      CHART_COLORS.blue,
+      CHART_COLORS.emerald,
+      CHART_COLORS.amber,
+      CHART_COLORS.purple,
+      CHART_COLORS.cyan,
+      CHART_COLORS.red,
+      CHART_COLORS.pink,
+      CHART_COLORS.indigo,
     ],
 
-    // Background & grid - using CSS variables
+    // Background & grid - using CSS variables (these work fine)
     background: getCSSVar('card'),
     grid: getCSSVar('surface-border'),
     axis: getCSSVar('foreground-subtle'),
