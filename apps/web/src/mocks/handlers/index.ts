@@ -438,7 +438,33 @@ export const handlers = [
 
   http.get('http://localhost:4000/operations/sell-tracking', async () => {
     await delay(300);
-    return HttpResponse.json({ success: true, data: mockSellData });
+    // Transform mock data to match expected format
+    const transformedData = mockSellData.map(item => ({
+      ...item,
+      customer: { id: item.customerId, name: item.customerName, code: item.customerId },
+      product: { id: item.productId, name: item.productName, code: item.productId },
+      sellInQty: item.sellIn,
+      sellInValue: item.sellIn * (item.avgPrice || 10000),
+      sellOutQty: item.sellOut,
+      sellOutValue: item.sellOut * (item.avgPrice || 10000),
+      stockQty: item.closingStock,
+      stockValue: item.closingStock * (item.avgPrice || 10000),
+      sellThroughRate: item.sellThrough,
+    }));
+    return HttpResponse.json({ success: true, data: transformedData });
+  }),
+
+  http.get('http://localhost:4000/operations/sell-tracking/summary', async () => {
+    await delay(200);
+    return HttpResponse.json({
+      success: true,
+      data: {
+        totalSellIn: mockSellData.reduce((sum, item) => sum + item.sellIn, 0),
+        totalSellOut: mockSellData.reduce((sum, item) => sum + item.sellOut, 0),
+        avgSellThrough: mockSellData.reduce((sum, item) => sum + item.sellThrough, 0) / mockSellData.length,
+        totalRevenue: mockSellData.reduce((sum, item) => sum + item.revenue, 0),
+      }
+    });
   }),
 
   http.get('http://localhost:4000/operations/inventory', async () => {
