@@ -16,7 +16,7 @@ import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import type { AIRecommendation, RecommendationType, RecommendationStatus } from '@/types/advanced';
+import type { AIRecommendation } from '@/types/advanced';
 
 interface RecommendationCardProps {
   recommendation: AIRecommendation;

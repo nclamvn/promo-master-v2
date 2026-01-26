@@ -112,11 +112,11 @@ export const handlers = [
     const url = new URL(request.url);
     const page = parseInt(url.searchParams.get('page') || '1');
     const pageSize = parseInt(url.searchParams.get('pageSize') || '10');
-    
+
     const filtered = filterItems(mockPromotions, url.searchParams);
     const result = paginate(filtered, page, pageSize);
-    
-    return HttpResponse.json({ success: true, ...result });
+
+    return HttpResponse.json({ success: true, promotions: result.data, data: result.data, pagination: result.pagination });
   }),
 
   http.get('http://localhost:4000/promotions/stats', async () => {
@@ -235,11 +235,11 @@ export const handlers = [
     const url = new URL(request.url);
     const page = parseInt(url.searchParams.get('page') || '1');
     const pageSize = parseInt(url.searchParams.get('pageSize') || '10');
-    
+
     const filtered = filterItems(mockClaims, url.searchParams);
     const result = paginate(filtered, page, pageSize);
-    
-    return HttpResponse.json({ success: true, ...result });
+
+    return HttpResponse.json({ success: true, claims: result.data, data: result.data, pagination: result.pagination });
   }),
 
   http.get('http://localhost:4000/claims/stats', async () => {
@@ -320,11 +320,11 @@ export const handlers = [
     const url = new URL(request.url);
     const page = parseInt(url.searchParams.get('page') || '1');
     const pageSize = parseInt(url.searchParams.get('pageSize') || '10');
-    
+
     const filtered = filterItems(mockCustomers, url.searchParams);
     const result = paginate(filtered, page, pageSize);
-    
-    return HttpResponse.json({ success: true, ...result });
+
+    return HttpResponse.json({ success: true, customers: result.data, data: result.data, pagination: result.pagination });
   }),
 
   http.get('http://localhost:4000/customers/:id', async ({ params }) => {
@@ -347,11 +347,11 @@ export const handlers = [
     const url = new URL(request.url);
     const page = parseInt(url.searchParams.get('page') || '1');
     const pageSize = parseInt(url.searchParams.get('pageSize') || '10');
-    
+
     const filtered = filterItems(mockProducts, url.searchParams);
     const result = paginate(filtered, page, pageSize);
-    
-    return HttpResponse.json({ success: true, ...result });
+
+    return HttpResponse.json({ success: true, products: result.data, data: result.data, pagination: result.pagination });
   }),
 
   http.get('http://localhost:4000/products/:id', async ({ params }) => {
@@ -379,11 +379,11 @@ export const handlers = [
     const url = new URL(request.url);
     const page = parseInt(url.searchParams.get('page') || '1');
     const pageSize = parseInt(url.searchParams.get('pageSize') || '10');
-    
+
     const filtered = filterItems(mockAccruals, url.searchParams);
     const result = paginate(filtered, page, pageSize);
-    
-    return HttpResponse.json({ success: true, ...result });
+
+    return HttpResponse.json({ success: true, accruals: result.data, pagination: result.pagination });
   }),
 
   http.get('http://localhost:4000/finance/deductions', async ({ request }) => {
@@ -391,11 +391,11 @@ export const handlers = [
     const url = new URL(request.url);
     const page = parseInt(url.searchParams.get('page') || '1');
     const pageSize = parseInt(url.searchParams.get('pageSize') || '10');
-    
+
     const filtered = filterItems(mockDeductions, url.searchParams);
     const result = paginate(filtered, page, pageSize);
-    
-    return HttpResponse.json({ success: true, ...result });
+
+    return HttpResponse.json({ success: true, deductions: result.data, pagination: result.pagination });
   }),
 
   http.get('http://localhost:4000/finance/journals', async ({ request }) => {
@@ -403,11 +403,11 @@ export const handlers = [
     const url = new URL(request.url);
     const page = parseInt(url.searchParams.get('page') || '1');
     const pageSize = parseInt(url.searchParams.get('pageSize') || '10');
-    
+
     const filtered = filterItems(mockJournals, url.searchParams);
     const result = paginate(filtered, page, pageSize);
-    
-    return HttpResponse.json({ success: true, ...result });
+
+    return HttpResponse.json({ success: true, journals: result.data, pagination: result.pagination });
   }),
 
   http.get('http://localhost:4000/finance/cheques', async ({ request }) => {
@@ -415,11 +415,11 @@ export const handlers = [
     const url = new URL(request.url);
     const page = parseInt(url.searchParams.get('page') || '1');
     const pageSize = parseInt(url.searchParams.get('pageSize') || '10');
-    
+
     const filtered = filterItems(mockCheques, url.searchParams);
     const result = paginate(filtered, page, pageSize);
-    
-    return HttpResponse.json({ success: true, ...result });
+
+    return HttpResponse.json({ success: true, cheques: result.data, pagination: result.pagination });
   }),
 
   // ═══════════════════════════════════════════════════════════════════════
@@ -433,7 +433,7 @@ export const handlers = [
     const pageSize = parseInt(url.searchParams.get('pageSize') || '10');
     
     const result = paginate(mockDeliveries, page, pageSize);
-    return HttpResponse.json({ success: true, ...result });
+    return HttpResponse.json({ success: true, deliveries: result.data, data: result.data, pagination: result.pagination });
   }),
 
   http.get('http://localhost:4000/operations/sell-tracking', async () => {
@@ -576,8 +576,20 @@ export const handlers = [
     return HttpResponse.json({
       success: true,
       data: {
-        kpis: mockDashboardKPIs,
-        charts: mockChartData,
+        kpis: [
+          { name: 'Total Revenue', value: mockDashboardKPIs.totalRevenue, format: 'CURRENCY', subtitle: 'All time revenue' },
+          { name: 'Revenue Growth', value: mockDashboardKPIs.revenueGrowth, format: 'PERCENTAGE', subtitle: 'vs last period' },
+          { name: 'Total Promotions', value: mockDashboardKPIs.totalPromotions, format: 'NUMBER', subtitle: 'All promotions' },
+          { name: 'Active Promotions', value: mockDashboardKPIs.activePromotions, format: 'NUMBER', subtitle: 'Currently running' },
+          { name: 'Pending Claims', value: mockDashboardKPIs.pendingClaims, format: 'NUMBER', subtitle: 'Awaiting review' },
+          { name: 'Claim Approval Rate', value: mockDashboardKPIs.claimApprovalRate, format: 'PERCENTAGE', subtitle: 'Approved claims' },
+        ],
+        charts: [
+          { id: 'revenue', title: 'Revenue by Month', type: 'LINE', data: mockChartData.revenueByMonth },
+          { id: 'status', title: 'Promotions by Status', type: 'PIE', data: mockChartData.promotionsByStatus },
+          { id: 'claims', title: 'Claims Trend', type: 'BAR', data: mockChartData.claimsTrend },
+          { id: 'customers', title: 'Top Customers', type: 'BAR', data: mockChartData.topCustomers },
+        ],
         summary: {
           totalPromotions: 45,
           activePromotions: 12,
