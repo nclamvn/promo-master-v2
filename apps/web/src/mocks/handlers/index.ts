@@ -592,13 +592,14 @@ export const handlers = [
     await delay(300);
     return HttpResponse.json({
       success: true,
-      data: {
-        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-        datasets: [
-          { label: 'Promotions', data: [12, 15, 18, 14, 20, 22] },
-          { label: 'Claims', data: [8, 10, 12, 9, 15, 18] },
-        ]
-      }
+      data: [
+        { period: 'Jan', value: 120000000 },
+        { period: 'Feb', value: 150000000 },
+        { period: 'Mar', value: 180000000 },
+        { period: 'Apr', value: 140000000 },
+        { period: 'May', value: 200000000 },
+        { period: 'Jun', value: 220000000 },
+      ]
     });
   }),
 
