@@ -20,6 +20,7 @@ interface ListParams {
   month?: number;
   targetType?: string;
   status?: string;
+  [key: string]: unknown;
 }
 
 export function useTargets(params: ListParams = {}) {

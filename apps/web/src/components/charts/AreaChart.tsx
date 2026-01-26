@@ -14,10 +14,9 @@ import {
 } from 'recharts';
 import { chartTheme, tooltipStyle, axisStyle, gridStyle } from './chart-theme';
 import { cn } from '@/lib/utils';
-import { formatCurrency, formatNumber } from '@/lib/utils';
+import { formatCurrency } from '@/lib/utils';
 
-interface AreaChartData {
-  name: string;
+export interface AreaChartData {
   [key: string]: string | number;
 }
 
@@ -125,7 +124,8 @@ export function AreaChart({
 
             <Tooltip
               {...tooltipStyle}
-              formatter={(value: number, name: string) => [formatter(value), name]}
+              cursor={tooltipStyle.cursor}
+              formatter={((value: number, name: string) => [formatter(value), name]) as never}
             />
 
             {showLegend && (

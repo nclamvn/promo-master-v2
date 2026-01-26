@@ -3,11 +3,11 @@
  */
 
 import { useState, useMemo } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ColumnDef } from '@tanstack/react-table';
-import { Plus, LayoutGrid, List, MoreHorizontal, Eye, Send, RotateCcw, Calculator } from 'lucide-react';
+import { LayoutGrid, List, MoreHorizontal, Eye, Send, RotateCcw, Calculator } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -74,8 +74,8 @@ export default function AccrualListPage() {
   const [showBatchPostDialog, setShowBatchPostDialog] = useState(false);
   const [showReverseDialog, setShowReverseDialog] = useState(false);
   const [currentAccrualId, setCurrentAccrualId] = useState<string>('');
-  const [glAccountDebit, setGlAccountDebit] = useState(GL_ACCOUNTS.PROMOTION_EXPENSE);
-  const [glAccountCredit, setGlAccountCredit] = useState(GL_ACCOUNTS.ACCRUED_LIABILITIES);
+  const [glAccountDebit, setGlAccountDebit] = useState<string>(GL_ACCOUNTS.PROMOTION_EXPENSE);
+  const [glAccountCredit, setGlAccountCredit] = useState<string>(GL_ACCOUNTS.ACCRUED_LIABILITIES);
   const [reverseReason, setReverseReason] = useState('');
 
   // Filters from URL
@@ -179,7 +179,7 @@ export default function AccrualListPage() {
   const columns: ColumnDef<AccrualEntry>[] = [
     {
       id: 'select',
-      header: ({ table }) => (
+      header: () => (
         <Checkbox
           checked={selectedIds.length > 0}
           onCheckedChange={toggleSelectAll}

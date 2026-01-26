@@ -56,10 +56,84 @@ const TargetNew = lazy(() => import('@/pages/targets/TargetNew'));
 const BaselineList = lazy(() => import('@/pages/baselines/BaselineList'));
 const BaselineNew = lazy(() => import('@/pages/baselines/BaselineNew'));
 
-// Finance pages
+// Finance pages - Accruals
 const AccrualList = lazy(() => import('@/pages/finance/accruals/AccrualList'));
 const AccrualDetail = lazy(() => import('@/pages/finance/accruals/AccrualDetail'));
 const AccrualCalculate = lazy(() => import('@/pages/finance/accruals/AccrualCalculate'));
+
+// Finance pages - Deductions
+const DeductionList = lazy(() => import('@/pages/finance/deductions/DeductionList'));
+const DeductionDetail = lazy(() => import('@/pages/finance/deductions/DeductionDetail'));
+const DeductionMatching = lazy(() => import('@/pages/finance/deductions/DeductionMatching'));
+
+// Finance pages - GL Journals
+const JournalList = lazy(() => import('@/pages/finance/journals/JournalList'));
+const JournalDetail = lazy(() => import('@/pages/finance/journals/JournalDetail'));
+
+// Finance pages - Cheques
+const ChequeList = lazy(() => import('@/pages/finance/cheques/ChequeList'));
+const ChequeDetail = lazy(() => import('@/pages/finance/cheques/ChequeDetail'));
+
+// Planning pages - Templates
+const TemplateList = lazy(() => import('@/pages/planning/templates/TemplateList'));
+const TemplateDetail = lazy(() => import('@/pages/planning/templates/TemplateDetail'));
+const TemplateBuilder = lazy(() => import('@/pages/planning/templates/TemplateBuilder'));
+
+// Planning pages - Scenarios
+const ScenarioList = lazy(() => import('@/pages/planning/scenarios/ScenarioList'));
+const ScenarioDetail = lazy(() => import('@/pages/planning/scenarios/ScenarioDetail'));
+const ScenarioBuilder = lazy(() => import('@/pages/planning/scenarios/ScenarioBuilder'));
+const ScenarioCompare = lazy(() => import('@/pages/planning/scenarios/ScenarioCompare'));
+
+// Planning pages - Clash Detection
+const ClashList = lazy(() => import('@/pages/planning/clashes/ClashList'));
+const ClashDetail = lazy(() => import('@/pages/planning/clashes/ClashDetail'));
+
+// Operations pages - Delivery
+const DeliveryList = lazy(() => import('@/pages/operations/delivery/DeliveryList'));
+const DeliveryDetail = lazy(() => import('@/pages/operations/delivery/DeliveryDetail'));
+const DeliveryNew = lazy(() => import('@/pages/operations/delivery/DeliveryNew'));
+const DeliveryCalendarPage = lazy(() => import('@/pages/operations/delivery/DeliveryCalendarPage'));
+
+// Operations pages - Sell Tracking
+const SellTrackingList = lazy(() => import('@/pages/operations/sell-tracking/SellTrackingList'));
+const SellTrackingNew = lazy(() => import('@/pages/operations/sell-tracking/SellTrackingNew'));
+const SellTrackingImport = lazy(() => import('@/pages/operations/sell-tracking/SellTrackingImport'));
+const SellInPage = lazy(() => import('@/pages/operations/sell-tracking/SellInPage'));
+const SellOutPage = lazy(() => import('@/pages/operations/sell-tracking/SellOutPage'));
+
+// Operations pages - Inventory
+const InventoryList = lazy(() => import('@/pages/operations/inventory/InventoryList'));
+const InventoryNew = lazy(() => import('@/pages/operations/inventory/InventoryNew'));
+const InventoryImport = lazy(() => import('@/pages/operations/inventory/InventoryImport'));
+const InventoryDetail = lazy(() => import('@/pages/operations/inventory/InventoryDetail'));
+const InventorySnapshots = lazy(() => import('@/pages/operations/inventory/InventorySnapshots'));
+
+// Integration pages
+const IntegrationDashboard = lazy(() => import('@/pages/integration/IntegrationDashboard'));
+const ERPList = lazy(() => import('@/pages/integration/erp/ERPList'));
+const ERPDetail = lazy(() => import('@/pages/integration/erp/ERPDetail'));
+const DMSList = lazy(() => import('@/pages/integration/dms/DMSList'));
+const DMSDetail = lazy(() => import('@/pages/integration/dms/DMSDetail'));
+const WebhookList = lazy(() => import('@/pages/integration/webhooks/WebhookList'));
+const WebhookDetail = lazy(() => import('@/pages/integration/webhooks/WebhookDetail'));
+const SecurityDashboard = lazy(() => import('@/pages/integration/security/SecurityDashboard'));
+const APIKeysList = lazy(() => import('@/pages/integration/security/APIKeysList'));
+const AuditLogsList = lazy(() => import('@/pages/integration/security/AuditLogsList'));
+
+// AI pages
+const AIDashboard = lazy(() => import('@/pages/ai/AIDashboard'));
+const InsightsList = lazy(() => import('@/pages/ai/InsightsList'));
+const RecommendationsList = lazy(() => import('@/pages/ai/RecommendationsList'));
+
+// Voice pages
+const VoiceCommandCenter = lazy(() => import('@/pages/voice/VoiceCommandCenter'));
+
+// BI pages
+const BIDashboard = lazy(() => import('@/pages/bi/BIDashboard'));
+const ReportBuilder = lazy(() => import('@/pages/bi/ReportBuilder'));
+const AnalyticsDashboard = lazy(() => import('@/pages/bi/AnalyticsDashboard'));
+const ExportCenter = lazy(() => import('@/pages/bi/ExportCenter'));
 
 const NotFound = lazy(() => import('@/pages/errors/NotFound'));
 
@@ -200,6 +274,187 @@ export default function AppRouter() {
         } />
         <Route path="/finance/accruals/:id" element={
           <SuspenseWrapper><AccrualDetail /></SuspenseWrapper>
+        } />
+
+        {/* Finance - Deductions */}
+        <Route path="/finance/deductions" element={
+          <SuspenseWrapper><DeductionList /></SuspenseWrapper>
+        } />
+        <Route path="/finance/deductions/:id" element={
+          <SuspenseWrapper><DeductionDetail /></SuspenseWrapper>
+        } />
+        <Route path="/finance/deductions/:id/match" element={
+          <SuspenseWrapper><DeductionMatching /></SuspenseWrapper>
+        } />
+
+        {/* Finance - GL Journals */}
+        <Route path="/finance/journals" element={
+          <SuspenseWrapper><JournalList /></SuspenseWrapper>
+        } />
+        <Route path="/finance/journals/:id" element={
+          <SuspenseWrapper><JournalDetail /></SuspenseWrapper>
+        } />
+
+        {/* Finance - Cheques */}
+        <Route path="/finance/cheques" element={
+          <SuspenseWrapper><ChequeList /></SuspenseWrapper>
+        } />
+        <Route path="/finance/cheques/:id" element={
+          <SuspenseWrapper><ChequeDetail /></SuspenseWrapper>
+        } />
+
+        {/* Planning - Templates */}
+        <Route path="/planning/templates" element={
+          <SuspenseWrapper><TemplateList /></SuspenseWrapper>
+        } />
+        <Route path="/planning/templates/builder" element={
+          <SuspenseWrapper><TemplateBuilder /></SuspenseWrapper>
+        } />
+        <Route path="/planning/templates/:id" element={
+          <SuspenseWrapper><TemplateDetail /></SuspenseWrapper>
+        } />
+
+        {/* Planning - Scenarios */}
+        <Route path="/planning/scenarios" element={
+          <SuspenseWrapper><ScenarioList /></SuspenseWrapper>
+        } />
+        <Route path="/planning/scenarios/new" element={
+          <SuspenseWrapper><ScenarioBuilder /></SuspenseWrapper>
+        } />
+        <Route path="/planning/scenarios/compare" element={
+          <SuspenseWrapper><ScenarioCompare /></SuspenseWrapper>
+        } />
+        <Route path="/planning/scenarios/:id" element={
+          <SuspenseWrapper><ScenarioDetail /></SuspenseWrapper>
+        } />
+        <Route path="/planning/scenarios/:id/edit" element={
+          <SuspenseWrapper><ScenarioBuilder /></SuspenseWrapper>
+        } />
+
+        {/* Planning - Clash Detection */}
+        <Route path="/planning/clashes" element={
+          <SuspenseWrapper><ClashList /></SuspenseWrapper>
+        } />
+        <Route path="/planning/clashes/:id" element={
+          <SuspenseWrapper><ClashDetail /></SuspenseWrapper>
+        } />
+
+        {/* Operations - Delivery */}
+        <Route path="/operations/delivery" element={
+          <SuspenseWrapper><DeliveryList /></SuspenseWrapper>
+        } />
+        <Route path="/operations/delivery/new" element={
+          <SuspenseWrapper><DeliveryNew /></SuspenseWrapper>
+        } />
+        <Route path="/operations/delivery/calendar" element={
+          <SuspenseWrapper><DeliveryCalendarPage /></SuspenseWrapper>
+        } />
+        <Route path="/operations/delivery/:id" element={
+          <SuspenseWrapper><DeliveryDetail /></SuspenseWrapper>
+        } />
+
+        {/* Operations - Sell Tracking */}
+        <Route path="/operations/sell-tracking" element={
+          <SuspenseWrapper><SellTrackingList /></SuspenseWrapper>
+        } />
+        <Route path="/operations/sell-tracking/new" element={
+          <SuspenseWrapper><SellTrackingNew /></SuspenseWrapper>
+        } />
+        <Route path="/operations/sell-tracking/import" element={
+          <SuspenseWrapper><SellTrackingImport /></SuspenseWrapper>
+        } />
+        <Route path="/operations/sell-tracking/sell-in" element={
+          <SuspenseWrapper><SellInPage /></SuspenseWrapper>
+        } />
+        <Route path="/operations/sell-tracking/sell-out" element={
+          <SuspenseWrapper><SellOutPage /></SuspenseWrapper>
+        } />
+
+        {/* Operations - Inventory */}
+        <Route path="/operations/inventory" element={
+          <SuspenseWrapper><InventoryList /></SuspenseWrapper>
+        } />
+        <Route path="/operations/inventory/new" element={
+          <SuspenseWrapper><InventoryNew /></SuspenseWrapper>
+        } />
+        <Route path="/operations/inventory/import" element={
+          <SuspenseWrapper><InventoryImport /></SuspenseWrapper>
+        } />
+        <Route path="/operations/inventory/snapshots" element={
+          <SuspenseWrapper><InventorySnapshots /></SuspenseWrapper>
+        } />
+        <Route path="/operations/inventory/:id" element={
+          <SuspenseWrapper><InventoryDetail /></SuspenseWrapper>
+        } />
+
+        {/* Integration - Dashboard */}
+        <Route path="/integration" element={
+          <SuspenseWrapper><IntegrationDashboard /></SuspenseWrapper>
+        } />
+
+        {/* Integration - ERP */}
+        <Route path="/integration/erp" element={
+          <SuspenseWrapper><ERPList /></SuspenseWrapper>
+        } />
+        <Route path="/integration/erp/:id" element={
+          <SuspenseWrapper><ERPDetail /></SuspenseWrapper>
+        } />
+
+        {/* Integration - DMS */}
+        <Route path="/integration/dms" element={
+          <SuspenseWrapper><DMSList /></SuspenseWrapper>
+        } />
+        <Route path="/integration/dms/:id" element={
+          <SuspenseWrapper><DMSDetail /></SuspenseWrapper>
+        } />
+
+        {/* Integration - Webhooks */}
+        <Route path="/integration/webhooks" element={
+          <SuspenseWrapper><WebhookList /></SuspenseWrapper>
+        } />
+        <Route path="/integration/webhooks/:id" element={
+          <SuspenseWrapper><WebhookDetail /></SuspenseWrapper>
+        } />
+
+        {/* Integration - Security */}
+        <Route path="/integration/security" element={
+          <SuspenseWrapper><SecurityDashboard /></SuspenseWrapper>
+        } />
+        <Route path="/integration/security/api-keys" element={
+          <SuspenseWrapper><APIKeysList /></SuspenseWrapper>
+        } />
+        <Route path="/integration/security/audit-logs" element={
+          <SuspenseWrapper><AuditLogsList /></SuspenseWrapper>
+        } />
+
+        {/* AI */}
+        <Route path="/ai" element={
+          <SuspenseWrapper><AIDashboard /></SuspenseWrapper>
+        } />
+        <Route path="/ai/insights" element={
+          <SuspenseWrapper><InsightsList /></SuspenseWrapper>
+        } />
+        <Route path="/ai/recommendations" element={
+          <SuspenseWrapper><RecommendationsList /></SuspenseWrapper>
+        } />
+
+        {/* Voice */}
+        <Route path="/voice" element={
+          <SuspenseWrapper><VoiceCommandCenter /></SuspenseWrapper>
+        } />
+
+        {/* BI */}
+        <Route path="/bi" element={
+          <SuspenseWrapper><BIDashboard /></SuspenseWrapper>
+        } />
+        <Route path="/bi/reports" element={
+          <SuspenseWrapper><ReportBuilder /></SuspenseWrapper>
+        } />
+        <Route path="/bi/analytics" element={
+          <SuspenseWrapper><AnalyticsDashboard /></SuspenseWrapper>
+        } />
+        <Route path="/bi/export" element={
+          <SuspenseWrapper><ExportCenter /></SuspenseWrapper>
         } />
 
         {/* Settings */}

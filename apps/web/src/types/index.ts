@@ -340,3 +340,8 @@ export interface CreateBaselineInput {
   categoryId?: string;
   notes?: string;
 }
+
+// ============================================
+// PLANNING (Re-export from planning.ts)
+// ============================================
+export * from './planning';

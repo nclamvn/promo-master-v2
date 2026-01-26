@@ -1,6 +1,11 @@
+/**
+ * Promotion Templates API - List & Create
+ * GET /api/planning/templates - List templates with filters & summary
+ * POST /api/planning/templates - Create new template with initial version
+ */
+
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import prisma from '../../_lib/prisma';
-import { getUserFromRequest } from '../../_lib/auth';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method === 'OPTIONS') {
@@ -8,68 +13,196 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return;
   }
 
-  const user = getUserFromRequest(req);
-  if (!user) return res.status(401).json({ error: 'Unauthorized' });
-
   try {
     if (req.method === 'GET') {
-      const { page = '1', limit = '20', type, isActive, category } = req.query as Record<string, string>;
-      const skip = (parseInt(page) - 1) * parseInt(limit);
-      const take = parseInt(limit);
-
-      const where: Record<string, unknown> = {};
-      if (type) where.type = type;
-      if (isActive !== undefined) where.isActive = isActive === 'true';
-      if (category) where.category = category;
-
-      const [templates, total] = await Promise.all([
-        prisma.promotionTemplate.findMany({
-          where,
-          skip,
-          take,
-          orderBy: { createdAt: 'desc' },
-          include: {
-            createdBy: { select: { id: true, name: true } },
-            _count: { select: { versions: true } },
-          },
-        }),
-        prisma.promotionTemplate.count({ where }),
-      ]);
-
-      return res.status(200).json({
-        data: templates,
-        pagination: { page: parseInt(page), limit: take, total, totalPages: Math.ceil(total / take) },
-      });
+      return handleList(req, res);
+    } else if (req.method === 'POST') {
+      return handleCreate(req, res);
+    } else {
+      res.setHeader('Allow', ['GET', 'POST']);
+      return res.status(405).json({ error: `Method ${req.method} Not Allowed` });
     }
+  } catch (error: any) {
+    console.error('Templates API error:', error);
+    return res.status(500).json({ error: error.message || 'Internal Server Error' });
+  }
+}
 
-    if (req.method === 'POST') {
-      const { code, name, description, type, category, defaultDuration, defaultBudget, mechanics, eligibility } = req.body;
+async function handleList(req: VercelRequest, res: VercelResponse) {
+  const {
+    type,
+    category,
+    isActive,
+    search,
+    page = '1',
+    pageSize = '20',
+  } = req.query as Record<string, string>;
 
-      if (!code || !name || !type) {
-        return res.status(400).json({ error: 'Missing required fields: code, name, type' });
-      }
+  const pageNum = parseInt(page);
+  const limit = parseInt(pageSize);
+  const skip = (pageNum - 1) * limit;
 
-      const template = await prisma.promotionTemplate.create({
-        data: {
+  // Build where clause
+  const where: any = {};
+
+  if (type) {
+    where.type = type;
+  }
+
+  if (category) {
+    where.category = category;
+  }
+
+  if (isActive !== undefined) {
+    where.isActive = isActive === 'true';
+  }
+
+  if (search) {
+    where.OR = [
+      { name: { contains: search, mode: 'insensitive' } },
+      { code: { contains: search, mode: 'insensitive' } },
+      { description: { contains: search, mode: 'insensitive' } },
+    ];
+  }
+
+  // Get templates with pagination
+  const [templates, total] = await Promise.all([
+    prisma.promotionTemplate.findMany({
+      where,
+      include: {
+        createdBy: {
+          select: { id: true, name: true, email: true },
+        },
+        _count: {
+          select: { versions: true, promotions: true },
+        },
+      },
+      orderBy: { updatedAt: 'desc' },
+      skip,
+      take: limit,
+    }),
+    prisma.promotionTemplate.count({ where }),
+  ]);
+
+  // Get summary stats
+  const summaryStats = await prisma.promotionTemplate.groupBy({
+    by: ['type', 'isActive'],
+    _count: { id: true },
+  });
+
+  const byType: Record<string, number> = {};
+  let active = 0;
+  let inactive = 0;
+
+  summaryStats.forEach((s) => {
+    if (!byType[s.type]) byType[s.type] = 0;
+    byType[s.type] += s._count.id;
+
+    if (s.isActive) {
+      active += s._count.id;
+    } else {
+      inactive += s._count.id;
+    }
+  });
+
+  return res.status(200).json({
+    success: true,
+    data: templates,
+    pagination: {
+      page: pageNum,
+      pageSize: limit,
+      total,
+      totalPages: Math.ceil(total / limit),
+    },
+    summary: {
+      total,
+      active,
+      inactive,
+      byType,
+    },
+  });
+}
+
+async function handleCreate(req: VercelRequest, res: VercelResponse) {
+  const {
+    code,
+    name,
+    description,
+    type,
+    category,
+    defaultDuration,
+    defaultBudget,
+    mechanics,
+    eligibility,
+  } = req.body;
+
+  // Validate required fields
+  if (!code || !name || !type) {
+    return res.status(400).json({
+      error: 'Missing required fields: code, name, type',
+    });
+  }
+
+  // Check for duplicate code
+  const existing = await prisma.promotionTemplate.findUnique({
+    where: { code },
+  });
+
+  if (existing) {
+    return res.status(400).json({
+      error: `Template code '${code}' already exists`,
+    });
+  }
+
+  // Create template with initial version in transaction
+  const result = await prisma.$transaction(async (tx) => {
+    // Create template
+    const template = await tx.promotionTemplate.create({
+      data: {
+        code,
+        name,
+        description: description || null,
+        type,
+        category: category || null,
+        defaultDuration: defaultDuration ? parseInt(defaultDuration) : null,
+        defaultBudget: defaultBudget ? parseFloat(defaultBudget) : null,
+        mechanics: mechanics || {},
+        eligibility: eligibility || {},
+        isActive: true,
+        usageCount: 0,
+      },
+      include: {
+        createdBy: {
+          select: { id: true, name: true, email: true },
+        },
+      },
+    });
+
+    // Create initial version (version 1)
+    await tx.templateVersion.create({
+      data: {
+        templateId: template.id,
+        version: 1,
+        snapshot: {
           code,
           name,
-          description: description || null,
+          description,
           type,
-          category: category || null,
-          defaultDuration: defaultDuration ? parseInt(defaultDuration) : null,
-          defaultBudget: defaultBudget ? parseFloat(defaultBudget) : null,
-          mechanics: mechanics || null,
-          eligibility: eligibility || null,
-          createdById: user.userId,
+          category,
+          defaultDuration,
+          defaultBudget,
+          mechanics,
+          eligibility,
         },
-      });
+        changes: null,
+      },
+    });
 
-      return res.status(201).json({ data: template });
-    }
+    return template;
+  });
 
-    return res.status(405).json({ error: 'Method not allowed' });
-  } catch (error) {
-    console.error('Templates error:', error);
-    return res.status(500).json({ error: 'Internal server error' });
-  }
+  return res.status(201).json({
+    success: true,
+    data: result,
+  });
 }

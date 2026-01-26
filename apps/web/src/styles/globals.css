@@ -86,6 +86,9 @@
   --color-chart-5: hsl(188 94% 43%);
   --color-chart-6: hsl(0 84% 60%);
 
+  /* Chart cursor */
+  --chart-cursor-fill: rgba(255, 255, 255, 0.05);
+
   /* Sidebar */
   --color-sidebar-background: hsl(220 20% 7%);
   --color-sidebar-foreground: hsl(215 20% 65%);
@@ -156,9 +159,123 @@
    BASE LAYER
 ═══════════════════════════════════════════════════════════════════════════ */
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   LIGHT THEME
+═══════════════════════════════════════════════════════════════════════════ */
+
+.light {
+  color-scheme: light;
+
+  /* Base - Light Industrial */
+  --color-background: hsl(210 20% 98%);
+  --color-background-elevated: hsl(0 0% 100%);
+  --color-background-muted: hsl(210 20% 96%);
+
+  /* Surface layers */
+  --color-surface: hsl(0 0% 100%);
+  --color-surface-hover: hsl(210 20% 96%);
+  --color-surface-active: hsl(210 18% 92%);
+  --color-surface-border: hsl(214 20% 88%);
+
+  /* Foreground / Text hierarchy - darker for better readability */
+  --color-foreground: hsl(222 47% 8%);
+  --color-foreground-muted: hsl(215 20% 35%);
+  --color-foreground-subtle: hsl(215 16% 50%);
+
+  /* Card/Popover - darker text */
+  --color-card: hsl(0 0% 100%);
+  --color-card-foreground: hsl(222 47% 8%);
+  --color-popover: hsl(0 0% 100%);
+  --color-popover-foreground: hsl(222 47% 8%);
+
+  /* Primary - Industrial Blue */
+  --color-primary: hsl(217 91% 50%);
+  --color-primary-hover: hsl(217 91% 45%);
+  --color-primary-muted: hsl(217 91% 95%);
+  --color-primary-foreground: hsl(0 0% 100%);
+
+  /* Secondary */
+  --color-secondary: hsl(210 20% 96%);
+  --color-secondary-foreground: hsl(222 47% 11%);
+
+  /* Muted - darker for readability */
+  --color-muted: hsl(210 20% 96%);
+  --color-muted-foreground: hsl(215 20% 35%);
+
+  /* Accent - Cyan */
+  --color-accent: hsl(188 94% 40%);
+  --color-accent-hover: hsl(188 94% 35%);
+  --color-accent-muted: hsl(188 94% 95%);
+  --color-accent-foreground: hsl(0 0% 100%);
+
+  /* Success - Emerald */
+  --color-success: hsl(160 84% 35%);
+  --color-success-hover: hsl(160 84% 30%);
+  --color-success-muted: hsl(160 84% 94%);
+  --color-success-foreground: hsl(0 0% 100%);
+
+  /* Warning - Amber */
+  --color-warning: hsl(38 92% 45%);
+  --color-warning-hover: hsl(38 92% 40%);
+  --color-warning-muted: hsl(38 92% 95%);
+  --color-warning-foreground: hsl(0 0% 0%);
+
+  /* Danger - Red */
+  --color-danger: hsl(0 84% 55%);
+  --color-danger-hover: hsl(0 84% 50%);
+  --color-danger-muted: hsl(0 84% 95%);
+  --color-danger-foreground: hsl(0 0% 100%);
+
+  /* Destructive */
+  --color-destructive: hsl(0 84% 55%);
+  --color-destructive-foreground: hsl(0 0% 100%);
+
+  /* Border/Input/Ring */
+  --color-border: hsl(214 20% 88%);
+  --color-input: hsl(214 20% 88%);
+  --color-ring: hsl(217 91% 50%);
+
+  /* Chart colors - adjusted for light mode */
+  --color-chart-1: hsl(217 91% 50%);
+  --color-chart-2: hsl(160 84% 35%);
+  --color-chart-3: hsl(38 92% 45%);
+  --color-chart-4: hsl(280 65% 55%);
+  --color-chart-5: hsl(188 94% 40%);
+  --color-chart-6: hsl(0 84% 55%);
+
+  /* Chart cursor */
+  --chart-cursor-fill: rgba(0, 0, 0, 0.05);
+
+  /* Sidebar - darker text for readability */
+  --color-sidebar-background: hsl(210 20% 96%);
+  --color-sidebar-foreground: hsl(215 20% 35%);
+  --color-sidebar-primary: hsl(217 91% 50%);
+  --color-sidebar-primary-foreground: hsl(0 0% 100%);
+  --color-sidebar-accent: hsl(210 20% 92%);
+  --color-sidebar-accent-foreground: hsl(222 47% 8%);
+  --color-sidebar-border: hsl(214 20% 82%);
+  --color-sidebar-ring: hsl(217 91% 50%);
+
+  /* Shadows - lighter */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-default: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+
+  /* Glow effects - lighter */
+  --shadow-glow-success: 0 0 12px 0 hsl(160 84% 39% / 0.25);
+  --shadow-glow-warning: 0 0 12px 0 hsl(38 92% 50% / 0.25);
+  --shadow-glow-danger: 0 0 12px 0 hsl(0 84% 60% / 0.25);
+  --shadow-glow-primary: 0 0 12px 0 hsl(217 91% 60% / 0.25);
+}
+
 @layer base {
   :root {
     color-scheme: dark;
+  }
+
+  :root.light {
+    color-scheme: light;
   }
 
   * {
@@ -193,10 +310,23 @@
     background: hsl(220 12% 35%);
   }
 
+  /* Light theme scrollbar */
+  .light ::-webkit-scrollbar-thumb {
+    background: hsl(214 20% 75%);
+  }
+
+  .light ::-webkit-scrollbar-thumb:hover {
+    background: hsl(214 20% 65%);
+  }
+
   /* Selection */
   ::selection {
     background: hsl(217 91% 60% / 0.3);
     color: var(--color-foreground);
+  }
+
+  .light ::selection {
+    background: hsl(217 91% 50% / 0.2);
   }
 
   /* Focus visible - High contrast */

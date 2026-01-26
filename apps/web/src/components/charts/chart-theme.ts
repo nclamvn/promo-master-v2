@@ -1,33 +1,37 @@
 /**
  * Industrial chart theme configuration
+ * Supports both light and dark themes using CSS variables
  */
 
-export const chartTheme = {
-  // Colors
-  colors: {
-    primary: 'hsl(217, 91%, 60%)',      // Blue
-    secondary: 'hsl(188, 94%, 43%)',    // Cyan
-    success: 'hsl(160, 84%, 39%)',      // Emerald
-    warning: 'hsl(38, 92%, 50%)',       // Amber
-    danger: 'hsl(0, 84%, 60%)',         // Red
-    purple: 'hsl(280, 65%, 60%)',       // Purple
+// Helper to get CSS variable value
+const getCSSVar = (name: string) => `var(--color-${name})`;
 
-    // Chart series
+export const chartTheme = {
+  // Colors - using CSS variables for theme support
+  colors: {
+    primary: getCSSVar('chart-1'),
+    secondary: getCSSVar('chart-5'),
+    success: getCSSVar('chart-2'),
+    warning: getCSSVar('chart-3'),
+    danger: getCSSVar('chart-6'),
+    purple: getCSSVar('chart-4'),
+
+    // Chart series - using CSS variables
     series: [
-      'hsl(217, 91%, 60%)',   // Blue
-      'hsl(160, 84%, 39%)',   // Emerald
-      'hsl(38, 92%, 50%)',    // Amber
-      'hsl(280, 65%, 60%)',   // Purple
-      'hsl(188, 94%, 43%)',   // Cyan
-      'hsl(0, 84%, 60%)',     // Red
+      getCSSVar('chart-1'),   // Blue
+      getCSSVar('chart-2'),   // Emerald
+      getCSSVar('chart-3'),   // Amber
+      getCSSVar('chart-4'),   // Purple
+      getCSSVar('chart-5'),   // Cyan
+      getCSSVar('chart-6'),   // Red
     ],
 
-    // Background & grid
-    background: 'hsl(220, 18%, 10%)',
-    grid: 'hsl(220, 12%, 22%)',
-    axis: 'hsl(215, 15%, 45%)',
-    text: 'hsl(215, 20%, 65%)',
-    tooltip: 'hsl(220, 20%, 7%)',
+    // Background & grid - using CSS variables
+    background: getCSSVar('card'),
+    grid: getCSSVar('surface-border'),
+    axis: getCSSVar('foreground-subtle'),
+    text: getCSSVar('foreground-muted'),
+    tooltip: getCSSVar('popover'),
   },
 
   // Typography
@@ -50,46 +54,49 @@ export const chartTheme = {
   animationDuration: 400,
 };
 
-// Tooltip styles for Recharts
+// Tooltip styles for Recharts - theme aware
 export const tooltipStyle = {
   contentStyle: {
-    backgroundColor: chartTheme.colors.tooltip,
-    border: `1px solid ${chartTheme.colors.grid}`,
+    backgroundColor: getCSSVar('popover'),
+    border: `1px solid ${getCSSVar('surface-border')}`,
     borderRadius: '4px',
     padding: '8px 12px',
-    boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.3)',
+    boxShadow: 'var(--shadow-lg)',
   },
   labelStyle: {
-    color: chartTheme.colors.text,
+    color: getCSSVar('foreground'),
     fontFamily: chartTheme.fontFamily,
     fontSize: chartTheme.fontSize.label,
     fontWeight: 600,
     marginBottom: '4px',
   },
   itemStyle: {
-    color: chartTheme.colors.text,
+    color: getCSSVar('foreground-muted'),
     fontFamily: chartTheme.fontFamily,
     fontSize: chartTheme.fontSize.label,
   },
+  cursor: {
+    fill: 'var(--chart-cursor-fill, rgba(128, 128, 128, 0.1))',
+  },
 };
 
-// Axis styles
+// Axis styles - theme aware
 export const axisStyle = {
   tick: {
     fontSize: chartTheme.fontSize.axis,
-    fill: chartTheme.colors.axis,
+    fill: getCSSVar('foreground-subtle'),
     fontFamily: chartTheme.fontFamily,
   },
   axisLine: {
-    stroke: chartTheme.colors.grid,
+    stroke: getCSSVar('surface-border'),
   },
   tickLine: {
-    stroke: chartTheme.colors.grid,
+    stroke: getCSSVar('surface-border'),
   },
 };
 
-// Grid styles
+// Grid styles - theme aware
 export const gridStyle = {
-  stroke: chartTheme.colors.grid,
+  stroke: getCSSVar('surface-border'),
   strokeDasharray: '3 3',
 };

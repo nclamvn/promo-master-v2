@@ -19,8 +19,10 @@ export const fundKeys = {
 interface ListParams {
   page?: number;
   pageSize?: number;
+  limit?: number;
   fundType?: string;
   search?: string;
+  [key: string]: unknown;
 }
 
 interface CreateFundInput {

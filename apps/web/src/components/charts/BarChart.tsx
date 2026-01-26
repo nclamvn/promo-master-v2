@@ -16,9 +16,7 @@ import {
 import { chartTheme, tooltipStyle, axisStyle, gridStyle } from './chart-theme';
 import { cn, formatCurrency } from '@/lib/utils';
 
-interface BarChartData {
-  name: string;
-  value?: number;
+export interface BarChartData {
   [key: string]: string | number | undefined;
 }
 
@@ -144,7 +142,8 @@ export function BarChart({
 
             <Tooltip
               {...tooltipStyle}
-              formatter={(value: number) => [formatter(value), dataKey]}
+              cursor={tooltipStyle.cursor}
+              formatter={((value: number) => [formatter(value), dataKey]) as never}
             />
 
             {showLegend && (

@@ -14,31 +14,31 @@ interface PromotionStatusBadgeProps {
 const statusConfig: Record<PromotionStatus, { label: string; className: string }> = {
   DRAFT: {
     label: 'Draft',
-    className: 'bg-gray-100 text-gray-700 hover:bg-gray-100',
+    className: 'bg-surface-hover text-foreground-muted border border-surface-border',
   },
   PENDING_APPROVAL: {
     label: 'Pending Approval',
-    className: 'bg-yellow-50 text-yellow-700 border-yellow-200 hover:bg-yellow-50',
+    className: 'bg-warning-muted text-warning border border-warning/30',
   },
   APPROVED: {
     label: 'Approved',
-    className: 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-50',
+    className: 'bg-primary-muted text-primary border border-primary/30',
   },
   ACTIVE: {
     label: 'Active',
-    className: 'bg-green-500 text-white hover:bg-green-500',
+    className: 'bg-success-muted text-success border border-success/30',
   },
   COMPLETED: {
     label: 'Completed',
-    className: 'bg-purple-100 text-purple-700 hover:bg-purple-100',
+    className: 'bg-accent-muted text-accent border border-accent/30',
   },
   CANCELLED: {
     label: 'Cancelled',
-    className: 'bg-red-100 text-red-700 hover:bg-red-100',
+    className: 'bg-danger-muted text-danger border border-danger/30',
   },
   REJECTED: {
     label: 'Rejected',
-    className: 'bg-red-50 text-red-600 hover:bg-red-50',
+    className: 'bg-danger-muted text-danger border border-danger/30',
   },
 };
 

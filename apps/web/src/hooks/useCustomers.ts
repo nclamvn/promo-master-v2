@@ -16,8 +16,10 @@ export const customerKeys = {
 interface ListParams {
   page?: number;
   pageSize?: number;
+  limit?: number;
   search?: string;
   channel?: string;
+  [key: string]: unknown;
 }
 
 export function useCustomers(params: ListParams = {}) {

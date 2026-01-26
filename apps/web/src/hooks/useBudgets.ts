@@ -21,6 +21,7 @@ interface ListParams {
   status?: string;
   category?: string;
   search?: string;
+  [key: string]: unknown;
 }
 
 export function useBudgets(params: ListParams = {}) {

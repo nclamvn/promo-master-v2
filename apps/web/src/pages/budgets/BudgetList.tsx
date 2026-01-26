@@ -70,10 +70,10 @@ const demoBudgets: Budget[] = [
 ];
 
 const statusColors: Record<string, string> = {
-  DRAFT: 'bg-gray-100 text-gray-700',
-  APPROVED: 'bg-blue-100 text-blue-700',
-  ACTIVE: 'bg-green-100 text-green-700',
-  CLOSED: 'bg-purple-100 text-purple-700',
+  DRAFT: 'bg-surface-hover text-foreground-muted border border-surface-border',
+  APPROVED: 'bg-primary-muted text-primary border border-primary/30',
+  ACTIVE: 'bg-success-muted text-success border border-success/30',
+  CLOSED: 'bg-accent-muted text-accent border border-accent/30',
 };
 
 const columns: ColumnDef<Budget>[] = [

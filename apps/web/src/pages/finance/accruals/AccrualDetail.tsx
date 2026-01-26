@@ -45,8 +45,8 @@ export default function AccrualDetailPage() {
   const [editNotes, setEditNotes] = useState('');
   const [showPostDialog, setShowPostDialog] = useState(false);
   const [showReverseDialog, setShowReverseDialog] = useState(false);
-  const [glAccountDebit, setGlAccountDebit] = useState(GL_ACCOUNTS.PROMOTION_EXPENSE);
-  const [glAccountCredit, setGlAccountCredit] = useState(GL_ACCOUNTS.ACCRUED_LIABILITIES);
+  const [glAccountDebit, setGlAccountDebit] = useState<string>(GL_ACCOUNTS.PROMOTION_EXPENSE);
+  const [glAccountCredit, setGlAccountCredit] = useState<string>(GL_ACCOUNTS.ACCRUED_LIABILITIES);
   const [reverseReason, setReverseReason] = useState('');
 
   // Queries & Mutations

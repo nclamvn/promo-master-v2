@@ -3,7 +3,7 @@
  */
 
 import { ReactNode } from 'react';
-import { FileX2, Search, Plus, AlertCircle, LucideIcon, FileQuestion } from 'lucide-react';
+import { FileX2, Search, Plus, AlertCircle, LucideIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -11,7 +11,7 @@ interface EmptyStateProps {
   icon?: ReactNode | LucideIcon;
   title: string;
   description?: string;
-  action?: {
+  action?: ReactNode | {
     label: string;
     onClick: () => void;
   };
@@ -56,10 +56,14 @@ export function EmptyState({
         </p>
       )}
       {action && (
-        <Button onClick={action.onClick} size="sm" className="mt-4">
-          <Plus className="mr-2 h-3.5 w-3.5" />
-          {action.label}
-        </Button>
+        typeof action === 'object' && 'label' in action && 'onClick' in action ? (
+          <Button onClick={action.onClick} size="sm" className="mt-4">
+            <Plus className="mr-2 h-3.5 w-3.5" />
+            {action.label}
+          </Button>
+        ) : (
+          <div className="mt-4">{action}</div>
+        )
       )}
       {!action && actionLabel && onAction && (
         <Button onClick={onAction} size="sm" className="mt-4">

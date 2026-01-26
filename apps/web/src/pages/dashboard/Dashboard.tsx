@@ -26,7 +26,6 @@ import { KPICard } from '@/components/charts/KPICard';
 import { AreaChart } from '@/components/charts/AreaChart';
 import { BarChart } from '@/components/charts/BarChart';
 import { PieChart } from '@/components/charts/PieChart';
-import { StatusBadge } from '@/components/shared/StatusBadge';
 import { PageLoading } from '@/components/shared/LoadingSpinner';
 import { useDashboardStats, useSpendTrend, useStatusDistribution, useTopCustomers } from '@/hooks/useDashboard';
 import { formatCurrency, formatRelativeTime } from '@/lib/utils';

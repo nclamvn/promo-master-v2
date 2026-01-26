@@ -88,7 +88,7 @@ export function PieChart({
               innerRadius={calculatedInnerRadius}
               outerRadius={outerRadius}
               paddingAngle={2}
-              label={renderCustomLabel}
+              label={renderCustomLabel as never}
               labelLine={false}
               animationDuration={chartTheme.animationDuration}
             >
@@ -104,10 +104,11 @@ export function PieChart({
 
             <Tooltip
               {...tooltipStyle}
-              formatter={(value: number, name: string) => {
+              cursor={tooltipStyle.cursor}
+              formatter={((value: number, name: string) => {
                 const percentage = ((value / total) * 100).toFixed(1);
                 return [`${formatter(value)} (${percentage}%)`, name];
-              }}
+              }) as never}
             />
 
             {showLegend && (

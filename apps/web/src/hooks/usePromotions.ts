@@ -23,12 +23,14 @@ export const promotionKeys = {
 interface ListParams {
   page?: number;
   pageSize?: number;
+  limit?: number;
   status?: string;
   customerId?: string;
   fundId?: string;
   search?: string;
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
+  [key: string]: unknown;
 }
 
 interface CreatePromotionInput {

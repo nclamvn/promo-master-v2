@@ -19,6 +19,33 @@ import {
   Zap,
   Activity,
   X,
+  // Finance icons
+  Calculator,
+  CreditCard,
+  FileText,
+  Banknote,
+  // Planning icons
+  FileStack,
+  GitBranch,
+  AlertTriangle,
+  // Operations icons
+  Truck,
+  ShoppingCart,
+  Boxes,
+  // Integration icons
+  Link2,
+  Server,
+  Building2,
+  Webhook,
+  Shield,
+  // AI & BI icons
+  Brain,
+  Lightbulb,
+  ThumbsUp,
+  Mic,
+  PieChart,
+  FileBarChart,
+  Download,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useUIStore } from '@/stores/uiStore';
@@ -46,11 +73,39 @@ const navigation: NavGroup[] = [
     ],
   },
   {
-    title: 'OPERATIONS',
+    title: 'TRADE PROMO',
     items: [
       { title: 'Promotions', href: '/promotions', icon: Tag, badge: 24 },
       { title: 'Claims', href: '/claims', icon: Receipt, badge: 12 },
       { title: 'Funds', href: '/funds', icon: Wallet },
+    ],
+  },
+  {
+    title: 'FINANCE',
+    items: [
+      { title: 'Accruals', href: '/finance/accruals', icon: Calculator },
+      { title: 'Deductions', href: '/finance/deductions', icon: CreditCard },
+      { title: 'GL Journals', href: '/finance/journals', icon: FileText },
+      { title: 'Cheques', href: '/finance/cheques', icon: Banknote },
+    ],
+  },
+  {
+    title: 'PLANNING',
+    items: [
+      { title: 'Budgets', href: '/budgets', icon: PiggyBank },
+      { title: 'Targets', href: '/targets', icon: Target },
+      { title: 'Baselines', href: '/baselines', icon: TrendingUp },
+      { title: 'Templates', href: '/planning/templates', icon: FileStack },
+      { title: 'Scenarios', href: '/planning/scenarios', icon: GitBranch },
+      { title: 'Clash Detection', href: '/planning/clashes', icon: AlertTriangle },
+    ],
+  },
+  {
+    title: 'OPERATIONS',
+    items: [
+      { title: 'Delivery', href: '/operations/delivery', icon: Truck },
+      { title: 'Sell Tracking', href: '/operations/sell-tracking', icon: ShoppingCart },
+      { title: 'Inventory', href: '/operations/inventory', icon: Boxes },
     ],
   },
   {
@@ -61,11 +116,31 @@ const navigation: NavGroup[] = [
     ],
   },
   {
-    title: 'PLANNING',
+    title: 'INTEGRATION',
     items: [
-      { title: 'Budgets', href: '/budgets', icon: PiggyBank },
-      { title: 'Targets', href: '/targets', icon: Target },
-      { title: 'Baselines', href: '/baselines', icon: TrendingUp },
+      { title: 'Dashboard', href: '/integration', icon: Link2 },
+      { title: 'ERP Sync', href: '/integration/erp', icon: Server },
+      { title: 'DMS Sync', href: '/integration/dms', icon: Building2 },
+      { title: 'Webhooks', href: '/integration/webhooks', icon: Webhook },
+      { title: 'Security', href: '/integration/security', icon: Shield },
+    ],
+  },
+  {
+    title: 'AI & INTELLIGENCE',
+    items: [
+      { title: 'AI Dashboard', href: '/ai', icon: Brain },
+      { title: 'Insights', href: '/ai/insights', icon: Lightbulb },
+      { title: 'Recommendations', href: '/ai/recommendations', icon: ThumbsUp },
+      { title: 'Voice Command', href: '/voice', icon: Mic },
+    ],
+  },
+  {
+    title: 'BI & REPORTS',
+    items: [
+      { title: 'BI Dashboard', href: '/bi', icon: PieChart },
+      { title: 'Report Builder', href: '/bi/reports', icon: FileBarChart },
+      { title: 'Analytics', href: '/bi/analytics', icon: BarChart3 },
+      { title: 'Export Center', href: '/bi/export', icon: Download },
     ],
   },
   {
@@ -84,7 +159,7 @@ interface SidebarProps {
 export function Sidebar({ isMobileOpen = false, onMobileClose }: SidebarProps) {
   const location = useLocation();
   const { sidebarOpen, toggleSidebar } = useUIStore();
-  const [expandedGroups, setExpandedGroups] = useState<string[]>(['COMMAND', 'OPERATIONS']);
+  const [expandedGroups, setExpandedGroups] = useState<string[]>(['COMMAND', 'TRADE PROMO', 'FINANCE', 'PLANNING']);
 
   // sidebarOpen = true means expanded, false means collapsed
   const sidebarCollapsed = !sidebarOpen;
@@ -203,7 +278,7 @@ export function Sidebar({ isMobileOpen = false, onMobileClose }: SidebarProps) {
                       />
                       {!sidebarCollapsed && (
                         <>
-                          <span className="flex-1 truncate">{item.title}</span>
+                          <span className="flex-1 truncate font-semibold">{item.title}</span>
                           {item.badge && (
                             <span
                               className={cn(
@@ -231,30 +306,30 @@ export function Sidebar({ isMobileOpen = false, onMobileClose }: SidebarProps) {
       {/* System Status */}
       {!sidebarCollapsed && (
         <div className="border-t border-sidebar-border p-3">
-          <div className="flex items-center gap-1.5 mb-1.5">
-            <Activity className="h-3 w-3 text-foreground-subtle" />
-            <span className="text-[10px] font-semibold text-foreground-subtle uppercase tracking-wide">
+          <div className="flex items-center gap-2 mb-2">
+            <Activity className="h-4 w-4 text-foreground-subtle" />
+            <span className="text-xs font-semibold text-foreground-subtle uppercase tracking-wide">
               System Status
             </span>
           </div>
-          <div className="space-y-1">
+          <div className="space-y-1.5">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] text-foreground-muted">API</span>
-              <div className="flex items-center gap-1">
+              <span className="text-xs text-foreground-muted font-medium">API</span>
+              <div className="flex items-center gap-1.5">
                 <div className="status-dot status-dot-success" />
-                <span className="text-[10px] text-success">Online</span>
+                <span className="text-xs text-success font-medium">Online</span>
               </div>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-[10px] text-foreground-muted">Database</span>
-              <div className="flex items-center gap-1">
+              <span className="text-xs text-foreground-muted font-medium">Database</span>
+              <div className="flex items-center gap-1.5">
                 <div className="status-dot status-dot-success" />
-                <span className="text-[10px] text-success">Online</span>
+                <span className="text-xs text-success font-medium">Online</span>
               </div>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-[10px] text-foreground-muted">Last Sync</span>
-              <span className="text-[10px] text-foreground-muted font-mono">2m ago</span>
+              <span className="text-xs text-foreground-muted font-medium">Last Sync</span>
+              <span className="text-xs text-foreground-muted font-mono font-medium">2m ago</span>
             </div>
           </div>
         </div>

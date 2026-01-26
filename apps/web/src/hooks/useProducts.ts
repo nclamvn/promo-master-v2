@@ -16,9 +16,11 @@ export const productKeys = {
 interface ListParams {
   page?: number;
   pageSize?: number;
+  limit?: number;
   search?: string;
   categoryId?: string;
   brandId?: string;
+  [key: string]: unknown;
 }
 
 export function useProducts(params: ListParams = {}) {

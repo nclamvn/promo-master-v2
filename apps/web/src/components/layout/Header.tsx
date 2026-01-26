@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   Search,
-  User,
   LogOut,
   Settings,
   ChevronDown,
@@ -14,14 +13,12 @@ import {
   BookOpen,
   MessageCircle,
   Mail,
-  Command,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
@@ -34,6 +31,7 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { NotificationDropdown } from '@/components/notifications/NotificationDropdown';
+import { ThemeToggleCompact } from '@/components/ui/ThemeToggle';
 import { useAuthStore } from '@/stores/authStore';
 import { useUIStore } from '@/stores/uiStore';
 import { cn } from '@/lib/utils';
@@ -208,6 +206,9 @@ export function Header({ onMobileMenuClick }: HeaderProps) {
             <HelpCircle className="h-4 w-4" />
           </Button>
 
+          {/* Theme Toggle */}
+          <ThemeToggleCompact />
+
           {/* Keyboard Shortcuts */}
           <Button
             variant="ghost"
@@ -249,22 +250,7 @@ export function Header({ onMobileMenuClick }: HeaderProps) {
                 <ChevronDown className="h-3 w-3 text-foreground-subtle shrink-0" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-52">
-              <DropdownMenuLabel className="py-2">
-                <div className="flex flex-col gap-0.5 max-w-full overflow-hidden">
-                  <span className="text-xs font-medium truncate">{user?.name || 'User'}</span>
-                  <span className="text-[10px] text-foreground-muted font-normal truncate">
-                    {user?.email || 'user@company.com'}
-                  </span>
-                </div>
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
-                <Link to="/settings/profile" className="flex items-center gap-2">
-                  <User className="h-4 w-4" />
-                  <span>Profile</span>
-                </Link>
-              </DropdownMenuItem>
+            <DropdownMenuContent align="end" className="w-48">
               <DropdownMenuItem asChild>
                 <Link to="/settings" className="flex items-center gap-2">
                   <Settings className="h-4 w-4" />

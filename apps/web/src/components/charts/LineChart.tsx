@@ -102,7 +102,8 @@ export function LineChart({
 
             <Tooltip
               {...tooltipStyle}
-              formatter={(value: number, name: string) => [formatter(value), name]}
+              cursor={tooltipStyle.cursor}
+              formatter={((value: number, name: string) => [formatter(value), name]) as never}
             />
 
             {showLegend && (

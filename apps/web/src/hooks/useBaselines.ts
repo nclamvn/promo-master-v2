@@ -19,6 +19,7 @@ interface ListParams {
   year?: number;
   period?: string;
   baselineType?: string;
+  [key: string]: unknown;
 }
 
 export function useBaselines(params: ListParams = {}) {

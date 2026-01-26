@@ -1,6 +1,20 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Bell, Check, CheckCheck, Trash2, ExternalLink } from 'lucide-react';
+import {
+  Bell,
+  Check,
+  CheckCheck,
+  Trash2,
+  ExternalLink,
+  ClipboardList,
+  CheckCircle,
+  XCircle,
+  FileText,
+  Banknote,
+  AlertTriangle,
+  Settings,
+  type LucideIcon
+} from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import {
@@ -8,8 +22,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import {
   useNotifications,
@@ -21,16 +33,16 @@ import {
 } from '@/hooks/useNotifications';
 
 // Notification type icons and colors
-const notificationConfig: Record<string, { icon: string; color: string }> = {
-  PROMOTION_CREATED: { icon: '📋', color: 'text-primary' },
-  PROMOTION_APPROVED: { icon: '✅', color: 'text-success' },
-  PROMOTION_REJECTED: { icon: '❌', color: 'text-danger' },
-  CLAIM_SUBMITTED: { icon: '📝', color: 'text-warning' },
-  CLAIM_APPROVED: { icon: '💰', color: 'text-success' },
-  CLAIM_REJECTED: { icon: '❌', color: 'text-danger' },
-  CLAIM_PAID: { icon: '💵', color: 'text-success' },
-  BUDGET_ALERT: { icon: '⚠️', color: 'text-danger' },
-  SYSTEM: { icon: '⚙️', color: 'text-foreground-muted' },
+const notificationConfig: Record<string, { icon: LucideIcon; color: string }> = {
+  PROMOTION_CREATED: { icon: ClipboardList, color: 'text-primary' },
+  PROMOTION_APPROVED: { icon: CheckCircle, color: 'text-success' },
+  PROMOTION_REJECTED: { icon: XCircle, color: 'text-danger' },
+  CLAIM_SUBMITTED: { icon: FileText, color: 'text-warning' },
+  CLAIM_APPROVED: { icon: CheckCircle, color: 'text-success' },
+  CLAIM_REJECTED: { icon: XCircle, color: 'text-danger' },
+  CLAIM_PAID: { icon: Banknote, color: 'text-success' },
+  BUDGET_ALERT: { icon: AlertTriangle, color: 'text-warning' },
+  SYSTEM: { icon: Settings, color: 'text-foreground-muted' },
 };
 
 // Demo notifications for when API returns empty
@@ -157,6 +169,7 @@ export function NotificationDropdown() {
             <ul className="divide-y divide-surface-border">
               {notifications.map((notification) => {
                 const config = notificationConfig[notification.type] || notificationConfig.SYSTEM;
+                const IconComponent = config.icon;
                 return (
                   <li
                     key={notification.id}
@@ -167,8 +180,8 @@ export function NotificationDropdown() {
                     data-testid="notification-item"
                   >
                     {/* Icon */}
-                    <div className={cn('text-lg', config.color)}>
-                      {config.icon}
+                    <div className={cn('flex-shrink-0', config.color)}>
+                      <IconComponent className="h-5 w-5" />
                     </div>
 
                     {/* Content */}
