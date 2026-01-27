@@ -7,10 +7,10 @@ import './styles/globals.css';
 
 // ══════════════════════════════════════════════════════════════════════════════
 // MOCK DATA CONFIGURATION
-// Set to true to use mock data (no backend needed)
-// Set to false to use real API
+// Mocking is only enabled in development mode
+// In production, always use real API
 // ══════════════════════════════════════════════════════════════════════════════
-const ENABLE_MOCKING = true;
+const ENABLE_MOCKING = import.meta.env.DEV;
 
 // Create Query Client
 const queryClient = new QueryClient({
@@ -26,9 +26,11 @@ const queryClient = new QueryClient({
   },
 });
 
-// Enable MSW mocking (works in both dev and production for demo)
+// Enable MSW mocking (only in development)
 async function enableMocking() {
-  if (!ENABLE_MOCKING) {
+  // Only enable mocking in development mode
+  // This check allows Vite to tree-shake the mock import in production
+  if (import.meta.env.PROD) {
     return;
   }
 
