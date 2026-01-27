@@ -17,8 +17,8 @@ import {
 } from '../data/operations-ai-bi';
 import {
   mockGeographicUnits,
-  mockBudgetsExtended,
-  mockTargetsExtended,
+  mockBudgetsForAllocation,
+  mockTargetsForAllocation,
   mockBudgetAllocations,
   mockTargetAllocations,
   getBudgetAllocationTree,
@@ -237,11 +237,7 @@ const mockClashes = [
   },
 ];
 
-const mockBudgets = [
-  { id: 'bud-1', name: 'Q1 2026 Marketing', code: 'BUD-2026-Q1', totalAmount: 500000000, allocatedAmount: 350000000, spentAmount: 120000000, remainingAmount: 380000000, status: 'ACTIVE', period: 'Q1-2026', year: 2026, createdAt: '2026-01-01T00:00:00Z', updatedAt: '2026-01-20T00:00:00Z' },
-  { id: 'bud-2', name: 'Summer Campaign', code: 'BUD-2026-SUM', totalAmount: 300000000, allocatedAmount: 200000000, spentAmount: 50000000, remainingAmount: 250000000, status: 'ACTIVE', period: 'Q2-2026', year: 2026, createdAt: '2026-01-15T00:00:00Z', updatedAt: '2026-01-21T00:00:00Z' },
-  { id: 'bud-3', name: 'Q3 Regional', code: 'BUD-2026-Q3', totalAmount: 400000000, allocatedAmount: 100000000, spentAmount: 0, remainingAmount: 400000000, status: 'DRAFT', period: 'Q3-2026', year: 2026, createdAt: '2026-01-20T00:00:00Z', updatedAt: '2026-01-22T00:00:00Z' },
-];
+// Use imported mockBudgetsForAllocation from budget-target.ts
 
 const mockFunds = [
   { id: 'fund-1', code: 'MKT-001', name: 'Marketing Fund 2026', type: 'MARKETING', totalAmount: 1000000000, allocatedAmount: 600000000, availableAmount: 400000000, status: 'ACTIVE', createdAt: '2026-01-01T00:00:00Z', updatedAt: '2026-01-20T00:00:00Z' },
@@ -249,11 +245,7 @@ const mockFunds = [
   { id: 'fund-3', code: 'PRO-001', name: 'Promotional Fund', type: 'PROMOTIONAL', totalAmount: 800000000, allocatedAmount: 400000000, availableAmount: 400000000, status: 'ACTIVE', createdAt: '2026-01-05T00:00:00Z', updatedAt: '2026-01-22T00:00:00Z' },
 ];
 
-const mockTargets = [
-  { id: 'tgt-1', name: 'Q1 Sales Target', type: 'SALES', targetValue: 5000000000, currentValue: 2500000000, progress: 50, period: 'Q1-2026', status: 'IN_PROGRESS', createdAt: '2026-01-01T00:00:00Z', updatedAt: '2026-01-20T00:00:00Z' },
-  { id: 'tgt-2', name: 'Customer Acquisition', type: 'ACQUISITION', targetValue: 100, currentValue: 45, progress: 45, period: 'Q1-2026', status: 'IN_PROGRESS', createdAt: '2026-01-01T00:00:00Z', updatedAt: '2026-01-21T00:00:00Z' },
-  { id: 'tgt-3', name: 'Market Share', type: 'MARKET_SHARE', targetValue: 25, currentValue: 22, progress: 88, period: 'Q1-2026', status: 'IN_PROGRESS', createdAt: '2026-01-05T00:00:00Z', updatedAt: '2026-01-22T00:00:00Z' },
-];
+// Use imported mockTargetsForAllocation from budget-target.ts
 
 const mockBaselines = [
   { id: 'bsl-1', name: '2025 Q4 Baseline', type: 'QUARTERLY', period: 'Q4-2025', salesVolume: 4500000000, margin: 18.5, status: 'APPROVED', createdAt: '2025-10-01T00:00:00Z', updatedAt: '2025-12-31T00:00:00Z' },
@@ -643,7 +635,7 @@ export const handlers = [
     const url = new URL(request.url);
     const page = parseInt(url.searchParams.get('page') || '1');
     const pageSize = parseInt(url.searchParams.get('pageSize') || url.searchParams.get('limit') || '10');
-    const result = paginate(mockBudgets, page, pageSize);
+    const result = paginate(mockBudgetsForAllocation, page, pageSize);
     return HttpResponse.json({ success: true, data: result.data, pagination: result.pagination });
   }),
 
@@ -654,7 +646,7 @@ export const handlers = [
 
   http.get('/api/budgets/:id', async ({ params }) => {
     await delay(200);
-    const budget = mockBudgets.find(b => b.id === params.id);
+    const budget = mockBudgetsForAllocation.find(b => b.id === params.id);
     if (!budget) {
       return HttpResponse.json({ success: false, error: { message: 'Budget not found' } }, { status: 404 });
     }
@@ -681,7 +673,7 @@ export const handlers = [
   http.patch('/api/budgets/:id', async ({ params, request }) => {
     await delay(300);
     const body = await request.json() as Record<string, unknown>;
-    const budget = mockBudgets.find(b => b.id === params.id);
+    const budget = mockBudgetsForAllocation.find(b => b.id === params.id);
     if (!budget) {
       return HttpResponse.json({ success: false, error: { message: 'Budget not found' } }, { status: 404 });
     }
@@ -703,13 +695,13 @@ export const handlers = [
     const url = new URL(request.url);
     const page = parseInt(url.searchParams.get('page') || '1');
     const pageSize = parseInt(url.searchParams.get('pageSize') || url.searchParams.get('limit') || '10');
-    const result = paginate(mockTargets, page, pageSize);
+    const result = paginate(mockTargetsForAllocation, page, pageSize);
     return HttpResponse.json({ success: true, data: result.data, pagination: result.pagination });
   }),
 
   http.get('/api/targets/:id', async ({ params }) => {
     await delay(200);
-    const target = mockTargets.find(t => t.id === params.id);
+    const target = mockTargetsForAllocation.find(t => t.id === params.id);
     if (!target) {
       return HttpResponse.json({ success: false, error: { message: 'Target not found' } }, { status: 404 });
     }
@@ -734,7 +726,7 @@ export const handlers = [
   http.patch('/api/targets/:id', async ({ params, request }) => {
     await delay(300);
     const body = await request.json() as Record<string, unknown>;
-    const target = mockTargets.find(t => t.id === params.id);
+    const target = mockTargetsForAllocation.find(t => t.id === params.id);
     if (!target) {
       return HttpResponse.json({ success: false, error: { message: 'Target not found' } }, { status: 404 });
     }
@@ -864,7 +856,7 @@ export const handlers = [
   http.post('/api/budget-allocations', async ({ request }) => {
     await delay(500);
     const body = await request.json() as Record<string, unknown>;
-    const budget = mockBudgetsExtended.find(b => b.id === body.budgetId);
+    const budget = mockBudgetsForAllocation.find(b => b.id === body.budgetId);
     const geoUnit = mockGeographicUnits.find(g => g.id === body.geographicUnitId);
     const newAllocation = {
       id: `ba-${Date.now()}`,
@@ -946,7 +938,7 @@ export const handlers = [
   http.post('/api/target-allocations', async ({ request }) => {
     await delay(500);
     const body = await request.json() as Record<string, unknown>;
-    const target = mockTargetsExtended.find(t => t.id === body.targetId);
+    const target = mockTargetsForAllocation.find(t => t.id === body.targetId);
     const geoUnit = mockGeographicUnits.find(g => g.id === body.geographicUnitId);
     const newAllocation = {
       id: `ta-${Date.now()}`,

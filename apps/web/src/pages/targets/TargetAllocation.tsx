@@ -115,7 +115,7 @@ const ProgressRing = ({ progress, size = 48, strokeWidth = 4, color }: ProgressR
     <div className="relative" style={{ width: size, height: size }}>
       <svg className="transform -rotate-90" width={size} height={size}>
         <circle
-          className="text-gray-100"
+          className="text-gray-100 dark:text-gray-700"
           strokeWidth={strokeWidth}
           stroke="currentColor"
           fill="transparent"
@@ -138,7 +138,7 @@ const ProgressRing = ({ progress, size = 48, strokeWidth = 4, color }: ProgressR
         />
       </svg>
       <div className="absolute inset-0 flex items-center justify-center">
-        <span className="text-xs font-semibold text-gray-700">{Math.min(progress, 100)}%</span>
+        <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">{Math.min(progress, 100)}%</span>
       </div>
     </div>
   );
@@ -171,14 +171,14 @@ const TargetTreeNode = ({ node, level = 0, expanded, onToggle, onSelect, selecte
       <div
         className={`group flex items-center gap-3 py-2 px-3 rounded-lg cursor-pointer transition-all duration-100 ${
           isSelected
-            ? 'bg-red-50 border border-red-200'
-            : 'hover:bg-gray-50 border border-transparent'
+            ? 'bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800'
+            : 'hover:bg-gray-50 dark:hover:bg-gray-700/50 border border-transparent'
         }`}
         style={{ marginLeft: level * 24 }}
         onClick={() => onSelect(node, currentPath)}
       >
         <button
-          className={`w-6 h-6 flex items-center justify-center rounded hover:bg-gray-200 transition-colors ${
+          className={`w-6 h-6 flex items-center justify-center rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors ${
             !hasChildren ? 'invisible' : ''
           }`}
           onClick={(e) => {
@@ -187,9 +187,9 @@ const TargetTreeNode = ({ node, level = 0, expanded, onToggle, onSelect, selecte
           }}
         >
           {isExpanded ? (
-            <ChevronDown className="w-4 h-4 text-gray-500" />
+            <ChevronDown className="w-4 h-4 text-gray-500 dark:text-gray-400" />
           ) : (
-            <ChevronRight className="w-4 h-4 text-gray-500" />
+            <ChevronRight className="w-4 h-4 text-gray-500 dark:text-gray-400" />
           )}
         </button>
 
@@ -202,35 +202,35 @@ const TargetTreeNode = ({ node, level = 0, expanded, onToggle, onSelect, selecte
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <span className="font-medium text-gray-900 truncate">{node.name}</span>
-            <span className="text-xs font-mono text-gray-400">{node.code}</span>
+            <span className="font-medium text-gray-900 dark:text-white truncate">{node.name}</span>
+            <span className="text-xs font-mono text-gray-400 dark:text-gray-500">{node.code}</span>
           </div>
-          <div className="text-xs text-gray-500 flex items-center gap-3 mt-0.5">
+          <div className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-3 mt-0.5">
             <span>{config.label}</span>
             {hasChildren && (
-              <span className="text-gray-400">• {node.children?.length} cấp dưới</span>
+              <span className="text-gray-400 dark:text-gray-500">• {node.children?.length} cấp dưới</span>
             )}
           </div>
         </div>
 
         <div className="flex items-center gap-6 flex-shrink-0">
           <div className="text-right">
-            <div className="text-sm font-semibold text-gray-900 tabular-nums">
+            <div className="text-sm font-semibold text-gray-900 dark:text-white tabular-nums">
               {formatNumber(node.achieved)} / {formatNumber(node.target)}
             </div>
-            <div className="text-xs text-gray-400">{getMetricLabel(node.metric as 'CASES' | 'VOLUME_LITERS' | 'REVENUE_VND' | 'UNITS')}</div>
+            <div className="text-xs text-gray-400 dark:text-gray-500">{getMetricLabel(node.metric as 'CASES' | 'VOLUME_LITERS' | 'REVENUE_VND' | 'UNITS')}</div>
           </div>
 
           <ProgressRing progress={progress} size={40} strokeWidth={3} color={progressColor} />
 
           <div className="w-24">
             <div className="flex items-center justify-between text-xs mb-1">
-              <span className="text-gray-500">Tiến độ</span>
+              <span className="text-gray-500 dark:text-gray-400">Tiến độ</span>
               <span style={{ color: progressColor }} className="font-medium">
                 {progress}%
               </span>
             </div>
-            <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+            <div className="h-1.5 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
               <div
                 className="h-full rounded-full transition-all duration-300"
                 style={{ width: `${Math.min(progress, 100)}%`, backgroundColor: progressColor }}
@@ -239,11 +239,11 @@ const TargetTreeNode = ({ node, level = 0, expanded, onToggle, onSelect, selecte
           </div>
 
           <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-            <button className="w-7 h-7 flex items-center justify-center rounded hover:bg-gray-200">
-              <Eye className="w-4 h-4 text-gray-500" strokeWidth={1.75} />
+            <button className="w-7 h-7 flex items-center justify-center rounded hover:bg-gray-200 dark:hover:bg-gray-600">
+              <Eye className="w-4 h-4 text-gray-500 dark:text-gray-400" strokeWidth={1.75} />
             </button>
-            <button className="w-7 h-7 flex items-center justify-center rounded hover:bg-gray-200">
-              <Edit2 className="w-4 h-4 text-gray-500" strokeWidth={1.75} />
+            <button className="w-7 h-7 flex items-center justify-center rounded hover:bg-gray-200 dark:hover:bg-gray-600">
+              <Edit2 className="w-4 h-4 text-gray-500 dark:text-gray-400" strokeWidth={1.75} />
             </button>
           </div>
         </div>
@@ -252,7 +252,7 @@ const TargetTreeNode = ({ node, level = 0, expanded, onToggle, onSelect, selecte
       {hasChildren && isExpanded && (
         <div className="relative">
           <div
-            className="absolute left-6 top-0 bottom-4 w-px bg-gray-200"
+            className="absolute left-6 top-0 bottom-4 w-px bg-gray-200 dark:bg-gray-700"
             style={{ marginLeft: level * 24 + 12 }}
           />
           {node.children?.map((child) => (
@@ -288,10 +288,10 @@ const DetailPanel = ({ node }: DetailPanelProps) => {
   const remaining = Math.max(0, node.target - node.achieved);
 
   const getStatusInfo = () => {
-    if (progress >= 100) return { label: 'Hoàn thành', icon: Check, color: 'text-green-600', bg: 'bg-green-50' };
-    if (progress >= 75) return { label: 'Đang tốt', icon: TrendingUp, color: 'text-blue-600', bg: 'bg-blue-50' };
-    if (progress >= 50) return { label: 'Cần cải thiện', icon: AlertCircle, color: 'text-amber-600', bg: 'bg-amber-50' };
-    return { label: 'Rủi ro', icon: TrendingDown, color: 'text-red-600', bg: 'bg-red-50' };
+    if (progress >= 100) return { label: 'Hoàn thành', icon: Check, color: 'text-green-600 dark:text-green-400', bg: 'bg-green-50 dark:bg-green-900/30' };
+    if (progress >= 75) return { label: 'Đang tốt', icon: TrendingUp, color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-50 dark:bg-blue-900/30' };
+    if (progress >= 50) return { label: 'Cần cải thiện', icon: AlertCircle, color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-50 dark:bg-amber-900/30' };
+    return { label: 'Rủi ro', icon: TrendingDown, color: 'text-red-600 dark:text-red-400', bg: 'bg-red-50 dark:bg-red-900/30' };
   };
 
   const status = getStatusInfo();
@@ -299,7 +299,7 @@ const DetailPanel = ({ node }: DetailPanelProps) => {
 
   return (
     <div className="space-y-4">
-      <div className="bg-white rounded-xl border border-gray-200 p-5">
+      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
         <div className="flex items-start gap-4">
           <div
             className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
@@ -309,9 +309,9 @@ const DetailPanel = ({ node }: DetailPanelProps) => {
           </div>
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-1">
-              <h2 className="text-lg font-semibold text-gray-900">{node.name}</h2>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{node.name}</h2>
             </div>
-            <p className="text-sm text-gray-500 font-mono">{node.code}</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400 font-mono">{node.code}</p>
             <div className={`inline-flex items-center gap-1.5 mt-2 px-2 py-1 rounded-full text-xs font-medium ${status.bg} ${status.color}`}>
               <StatusIcon className="w-3.5 h-3.5" />
               {status.label}
@@ -320,55 +320,55 @@ const DetailPanel = ({ node }: DetailPanelProps) => {
         </div>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 p-5">
+      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
         <div className="flex items-center justify-center mb-4">
           <ProgressRing progress={progress} size={100} strokeWidth={8} color={progressColor} />
         </div>
         <div className="text-center">
-          <div className="text-2xl font-bold text-gray-900">
+          <div className="text-2xl font-bold text-gray-900 dark:text-white">
             {formatNumber(node.achieved)}
           </div>
-          <div className="text-sm text-gray-500">
+          <div className="text-sm text-gray-500 dark:text-gray-400">
             trên {formatNumber(node.target)} {getMetricLabel(node.metric as 'CASES' | 'VOLUME_LITERS' | 'REVENUE_VND' | 'UNITS')}
           </div>
         </div>
       </div>
 
       <div className="grid grid-cols-2 gap-3">
-        <div className="bg-white rounded-xl border border-gray-200 p-4">
-          <div className="text-sm text-gray-500 mb-1">Mục tiêu</div>
-          <div className="text-xl font-semibold text-gray-900">{formatNumber(node.target)}</div>
+        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+          <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">Mục tiêu</div>
+          <div className="text-xl font-semibold text-gray-900 dark:text-white">{formatNumber(node.target)}</div>
         </div>
-        <div className="bg-white rounded-xl border border-gray-200 p-4">
-          <div className="text-sm text-gray-500 mb-1">Đạt được</div>
-          <div className="text-xl font-semibold text-green-600">{formatNumber(node.achieved)}</div>
+        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+          <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">Đạt được</div>
+          <div className="text-xl font-semibold text-green-600 dark:text-green-400">{formatNumber(node.achieved)}</div>
         </div>
-        <div className="bg-white rounded-xl border border-gray-200 p-4">
-          <div className="text-sm text-gray-500 mb-1">Còn lại</div>
-          <div className="text-xl font-semibold text-amber-600">{formatNumber(remaining)}</div>
+        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+          <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">Còn lại</div>
+          <div className="text-xl font-semibold text-amber-600 dark:text-amber-400">{formatNumber(remaining)}</div>
         </div>
-        <div className="bg-white rounded-xl border border-gray-200 p-4">
-          <div className="text-sm text-gray-500 mb-1">Tiến độ</div>
+        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+          <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">Tiến độ</div>
           <div className="text-xl font-semibold" style={{ color: progressColor }}>{progress}%</div>
         </div>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 p-4">
-        <div className="text-sm font-medium text-gray-900 mb-3">Thao tác</div>
+      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+        <div className="text-sm font-medium text-gray-900 dark:text-white mb-3">Thao tác</div>
         <div className="grid grid-cols-2 gap-2">
-          <button className="flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors">
+          <button className="flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-lg transition-colors">
             <Plus className="w-4 h-4" strokeWidth={2} />
             Thêm cấp dưới
           </button>
-          <button className="flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors">
+          <button className="flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-lg transition-colors">
             <Edit2 className="w-4 h-4" strokeWidth={1.75} />
             Cập nhật
           </button>
-          <button className="flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors">
+          <button className="flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-lg transition-colors">
             <BarChart3 className="w-4 h-4" strokeWidth={1.75} />
             Báo cáo
           </button>
-          <button className="flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors">
+          <button className="flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-lg transition-colors">
             <Calendar className="w-4 h-4" strokeWidth={1.75} />
             Lịch sử
           </button>
@@ -457,14 +457,14 @@ export default function TargetAllocation() {
   const overallProgress = rootNode ? getProgress(rootNode.achieved, rootNode.target) : 0;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
+      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-10">
         <div className="max-w-[1600px] mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-xl font-semibold text-gray-900">Phân bổ Mục tiêu</h1>
-              <p className="text-sm text-gray-500">Cấu trúc phân cấp mục tiêu theo vùng miền</p>
+              <h1 className="text-xl font-semibold text-gray-900 dark:text-white">Phân bổ Mục tiêu</h1>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Cấu trúc phân cấp mục tiêu theo vùng miền</p>
             </div>
             <div className="flex items-center gap-3">
               {/* Target Selector */}
@@ -476,7 +476,7 @@ export default function TargetAllocation() {
                   setSelectedPath([]);
                   setExpanded({});
                 }}
-                className="h-9 px-3 pr-8 text-sm bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500"
+                className="h-9 px-3 pr-8 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 dark:text-white"
               >
                 <option value="">Chọn mục tiêu...</option>
                 {targets.map((target: TargetType) => (
@@ -486,7 +486,7 @@ export default function TargetAllocation() {
                 ))}
               </select>
 
-              <button className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition-colors">
+              <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors">
                 <Plus className="w-4 h-4" strokeWidth={2} />
                 Tạo phân bổ
               </button>
@@ -499,14 +499,14 @@ export default function TargetAllocation() {
       <div className="max-w-[1600px] mx-auto px-6 py-6">
         {/* No Target Selected State */}
         {!selectedTargetId && (
-          <div className="bg-white rounded-xl border border-gray-200 p-12 text-center">
-            <Target className="w-16 h-16 mx-auto mb-4 text-gray-300" strokeWidth={1.5} />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Chọn mục tiêu để xem phân bổ</h3>
-            <p className="text-gray-500 mb-6">
+          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-12 text-center">
+            <Target className="w-16 h-16 mx-auto mb-4 text-gray-300 dark:text-gray-600" strokeWidth={1.5} />
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">Chọn mục tiêu để xem phân bổ</h3>
+            <p className="text-gray-500 dark:text-gray-400 mb-6">
               Vui lòng chọn một mục tiêu từ danh sách để xem và quản lý cấu trúc phân bổ
             </p>
             {targets.length === 0 && !targetsLoading && (
-              <p className="text-amber-600 text-sm">
+              <p className="text-amber-600 dark:text-amber-400 text-sm">
                 Chưa có mục tiêu nào. Vui lòng tạo mục tiêu trước khi phân bổ.
               </p>
             )}
@@ -515,9 +515,9 @@ export default function TargetAllocation() {
 
         {/* Loading State */}
         {selectedTargetId && isLoading && (
-          <div className="bg-white rounded-xl border border-gray-200 p-12 text-center">
-            <Loader2 className="w-12 h-12 mx-auto mb-4 text-red-500 animate-spin" />
-            <p className="text-gray-500">Đang tải dữ liệu phân bổ...</p>
+          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-12 text-center">
+            <Loader2 className="w-12 h-12 mx-auto mb-4 text-blue-500 animate-spin" />
+            <p className="text-gray-500 dark:text-gray-400">Đang tải dữ liệu phân bổ...</p>
           </div>
         )}
 
@@ -528,29 +528,29 @@ export default function TargetAllocation() {
             <div className="flex-1 min-w-0">
               {/* Stats Bar */}
               <div className="grid grid-cols-4 gap-4 mb-4">
-                <div className="bg-white rounded-xl border border-gray-200 p-4">
-                  <div className="text-sm text-gray-500 mb-1">Mục tiêu tổng</div>
-                  <div className="text-2xl font-semibold text-gray-900">{formatNumber(rootNode.target)}</div>
-                  <div className="text-xs text-gray-400">{getMetricLabel(rootNode.metric as 'CASES' | 'VOLUME_LITERS' | 'REVENUE_VND' | 'UNITS')}</div>
+                <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+                  <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">Mục tiêu tổng</div>
+                  <div className="text-2xl font-semibold text-gray-900 dark:text-white">{formatNumber(rootNode.target)}</div>
+                  <div className="text-xs text-gray-400 dark:text-gray-500">{getMetricLabel(rootNode.metric as 'CASES' | 'VOLUME_LITERS' | 'REVENUE_VND' | 'UNITS')}</div>
                 </div>
-                <div className="bg-white rounded-xl border border-gray-200 p-4">
-                  <div className="text-sm text-gray-500 mb-1">Đã đạt</div>
-                  <div className="text-2xl font-semibold text-green-600">{formatNumber(rootNode.achieved)}</div>
-                  <div className="text-xs text-gray-400">{overallProgress}% hoàn thành</div>
+                <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+                  <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">Đã đạt</div>
+                  <div className="text-2xl font-semibold text-green-600 dark:text-green-400">{formatNumber(rootNode.achieved)}</div>
+                  <div className="text-xs text-gray-400 dark:text-gray-500">{overallProgress}% hoàn thành</div>
                 </div>
-                <div className="bg-white rounded-xl border border-gray-200 p-4">
-                  <div className="text-sm text-gray-500 mb-1">Còn lại</div>
-                  <div className="text-2xl font-semibold text-amber-600">{formatNumber(Math.max(0, rootNode.target - rootNode.achieved))}</div>
-                  <div className="text-xs text-gray-400">cần đạt thêm</div>
+                <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+                  <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">Còn lại</div>
+                  <div className="text-2xl font-semibold text-amber-600 dark:text-amber-400">{formatNumber(Math.max(0, rootNode.target - rootNode.achieved))}</div>
+                  <div className="text-xs text-gray-400 dark:text-gray-500">cần đạt thêm</div>
                 </div>
-                <div className="bg-white rounded-xl border border-gray-200 p-4">
-                  <div className="text-sm text-gray-500 mb-1">Tiến độ</div>
+                <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+                  <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">Tiến độ</div>
                   <div className="flex items-center gap-3">
                     <div className="text-2xl font-semibold" style={{ color: getProgressColor(overallProgress) }}>
                       {overallProgress}%
                     </div>
                     <div className="flex-1">
-                      <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                      <div className="h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
                         <div
                           className="h-full rounded-full transition-all duration-500"
                           style={{ width: `${Math.min(overallProgress, 100)}%`, backgroundColor: getProgressColor(overallProgress) }}
@@ -562,7 +562,7 @@ export default function TargetAllocation() {
               </div>
 
               {/* Toolbar */}
-              <div className="bg-white rounded-xl border border-gray-200 p-4 mb-4">
+              <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 mb-4">
                 <div className="flex items-center gap-4">
                   <div className="relative flex-1">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" strokeWidth={1.75} />
@@ -571,25 +571,25 @@ export default function TargetAllocation() {
                       placeholder="Tìm kiếm theo tên, mã..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-full h-9 pl-9 pr-3 text-sm bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500"
+                      className="w-full h-9 pl-9 pr-3 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 dark:text-white dark:placeholder-gray-400"
                     />
                   </div>
 
-                  <button className="flex items-center gap-2 h-9 px-3 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50">
+                  <button className="flex items-center gap-2 h-9 px-3 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600">
                     <Filter className="w-4 h-4" strokeWidth={1.75} />
                     Lọc
                   </button>
 
-                  <div className="flex items-center gap-1 border-l border-gray-200 pl-4">
+                  <div className="flex items-center gap-1 border-l border-gray-200 dark:border-gray-600 pl-4">
                     <button
                       onClick={expandAll}
-                      className="h-9 px-3 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg"
+                      className="h-9 px-3 text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
                     >
                       Mở rộng
                     </button>
                     <button
                       onClick={collapseAll}
-                      className="h-9 px-3 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg"
+                      className="h-9 px-3 text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
                     >
                       Thu gọn
                     </button>
@@ -598,9 +598,9 @@ export default function TargetAllocation() {
               </div>
 
               {/* Tree View */}
-              <div className="bg-white rounded-xl border border-gray-200 p-4">
+              <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
                 {/* Legend */}
-                <div className="flex items-center gap-4 mb-4 pb-4 border-b border-gray-100 text-xs">
+                <div className="flex items-center gap-4 mb-4 pb-4 border-b border-gray-100 dark:border-gray-700 text-xs">
                   {Object.entries(typeConfig).map(([key, cfg]) => {
                     const LegendIcon = cfg.icon;
                     return (
@@ -608,7 +608,7 @@ export default function TargetAllocation() {
                         <div className="w-5 h-5 rounded flex items-center justify-center" style={{ backgroundColor: cfg.bg }}>
                           <LegendIcon className="w-3 h-3" style={{ color: cfg.color }} strokeWidth={2} />
                         </div>
-                        <span className="text-gray-600">{cfg.label}</span>
+                        <span className="text-gray-600 dark:text-gray-400">{cfg.label}</span>
                       </div>
                     );
                   })}
@@ -624,12 +624,12 @@ export default function TargetAllocation() {
                   />
                 ) : (
                   <div className="text-center py-12">
-                    <FolderTree className="w-12 h-12 mx-auto mb-4 text-gray-300" strokeWidth={1.5} />
-                    <h3 className="font-medium text-gray-900 mb-2">Chưa có phân bổ</h3>
-                    <p className="text-sm text-gray-500 mb-4">
+                    <FolderTree className="w-12 h-12 mx-auto mb-4 text-gray-300 dark:text-gray-600" strokeWidth={1.5} />
+                    <h3 className="font-medium text-gray-900 dark:text-white mb-2">Chưa có phân bổ</h3>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
                       Mục tiêu này chưa có dữ liệu phân bổ theo vùng miền
                     </p>
-                    <button className="inline-flex items-center gap-2 px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700">
+                    <button className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700">
                       <Plus className="w-4 h-4" />
                       Tạo phân bổ đầu tiên
                     </button>
@@ -643,10 +643,10 @@ export default function TargetAllocation() {
               {selectedNode ? (
                 <DetailPanel node={selectedNode} />
               ) : (
-                <div className="bg-white rounded-xl border border-gray-200 p-8 text-center">
-                  <Target className="w-12 h-12 mx-auto mb-4 text-gray-300" strokeWidth={1.5} />
-                  <h3 className="font-medium text-gray-900 mb-2">Chọn một mục</h3>
-                  <p className="text-sm text-gray-500">
+                <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-8 text-center">
+                  <Target className="w-12 h-12 mx-auto mb-4 text-gray-300 dark:text-gray-600" strokeWidth={1.5} />
+                  <h3 className="font-medium text-gray-900 dark:text-white mb-2">Chọn một mục</h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
                     Click vào bất kỳ mục nào trong cây để xem chi tiết
                   </p>
                 </div>
