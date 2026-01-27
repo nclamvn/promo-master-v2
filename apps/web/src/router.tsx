@@ -50,9 +50,11 @@ const Settings = lazy(() => import('@/pages/settings/Settings'));
 const Analytics = lazy(() => import('@/pages/analytics/Analytics'));
 const BudgetList = lazy(() => import('@/pages/budgets/BudgetList'));
 const BudgetNew = lazy(() => import('@/pages/budgets/BudgetNew'));
+const BudgetAllocation = lazy(() => import('@/pages/budgets/BudgetAllocation'));
 const CalendarView = lazy(() => import('@/pages/calendar/CalendarView'));
 const TargetList = lazy(() => import('@/pages/targets/TargetList'));
 const TargetNew = lazy(() => import('@/pages/targets/TargetNew'));
+const TargetAllocation = lazy(() => import('@/pages/targets/TargetAllocation'));
 const BaselineList = lazy(() => import('@/pages/baselines/BaselineList'));
 const BaselineNew = lazy(() => import('@/pages/baselines/BaselineNew'));
 
@@ -248,6 +250,9 @@ export default function AppRouter() {
         <Route path="/budgets/new" element={
           <SuspenseWrapper><BudgetNew /></SuspenseWrapper>
         } />
+        <Route path="/budgets/allocation" element={
+          <SuspenseWrapper><BudgetAllocation /></SuspenseWrapper>
+        } />
 
         {/* Targets */}
         <Route path="/targets" element={
@@ -255,6 +260,9 @@ export default function AppRouter() {
         } />
         <Route path="/targets/new" element={
           <SuspenseWrapper><TargetNew /></SuspenseWrapper>
+        } />
+        <Route path="/targets/allocation" element={
+          <SuspenseWrapper><TargetAllocation /></SuspenseWrapper>
         } />
 
         {/* Baselines */}
