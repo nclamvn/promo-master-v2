@@ -5,13 +5,6 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import App from './App';
 import './styles/globals.css';
 
-// ══════════════════════════════════════════════════════════════════════════════
-// MOCK DATA CONFIGURATION
-// Mocking is only enabled in development mode
-// In production, always use real API
-// ══════════════════════════════════════════════════════════════════════════════
-const ENABLE_MOCKING = import.meta.env.DEV;
-
 // Create Query Client
 const queryClient = new QueryClient({
   defaultOptions: {

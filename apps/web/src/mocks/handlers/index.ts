@@ -15,6 +15,16 @@ import {
   mockInsights, mockRecommendations,
   mockReports, mockDashboardKPIs, mockChartData
 } from '../data/operations-ai-bi';
+import {
+  mockGeographicUnits,
+  mockBudgetsExtended,
+  mockTargetsExtended,
+  mockBudgetAllocations,
+  mockTargetAllocations,
+  getBudgetAllocationTree,
+  getTargetAllocationTree,
+  getGeographicUnitsTree,
+} from '../data/budget-target';
 
 // ══════════════════════════════════════════════════════════════════════════════
 // HELPER FUNCTIONS
@@ -735,6 +745,242 @@ export const handlers = [
   http.delete('/api/targets/:id', async () => {
     await delay(300);
     return HttpResponse.json({ success: true, message: 'Target deleted' });
+  }),
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // GEOGRAPHIC UNITS
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  http.get('/api/geographic-units', async ({ request }) => {
+    await delay(300);
+    const url = new URL(request.url);
+    const tree = url.searchParams.get('tree');
+    const level = url.searchParams.get('level');
+    const parentId = url.searchParams.get('parentId');
+
+    let data = [...mockGeographicUnits];
+
+    if (level) {
+      data = data.filter(u => u.level === level);
+    }
+    if (parentId) {
+      data = data.filter(u => u.parentId === parentId);
+    }
+
+    if (tree === 'true') {
+      return HttpResponse.json({ success: true, data: getGeographicUnitsTree() });
+    }
+
+    return HttpResponse.json({ success: true, data });
+  }),
+
+  http.get('/api/geographic-units/:id', async ({ params, request }) => {
+    await delay(200);
+    const url = new URL(request.url);
+    const includeTree = url.searchParams.get('includeTree');
+    const unit = mockGeographicUnits.find(u => u.id === params.id);
+    if (!unit) {
+      return HttpResponse.json({ success: false, error: { message: 'Geographic unit not found' } }, { status: 404 });
+    }
+    if (includeTree === 'true') {
+      const children = mockGeographicUnits.filter(u => u.parentId === unit.id);
+      return HttpResponse.json({ success: true, data: { ...unit, children } });
+    }
+    return HttpResponse.json({ success: true, data: unit });
+  }),
+
+  http.post('/api/geographic-units', async ({ request }) => {
+    await delay(500);
+    const body = await request.json() as Record<string, unknown>;
+    const newUnit = {
+      id: `geo-${Date.now()}`,
+      ...body,
+      isActive: true,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      _count: { children: 0, budgetAllocations: 0, targetAllocations: 0 },
+    };
+    return HttpResponse.json({ success: true, data: newUnit }, { status: 201 });
+  }),
+
+  http.patch('/api/geographic-units/:id', async ({ params, request }) => {
+    await delay(300);
+    const body = await request.json() as Record<string, unknown>;
+    const unit = mockGeographicUnits.find(u => u.id === params.id);
+    if (!unit) {
+      return HttpResponse.json({ success: false, error: { message: 'Geographic unit not found' } }, { status: 404 });
+    }
+    const updated = { ...unit, ...body, updatedAt: new Date().toISOString() };
+    return HttpResponse.json({ success: true, data: updated });
+  }),
+
+  http.delete('/api/geographic-units/:id', async () => {
+    await delay(300);
+    return HttpResponse.json({ success: true, message: 'Geographic unit deleted' });
+  }),
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // BUDGET ALLOCATIONS
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  http.get('/api/budget-allocations', async ({ request }) => {
+    await delay(300);
+    const url = new URL(request.url);
+    const budgetId = url.searchParams.get('budgetId');
+    const tree = url.searchParams.get('tree');
+    const parentId = url.searchParams.get('parentId');
+
+    let data = [...mockBudgetAllocations];
+
+    if (budgetId) {
+      data = data.filter(a => a.budgetId === budgetId);
+    }
+    if (parentId) {
+      data = data.filter(a => a.parentId === parentId);
+    }
+
+    if (tree === 'true' && budgetId) {
+      return HttpResponse.json({ success: true, data: getBudgetAllocationTree(budgetId) });
+    }
+
+    return HttpResponse.json({ success: true, data });
+  }),
+
+  http.get('/api/budget-allocations/:id', async ({ params, request }) => {
+    await delay(200);
+    const url = new URL(request.url);
+    const includeTree = url.searchParams.get('includeTree');
+    const allocation = mockBudgetAllocations.find(a => a.id === params.id);
+    if (!allocation) {
+      return HttpResponse.json({ success: false, error: { message: 'Budget allocation not found' } }, { status: 404 });
+    }
+    if (includeTree === 'true') {
+      const children = mockBudgetAllocations.filter(a => a.parentId === allocation.id);
+      return HttpResponse.json({ success: true, data: { ...allocation, children } });
+    }
+    return HttpResponse.json({ success: true, data: allocation });
+  }),
+
+  http.post('/api/budget-allocations', async ({ request }) => {
+    await delay(500);
+    const body = await request.json() as Record<string, unknown>;
+    const budget = mockBudgetsExtended.find(b => b.id === body.budgetId);
+    const geoUnit = mockGeographicUnits.find(g => g.id === body.geographicUnitId);
+    const newAllocation = {
+      id: `ba-${Date.now()}`,
+      code: `BA-${Date.now().toString().slice(-6)}`,
+      ...body,
+      budget,
+      geographicUnit: geoUnit,
+      spentAmount: 0,
+      remainingAmount: body.allocatedAmount || 0,
+      childrenBudget: 0,
+      utilizationPercent: 0,
+      status: 'DRAFT',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      _count: { children: 0 },
+      children: [],
+    };
+    return HttpResponse.json({ success: true, data: newAllocation }, { status: 201 });
+  }),
+
+  http.patch('/api/budget-allocations/:id', async ({ params, request }) => {
+    await delay(300);
+    const body = await request.json() as Record<string, unknown>;
+    const allocation = mockBudgetAllocations.find(a => a.id === params.id);
+    if (!allocation) {
+      return HttpResponse.json({ success: false, error: { message: 'Budget allocation not found' } }, { status: 404 });
+    }
+    const updated = { ...allocation, ...body, updatedAt: new Date().toISOString() };
+    return HttpResponse.json({ success: true, data: updated });
+  }),
+
+  http.delete('/api/budget-allocations/:id', async () => {
+    await delay(300);
+    return HttpResponse.json({ success: true, message: 'Budget allocation deleted' });
+  }),
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // TARGET ALLOCATIONS
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  http.get('/api/target-allocations', async ({ request }) => {
+    await delay(300);
+    const url = new URL(request.url);
+    const targetId = url.searchParams.get('targetId');
+    const tree = url.searchParams.get('tree');
+    const parentId = url.searchParams.get('parentId');
+
+    let data = [...mockTargetAllocations];
+
+    if (targetId) {
+      data = data.filter(a => a.targetId === targetId);
+    }
+    if (parentId) {
+      data = data.filter(a => a.parentId === parentId);
+    }
+
+    if (tree === 'true' && targetId) {
+      return HttpResponse.json({ success: true, data: getTargetAllocationTree(targetId) });
+    }
+
+    return HttpResponse.json({ success: true, data });
+  }),
+
+  http.get('/api/target-allocations/:id', async ({ params, request }) => {
+    await delay(200);
+    const url = new URL(request.url);
+    const includeTree = url.searchParams.get('includeTree');
+    const allocation = mockTargetAllocations.find(a => a.id === params.id);
+    if (!allocation) {
+      return HttpResponse.json({ success: false, error: { message: 'Target allocation not found' } }, { status: 404 });
+    }
+    if (includeTree === 'true') {
+      const children = mockTargetAllocations.filter(a => a.parentId === allocation.id);
+      return HttpResponse.json({ success: true, data: { ...allocation, children } });
+    }
+    return HttpResponse.json({ success: true, data: allocation });
+  }),
+
+  http.post('/api/target-allocations', async ({ request }) => {
+    await delay(500);
+    const body = await request.json() as Record<string, unknown>;
+    const target = mockTargetsExtended.find(t => t.id === body.targetId);
+    const geoUnit = mockGeographicUnits.find(g => g.id === body.geographicUnitId);
+    const newAllocation = {
+      id: `ta-${Date.now()}`,
+      code: `TA-${Date.now().toString().slice(-6)}`,
+      ...body,
+      target,
+      geographicUnit: geoUnit,
+      achievedValue: 0,
+      metric: target?.metric || 'CASES',
+      childrenTarget: 0,
+      progressPercent: 0,
+      status: 'PENDING',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      _count: { children: 0 },
+      children: [],
+    };
+    return HttpResponse.json({ success: true, data: newAllocation }, { status: 201 });
+  }),
+
+  http.patch('/api/target-allocations/:id', async ({ params, request }) => {
+    await delay(300);
+    const body = await request.json() as Record<string, unknown>;
+    const allocation = mockTargetAllocations.find(a => a.id === params.id);
+    if (!allocation) {
+      return HttpResponse.json({ success: false, error: { message: 'Target allocation not found' } }, { status: 404 });
+    }
+    const updated = { ...allocation, ...body, updatedAt: new Date().toISOString() };
+    return HttpResponse.json({ success: true, data: updated });
+  }),
+
+  http.delete('/api/target-allocations/:id', async () => {
+    await delay(300);
+    return HttpResponse.json({ success: true, message: 'Target allocation deleted' });
   }),
 
   // ═══════════════════════════════════════════════════════════════════════════
