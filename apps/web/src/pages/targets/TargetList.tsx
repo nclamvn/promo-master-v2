@@ -191,17 +191,25 @@ export default function TargetList() {
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Targets</h1>
+          <h1 className="text-2xl font-bold">Mục tiêu</h1>
           <p className="text-muted-foreground">
-            Manage sales targets and track achievements
+            Quản lý mục tiêu bán hàng và theo dõi tiến độ
           </p>
         </div>
-        <Button asChild>
-          <Link to="/targets/new">
-            <Plus className="mr-2 h-4 w-4" />
-            New Target
-          </Link>
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" asChild>
+            <Link to="/targets/allocation">
+              <TargetIcon className="mr-2 h-4 w-4" />
+              Phân bổ mục tiêu
+            </Link>
+          </Button>
+          <Button asChild>
+            <Link to="/targets/new">
+              <Plus className="mr-2 h-4 w-4" />
+              Tạo mới
+            </Link>
+          </Button>
+        </div>
       </div>
 
       {/* Summary Cards */}

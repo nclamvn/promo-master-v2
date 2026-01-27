@@ -2876,3 +2876,213 @@ model VoiceCommand {
   @@index([status])
   @@index([createdAt])
 }
+
+// ═══════════════════════════════════════════════════════════════
+// PHASE 5: BUDGET & TARGET ALLOCATION
+// ═══════════════════════════════════════════════════════════════
+
+// Geographic Hierarchy Enums
+enum GeographicLevel {
+  COUNTRY
+  REGION
+  PROVINCE
+  DISTRICT
+  DEALER
+}
+
+enum AllocationStatus {
+  DRAFT
+  PENDING_APPROVAL
+  APPROVED
+  REJECTED
+  LOCKED
+}
+
+enum TargetMetric {
+  CASES
+  VOLUME_LITERS
+  REVENUE_VND
+  UNITS
+}
+
+// Geographic Unit - Master Data for hierarchy
+model GeographicUnit {
+  id          String           @id @default(cuid())
+  code        String           @unique
+  name        String
+  nameEn      String?
+  level       GeographicLevel
+
+  // Self-referencing hierarchy
+  parentId    String?
+  parent      GeographicUnit?  @relation("GeographicHierarchy", fields: [parentId], references: [id])
+  children    GeographicUnit[] @relation("GeographicHierarchy")
+
+  // Metadata
+  latitude    Float?
+  longitude   Float?
+  isActive    Boolean          @default(true)
+  sortOrder   Int              @default(0)
+
+  // Relations
+  budgetAllocations  BudgetAllocation[]
+  targetAllocations  TargetAllocation[]
+
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@index([parentId])
+  @@index([level])
+  @@index([code])
+}
+
+// Budget - Main budget entity for allocation
+model Budget {
+  id              String            @id @default(cuid())
+  code            String            @unique
+  name            String
+  description     String?
+
+  // Period
+  year            Int
+  quarter         Int?              // 1-4, null for annual
+
+  // Budget amounts (VND)
+  totalAmount     Decimal           @db.Decimal(18, 2)
+  allocatedAmount Decimal           @db.Decimal(18, 2) @default(0)
+  spentAmount     Decimal           @db.Decimal(18, 2) @default(0)
+
+  // Status
+  status          String            @default("DRAFT")
+  isActive        Boolean           @default(true)
+
+  // Relations
+  allocations     BudgetAllocation[]
+
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  createdBy       String?
+
+  @@index([year, quarter])
+  @@index([status])
+}
+
+// Budget Allocation - Hierarchical budget distribution
+model BudgetAllocation {
+  id                  String            @id @default(cuid())
+  code                String            @unique
+
+  // Link to parent Budget
+  budgetId            String
+  budget              Budget            @relation(fields: [budgetId], references: [id], onDelete: Cascade)
+
+  // Link to Geographic Unit
+  geographicUnitId    String
+  geographicUnit      GeographicUnit    @relation(fields: [geographicUnitId], references: [id])
+
+  // Self-referencing hierarchy (for allocation tree)
+  parentId            String?
+  parent              BudgetAllocation? @relation("BudgetAllocationHierarchy", fields: [parentId], references: [id])
+  children            BudgetAllocation[] @relation("BudgetAllocationHierarchy")
+
+  // Amounts (in VND)
+  allocatedAmount     Decimal           @db.Decimal(18, 2)  // Amount allocated to this level
+  spentAmount         Decimal           @db.Decimal(18, 2) @default(0)  // Amount already spent
+
+  // Computed fields (updated by triggers/jobs)
+  childrenAllocated   Decimal           @db.Decimal(18, 2) @default(0)  // Sum allocated to children
+  availableToAllocate Decimal           @db.Decimal(18, 2) @default(0)  // allocatedAmount - childrenAllocated
+
+  // Status & Workflow
+  status              AllocationStatus  @default(DRAFT)
+  approvedBy          String?
+  approvedAt          DateTime?
+
+  // Metadata
+  notes               String?
+
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+  createdBy           String?
+
+  @@unique([budgetId, geographicUnitId])
+  @@index([budgetId])
+  @@index([parentId])
+  @@index([geographicUnitId])
+  @@index([status])
+}
+
+// Target - Main target entity
+model Target {
+  id              String            @id @default(cuid())
+  code            String            @unique
+  name            String
+  description     String?
+
+  // Period
+  year            Int
+  quarter         Int?              // 1-4, null for annual
+  month           Int?              // 1-12, null for quarterly/annual
+
+  // Overall target
+  totalTarget     Decimal           @db.Decimal(18, 2)
+  totalAchieved   Decimal           @db.Decimal(18, 2) @default(0)
+  metric          TargetMetric      @default(CASES)
+
+  // Status
+  status          String            @default("DRAFT")
+  isActive        Boolean           @default(true)
+
+  // Relations
+  allocations     TargetAllocation[]
+
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  createdBy       String?
+
+  @@index([year, quarter])
+  @@index([status])
+}
+
+// Target Allocation - Hierarchical target distribution
+model TargetAllocation {
+  id                  String            @id @default(cuid())
+  code                String            @unique
+
+  // Link to parent Target
+  targetId            String
+  target              Target            @relation(fields: [targetId], references: [id], onDelete: Cascade)
+
+  // Link to Geographic Unit
+  geographicUnitId    String
+  geographicUnit      GeographicUnit    @relation(fields: [geographicUnitId], references: [id])
+
+  // Self-referencing hierarchy
+  parentId            String?
+  parent              TargetAllocation? @relation("TargetAllocationHierarchy", fields: [parentId], references: [id])
+  children            TargetAllocation[] @relation("TargetAllocationHierarchy")
+
+  // Target values
+  targetValue         Decimal           @db.Decimal(18, 2)  // Target for this level
+  achievedValue       Decimal           @db.Decimal(18, 2) @default(0)  // Achieved so far
+  metric              TargetMetric      @default(CASES)
+
+  // Computed fields
+  childrenTarget      Decimal           @db.Decimal(18, 2) @default(0)  // Sum of children targets
+  progressPercent     Decimal           @db.Decimal(5, 2) @default(0)   // (achieved/target)*100
+
+  // Status
+  status              AllocationStatus  @default(DRAFT)
+
+  // Metadata
+  notes               String?
+
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+  createdBy           String?
+
+  @@unique([targetId, geographicUnitId])
+  @@index([targetId])
+  @@index([parentId])
+  @@index([geographicUnitId])
+}

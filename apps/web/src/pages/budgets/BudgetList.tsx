@@ -166,17 +166,25 @@ export default function BudgetList() {
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Budgets</h1>
+          <h1 className="text-2xl font-bold">Ngân sách</h1>
           <p className="text-muted-foreground">
-            Manage annual budgets and allocations
+            Quản lý ngân sách và phân bổ theo năm
           </p>
         </div>
-        <Button asChild>
-          <Link to="/budgets/new">
-            <Plus className="mr-2 h-4 w-4" />
-            New Budget
-          </Link>
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" asChild>
+            <Link to="/budgets/allocation">
+              <DollarSign className="mr-2 h-4 w-4" />
+              Phân bổ ngân sách
+            </Link>
+          </Button>
+          <Button asChild>
+            <Link to="/budgets/new">
+              <Plus className="mr-2 h-4 w-4" />
+              Tạo mới
+            </Link>
+          </Button>
+        </div>
       </div>
 
       {/* Summary Cards */}
