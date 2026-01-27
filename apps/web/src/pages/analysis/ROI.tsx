@@ -244,23 +244,23 @@ const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
 const getROIStatusBadge = (status: PromotionROI['status']) => {
   switch (status) {
     case 'EXCELLENT':
-      return <Badge className="bg-green-100 text-green-700">Xuất sắc</Badge>;
+      return <Badge className="bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/20">Xuất sắc</Badge>;
     case 'GOOD':
-      return <Badge className="bg-blue-100 text-blue-700">Tốt</Badge>;
+      return <Badge className="bg-blue-500/15 text-blue-700 dark:text-blue-400 border-blue-500/20">Tốt</Badge>;
     case 'AVERAGE':
-      return <Badge className="bg-yellow-100 text-yellow-700">Trung bình</Badge>;
+      return <Badge className="bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/20">Trung bình</Badge>;
     case 'POOR':
-      return <Badge className="bg-red-100 text-red-700">Kém</Badge>;
+      return <Badge className="bg-red-500/15 text-red-700 dark:text-red-400 border-red-500/20">Kém</Badge>;
     default:
       return <Badge>{status}</Badge>;
   }
 };
 
 const getROIColor = (roi: number) => {
-  if (roi >= 200) return 'text-green-600';
-  if (roi >= 150) return 'text-blue-600';
-  if (roi >= 100) return 'text-yellow-600';
-  return 'text-red-600';
+  if (roi >= 200) return 'text-emerald-600 dark:text-emerald-400';
+  if (roi >= 150) return 'text-blue-600 dark:text-blue-400';
+  if (roi >= 100) return 'text-amber-600 dark:text-amber-400';
+  return 'text-red-600 dark:text-red-400';
 };
 
 // ============================================================================
@@ -272,68 +272,68 @@ const SummarySection = ({ summary }: { summary: ROISummary }) => {
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
       <Card>
-        <CardContent className="pt-4">
-          <div className="space-y-1">
-            <p className="text-xs text-muted-foreground">Tổng đầu tư</p>
-            <p className="text-xl font-bold">{formatCurrency(summary.totalInvestment)}</p>
+        <CardContent className="pt-4 pb-4">
+          <div className="space-y-1 min-w-0">
+            <p className="text-xs text-muted-foreground truncate">Tổng đầu tư</p>
+            <p className="text-sm sm:text-base lg:text-lg font-bold truncate">{formatCurrency(summary.totalInvestment)}</p>
           </div>
         </CardContent>
       </Card>
-      
+
       <Card>
-        <CardContent className="pt-4">
-          <div className="space-y-1">
-            <p className="text-xs text-muted-foreground">Doanh thu</p>
-            <p className="text-xl font-bold text-blue-600">{formatCurrency(summary.totalRevenue)}</p>
+        <CardContent className="pt-4 pb-4">
+          <div className="space-y-1 min-w-0">
+            <p className="text-xs text-muted-foreground truncate">Doanh thu</p>
+            <p className="text-sm sm:text-base lg:text-lg font-bold text-blue-600 dark:text-blue-400 truncate">{formatCurrency(summary.totalRevenue)}</p>
           </div>
         </CardContent>
       </Card>
-      
+
       <Card>
-        <CardContent className="pt-4">
-          <div className="space-y-1">
-            <p className="text-xs text-muted-foreground">Incremental</p>
-            <p className="text-xl font-bold text-green-600">{formatCurrency(summary.incrementalRevenue)}</p>
+        <CardContent className="pt-4 pb-4">
+          <div className="space-y-1 min-w-0">
+            <p className="text-xs text-muted-foreground truncate">Incremental</p>
+            <p className="text-sm sm:text-base lg:text-lg font-bold text-emerald-600 dark:text-emerald-400 truncate">{formatCurrency(summary.incrementalRevenue)}</p>
           </div>
         </CardContent>
       </Card>
-      
-      <Card className="bg-gradient-to-br from-green-50 to-emerald-50 border-green-200">
-        <CardContent className="pt-4">
-          <div className="space-y-1">
-            <p className="text-xs text-green-600">Gross ROI</p>
-            <p className="text-2xl font-bold text-green-700">{summary.grossROI}%</p>
-            <div className="flex items-center text-xs text-green-600">
+
+      <Card className="bg-gradient-to-br from-emerald-500/10 to-green-500/10 dark:from-emerald-500/20 dark:to-green-500/20 border-emerald-500/30">
+        <CardContent className="pt-4 pb-4">
+          <div className="space-y-1 min-w-0">
+            <p className="text-xs text-emerald-600 dark:text-emerald-400">Gross ROI</p>
+            <p className="text-base sm:text-xl lg:text-2xl font-bold text-emerald-700 dark:text-emerald-300">{summary.grossROI}%</p>
+            <div className="flex items-center text-xs text-emerald-600 dark:text-emerald-400">
               <TrendingUp className="h-3 w-3 mr-1" />
               +12.5% vs LY
             </div>
           </div>
         </CardContent>
       </Card>
-      
+
       <Card>
-        <CardContent className="pt-4">
-          <div className="space-y-1">
-            <p className="text-xs text-muted-foreground">Net ROI</p>
-            <p className="text-xl font-bold text-purple-600">{summary.netROI}%</p>
+        <CardContent className="pt-4 pb-4">
+          <div className="space-y-1 min-w-0">
+            <p className="text-xs text-muted-foreground truncate">Net ROI</p>
+            <p className="text-sm sm:text-base lg:text-lg font-bold text-violet-600 dark:text-violet-400 truncate">{summary.netROI}%</p>
           </div>
         </CardContent>
       </Card>
-      
+
       <Card>
-        <CardContent className="pt-4">
-          <div className="space-y-1">
-            <p className="text-xs text-muted-foreground">Payback (tháng)</p>
-            <p className="text-xl font-bold">{summary.paybackPeriod}</p>
+        <CardContent className="pt-4 pb-4">
+          <div className="space-y-1 min-w-0">
+            <p className="text-xs text-muted-foreground truncate">Payback (tháng)</p>
+            <p className="text-sm sm:text-base lg:text-lg font-bold truncate">{summary.paybackPeriod}</p>
           </div>
         </CardContent>
       </Card>
-      
+
       <Card>
-        <CardContent className="pt-4">
-          <div className="space-y-1">
-            <p className="text-xs text-muted-foreground">Profit Margin</p>
-            <p className="text-xl font-bold">{summary.profitMargin}%</p>
+        <CardContent className="pt-4 pb-4">
+          <div className="space-y-1 min-w-0">
+            <p className="text-xs text-muted-foreground truncate">Profit Margin</p>
+            <p className="text-sm sm:text-base lg:text-lg font-bold truncate">{summary.profitMargin}%</p>
           </div>
         </CardContent>
       </Card>

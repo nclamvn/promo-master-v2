@@ -448,11 +448,11 @@ const getStatusBadge = (status: AllocationNode['status']) => {
     case 'DRAFT':
       return <Badge variant="outline">Nháp</Badge>;
     case 'PENDING':
-      return <Badge variant="secondary" className="bg-yellow-100 text-yellow-700">Chờ duyệt</Badge>;
+      return <Badge className="bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/20 hover:bg-amber-500/20">Chờ duyệt</Badge>;
     case 'APPROVED':
-      return <Badge variant="secondary" className="bg-blue-100 text-blue-700">Đã duyệt</Badge>;
+      return <Badge className="bg-blue-500/15 text-blue-700 dark:text-blue-400 border-blue-500/20 hover:bg-blue-500/20">Đã duyệt</Badge>;
     case 'ACTIVE':
-      return <Badge variant="secondary" className="bg-green-100 text-green-700">Đang hoạt động</Badge>;
+      return <Badge className="bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20">Đang hoạt động</Badge>;
     default:
       return <Badge variant="outline">{status}</Badge>;
   }
@@ -482,78 +482,78 @@ const SummaryCards = ({ summary }: { summary: BudgetSummary }) => {
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
       <Card>
-        <CardContent className="pt-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground">Tổng ngân sách</p>
-              <p className="text-xl font-bold">{formatCurrency(summary.totalBudget)}</p>
+        <CardContent className="pt-4 pb-4">
+          <div className="flex items-center justify-between gap-2">
+            <div className="min-w-0 flex-1">
+              <p className="text-xs sm:text-sm text-muted-foreground truncate">Tổng ngân sách</p>
+              <p className="text-sm sm:text-base lg:text-lg font-bold truncate">{formatCurrency(summary.totalBudget)}</p>
             </div>
-            <Wallet className="h-8 w-8 text-blue-500 opacity-50" />
+            <Wallet className="h-6 w-6 sm:h-8 sm:w-8 text-blue-500 opacity-50 flex-shrink-0" />
           </div>
         </CardContent>
       </Card>
-      
+
       <Card>
-        <CardContent className="pt-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground">Đã phân bổ</p>
-              <p className="text-xl font-bold text-green-600">{formatCurrency(summary.allocated)}</p>
+        <CardContent className="pt-4 pb-4">
+          <div className="flex items-center justify-between gap-2">
+            <div className="min-w-0 flex-1">
+              <p className="text-xs sm:text-sm text-muted-foreground truncate">Đã phân bổ</p>
+              <p className="text-sm sm:text-base lg:text-lg font-bold text-emerald-600 dark:text-emerald-400 truncate">{formatCurrency(summary.allocated)}</p>
               <p className="text-xs text-muted-foreground">{formatPercent(summary.allocated / summary.totalBudget * 100)}</p>
             </div>
-            <CheckCircle2 className="h-8 w-8 text-green-500 opacity-50" />
+            <CheckCircle2 className="h-6 w-6 sm:h-8 sm:w-8 text-emerald-500 opacity-50 flex-shrink-0" />
           </div>
         </CardContent>
       </Card>
-      
+
       <Card>
-        <CardContent className="pt-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground">Chưa phân bổ</p>
-              <p className="text-xl font-bold text-yellow-600">{formatCurrency(summary.unallocated)}</p>
+        <CardContent className="pt-4 pb-4">
+          <div className="flex items-center justify-between gap-2">
+            <div className="min-w-0 flex-1">
+              <p className="text-xs sm:text-sm text-muted-foreground truncate">Chưa phân bổ</p>
+              <p className="text-sm sm:text-base lg:text-lg font-bold text-amber-600 dark:text-amber-400 truncate">{formatCurrency(summary.unallocated)}</p>
               <p className="text-xs text-muted-foreground">{formatPercent(summary.unallocated / summary.totalBudget * 100)}</p>
             </div>
-            <AlertTriangle className="h-8 w-8 text-yellow-500 opacity-50" />
+            <AlertTriangle className="h-6 w-6 sm:h-8 sm:w-8 text-amber-500 opacity-50 flex-shrink-0" />
           </div>
         </CardContent>
       </Card>
-      
+
       <Card>
-        <CardContent className="pt-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground">Đã chi tiêu</p>
-              <p className="text-xl font-bold text-purple-600">{formatCurrency(summary.spent)}</p>
+        <CardContent className="pt-4 pb-4">
+          <div className="flex items-center justify-between gap-2">
+            <div className="min-w-0 flex-1">
+              <p className="text-xs sm:text-sm text-muted-foreground truncate">Đã chi tiêu</p>
+              <p className="text-sm sm:text-base lg:text-lg font-bold text-violet-600 dark:text-violet-400 truncate">{formatCurrency(summary.spent)}</p>
               <p className="text-xs text-muted-foreground">{formatPercent(summary.spent / summary.totalBudget * 100)}</p>
             </div>
-            <TrendingUp className="h-8 w-8 text-purple-500 opacity-50" />
+            <TrendingUp className="h-6 w-6 sm:h-8 sm:w-8 text-violet-500 opacity-50 flex-shrink-0" />
           </div>
         </CardContent>
       </Card>
-      
+
       <Card>
-        <CardContent className="pt-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground">Cam kết</p>
-              <p className="text-xl font-bold text-orange-600">{formatCurrency(summary.committed)}</p>
+        <CardContent className="pt-4 pb-4">
+          <div className="flex items-center justify-between gap-2">
+            <div className="min-w-0 flex-1">
+              <p className="text-xs sm:text-sm text-muted-foreground truncate">Cam kết</p>
+              <p className="text-sm sm:text-base lg:text-lg font-bold text-orange-600 dark:text-orange-400 truncate">{formatCurrency(summary.committed)}</p>
               <p className="text-xs text-muted-foreground">{formatPercent(summary.committed / summary.totalBudget * 100)}</p>
             </div>
-            <Clock className="h-8 w-8 text-orange-500 opacity-50" />
+            <Clock className="h-6 w-6 sm:h-8 sm:w-8 text-orange-500 opacity-50 flex-shrink-0" />
           </div>
         </CardContent>
       </Card>
-      
+
       <Card>
-        <CardContent className="pt-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground">Còn khả dụng</p>
-              <p className="text-xl font-bold text-blue-600">{formatCurrency(summary.available)}</p>
+        <CardContent className="pt-4 pb-4">
+          <div className="flex items-center justify-between gap-2">
+            <div className="min-w-0 flex-1">
+              <p className="text-xs sm:text-sm text-muted-foreground truncate">Còn khả dụng</p>
+              <p className="text-sm sm:text-base lg:text-lg font-bold text-blue-600 dark:text-blue-400 truncate">{formatCurrency(summary.available)}</p>
               <p className="text-xs text-muted-foreground">{formatPercent(summary.available / summary.totalBudget * 100)}</p>
             </div>
-            <DollarSign className="h-8 w-8 text-blue-500 opacity-50" />
+            <DollarSign className="h-6 w-6 sm:h-8 sm:w-8 text-blue-500 opacity-50 flex-shrink-0" />
           </div>
         </CardContent>
       </Card>

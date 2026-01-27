@@ -360,14 +360,14 @@ export default function PromotionEfficiencyPage() {
                   <div className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                       <div className="p-4 bg-muted rounded-lg">
-                        <p className="text-sm text-muted-foreground">Incremental Revenue</p>
-                        <p className="text-xl font-bold">
+                        <p className="text-sm text-muted-foreground truncate">Incremental Revenue</p>
+                        <p className="text-sm sm:text-base lg:text-lg font-bold truncate">
                           {formatCurrency(calculatorResults.incrementalRevenue)}
                         </p>
                       </div>
                       <div className="p-4 bg-muted rounded-lg">
-                        <p className="text-sm text-muted-foreground">Incremental Profit</p>
-                        <p className="text-xl font-bold">
+                        <p className="text-sm text-muted-foreground truncate">Incremental Profit</p>
+                        <p className="text-sm sm:text-base lg:text-lg font-bold truncate">
                           {formatCurrency(calculatorResults.incrementalProfit)}
                         </p>
                       </div>
@@ -376,8 +376,8 @@ export default function PromotionEfficiencyPage() {
                     <div className="p-6 border rounded-lg text-center">
                       <p className="text-sm text-muted-foreground mb-2">Expected ROI</p>
                       <p
-                        className={`text-4xl font-bold ${
-                          calculatorResults.roi >= 0 ? 'text-green-600' : 'text-red-600'
+                        className={`text-2xl sm:text-3xl lg:text-4xl font-bold ${
+                          calculatorResults.roi >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'
                         }`}
                       >
                         {calculatorResults.roi.toFixed(1)}%

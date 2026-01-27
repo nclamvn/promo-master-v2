@@ -179,7 +179,7 @@ export default function InventoryDetail() {
                   {isExpired ? (
                     <Badge variant="destructive">Expired</Badge>
                   ) : isNearExpiry ? (
-                    <Badge variant="default" className="bg-orange-100 text-orange-700">
+                    <Badge className="bg-orange-500/15 text-orange-700 dark:text-orange-400 border-orange-500/20">
                       Near Expiry
                     </Badge>
                   ) : null}

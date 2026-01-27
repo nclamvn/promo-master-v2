@@ -284,23 +284,23 @@ const radarData = [
 const getEfficiencyStatusBadge = (status: PromotionEfficiency['status']) => {
   switch (status) {
     case 'EXCELLENT':
-      return <Badge className="bg-green-100 text-green-700">Xuất sắc</Badge>;
+      return <Badge className="bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/20">Xuất sắc</Badge>;
     case 'GOOD':
-      return <Badge className="bg-blue-100 text-blue-700">Tốt</Badge>;
+      return <Badge className="bg-blue-500/15 text-blue-700 dark:text-blue-400 border-blue-500/20">Tốt</Badge>;
     case 'AVERAGE':
-      return <Badge className="bg-yellow-100 text-yellow-700">Trung bình</Badge>;
+      return <Badge className="bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/20">Trung bình</Badge>;
     case 'POOR':
-      return <Badge className="bg-red-100 text-red-700">Kém</Badge>;
+      return <Badge className="bg-red-500/15 text-red-700 dark:text-red-400 border-red-500/20">Kém</Badge>;
     default:
       return <Badge>{status}</Badge>;
   }
 };
 
 const getScoreColor = (score: number) => {
-  if (score >= 85) return 'text-green-600';
-  if (score >= 70) return 'text-blue-600';
-  if (score >= 55) return 'text-yellow-600';
-  return 'text-red-600';
+  if (score >= 85) return 'text-emerald-600 dark:text-emerald-400';
+  if (score >= 70) return 'text-blue-600 dark:text-blue-400';
+  if (score >= 55) return 'text-amber-600 dark:text-amber-400';
+  return 'text-red-600 dark:text-red-400';
 };
 
 const getScoreBgColor = (score: number) => {
@@ -353,7 +353,7 @@ const EfficiencyGauge = ({ score, label }: { score: number; label: string }) => 
 const SummarySection = ({ summary }: { summary: EfficiencySummary }) => {
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
-      <Card className="col-span-2 bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200">
+      <Card className="col-span-2 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 dark:from-blue-500/20 dark:to-indigo-500/20 border-blue-500/30">
         <CardContent className="pt-4">
           <div className="flex items-center gap-4">
             <EfficiencyGauge score={summary.overallScore} label="Overall Score" />
@@ -374,63 +374,63 @@ const SummarySection = ({ summary }: { summary: EfficiencySummary }) => {
       </Card>
       
       <Card>
-        <CardContent className="pt-4">
-          <div className="space-y-1">
-            <p className="text-xs text-muted-foreground">Volume Uplift</p>
-            <p className="text-xl font-bold text-green-600">+{summary.volumeUplift}%</p>
-            <div className="flex items-center text-xs text-green-600">
+        <CardContent className="pt-4 pb-4">
+          <div className="space-y-1 min-w-0">
+            <p className="text-xs text-muted-foreground truncate">Volume Uplift</p>
+            <p className="text-sm sm:text-base lg:text-lg font-bold text-emerald-600 dark:text-emerald-400 truncate">+{summary.volumeUplift}%</p>
+            <div className="flex items-center text-xs text-emerald-600 dark:text-emerald-400">
               <TrendingUp className="h-3 w-3 mr-1" />
               vs baseline
             </div>
           </div>
         </CardContent>
       </Card>
-      
+
       <Card>
-        <CardContent className="pt-4">
-          <div className="space-y-1">
-            <p className="text-xs text-muted-foreground">Revenue Uplift</p>
-            <p className="text-xl font-bold text-blue-600">+{summary.revenueUplift}%</p>
-            <div className="flex items-center text-xs text-blue-600">
+        <CardContent className="pt-4 pb-4">
+          <div className="space-y-1 min-w-0">
+            <p className="text-xs text-muted-foreground truncate">Revenue Uplift</p>
+            <p className="text-sm sm:text-base lg:text-lg font-bold text-blue-600 dark:text-blue-400 truncate">+{summary.revenueUplift}%</p>
+            <div className="flex items-center text-xs text-blue-600 dark:text-blue-400">
               <TrendingUp className="h-3 w-3 mr-1" />
               vs baseline
             </div>
           </div>
         </CardContent>
       </Card>
-      
+
       <Card>
-        <CardContent className="pt-4">
-          <div className="space-y-1">
-            <p className="text-xs text-muted-foreground">Cost/Unit</p>
-            <p className="text-xl font-bold">{formatCurrency(summary.costPerUnit)}</p>
+        <CardContent className="pt-4 pb-4">
+          <div className="space-y-1 min-w-0">
+            <p className="text-xs text-muted-foreground truncate">Cost/Unit</p>
+            <p className="text-sm sm:text-base lg:text-lg font-bold truncate">{formatCurrency(summary.costPerUnit)}</p>
           </div>
         </CardContent>
       </Card>
-      
+
       <Card>
-        <CardContent className="pt-4">
-          <div className="space-y-1">
-            <p className="text-xs text-muted-foreground">Cost/Customer</p>
-            <p className="text-xl font-bold">{formatCurrency(summary.costPerCustomer)}</p>
+        <CardContent className="pt-4 pb-4">
+          <div className="space-y-1 min-w-0">
+            <p className="text-xs text-muted-foreground truncate">Cost/Customer</p>
+            <p className="text-sm sm:text-base lg:text-lg font-bold truncate">{formatCurrency(summary.costPerCustomer)}</p>
           </div>
         </CardContent>
       </Card>
-      
+
       <Card>
-        <CardContent className="pt-4">
-          <div className="space-y-1">
-            <p className="text-xs text-muted-foreground">Redemption</p>
-            <p className="text-xl font-bold text-purple-600">{summary.redemptionRate}%</p>
+        <CardContent className="pt-4 pb-4">
+          <div className="space-y-1 min-w-0">
+            <p className="text-xs text-muted-foreground truncate">Redemption</p>
+            <p className="text-sm sm:text-base lg:text-lg font-bold text-violet-600 dark:text-violet-400 truncate">{summary.redemptionRate}%</p>
           </div>
         </CardContent>
       </Card>
-      
+
       <Card>
-        <CardContent className="pt-4">
-          <div className="space-y-1">
-            <p className="text-xs text-muted-foreground">Target Achievement</p>
-            <p className={cn('text-xl font-bold', summary.targetAchievement >= 100 ? 'text-green-600' : 'text-yellow-600')}>
+        <CardContent className="pt-4 pb-4">
+          <div className="space-y-1 min-w-0">
+            <p className="text-xs text-muted-foreground truncate">Target Achievement</p>
+            <p className={cn('text-sm sm:text-base lg:text-lg font-bold truncate', summary.targetAchievement >= 100 ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400')}>
               {summary.targetAchievement}%
             </p>
           </div>

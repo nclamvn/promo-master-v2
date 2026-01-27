@@ -263,10 +263,10 @@ const getStatusBadge = (status: ApprovalRequest['status']) => {
 
 const getUrgencyBadge = (urgency: ApprovalRequest['urgency']) => {
   const config = {
-    LOW: { label: 'Low', className: 'bg-slate-100 text-slate-700' },
-    MEDIUM: { label: 'Medium', className: 'bg-blue-100 text-blue-700' },
-    HIGH: { label: 'High', className: 'bg-orange-100 text-orange-700' },
-    CRITICAL: { label: 'Critical', className: 'bg-red-100 text-red-700' },
+    LOW: { label: 'Low', className: 'bg-slate-500/15 text-slate-700 dark:text-slate-300 border-slate-500/20' },
+    MEDIUM: { label: 'Medium', className: 'bg-blue-500/15 text-blue-700 dark:text-blue-400 border-blue-500/20' },
+    HIGH: { label: 'High', className: 'bg-orange-500/15 text-orange-700 dark:text-orange-400 border-orange-500/20' },
+    CRITICAL: { label: 'Critical', className: 'bg-red-500/15 text-red-700 dark:text-red-400 border-red-500/20' },
   };
   const { label, className } = config[urgency];
   return <Badge className={className}>{label}</Badge>;
@@ -599,10 +599,10 @@ export default function BudgetApprovalPage() {
                       <div
                         className={`mt-0.5 rounded-full p-1 ${
                           step.status === 'APPROVED'
-                            ? 'bg-green-100 text-green-600'
+                            ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400'
                             : step.status === 'REJECTED'
-                            ? 'bg-red-100 text-red-600'
-                            : 'bg-yellow-100 text-yellow-600'
+                            ? 'bg-red-500/20 text-red-600 dark:text-red-400'
+                            : 'bg-amber-500/20 text-amber-600 dark:text-amber-400'
                         }`}
                       >
                         {step.status === 'APPROVED' ? (

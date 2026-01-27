@@ -48,13 +48,13 @@ export default function SellTrackingList() {
 
   const getSellThroughBadge = (rate: number) => {
     if (rate >= 80) {
-      return <Badge variant="default" className="bg-green-100 text-green-700">Excellent</Badge>;
+      return <Badge className="bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/20">Excellent</Badge>;
     } else if (rate >= 60) {
-      return <Badge variant="default" className="bg-blue-100 text-blue-700">Good</Badge>;
+      return <Badge className="bg-blue-500/15 text-blue-700 dark:text-blue-400 border-blue-500/20">Good</Badge>;
     } else if (rate >= 40) {
-      return <Badge variant="default" className="bg-yellow-100 text-yellow-700">Average</Badge>;
+      return <Badge className="bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/20">Average</Badge>;
     } else {
-      return <Badge variant="default" className="bg-red-100 text-red-700">Low</Badge>;
+      return <Badge className="bg-red-500/15 text-red-700 dark:text-red-400 border-red-500/20">Low</Badge>;
     }
   };
 
