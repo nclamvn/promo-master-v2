@@ -352,6 +352,12 @@ model Customer {
   deliveryOrders DeliveryOrder[]              @relation("DeliveryCustomer")
   sellTracking   SellTracking[]               @relation("SellTrackingCustomer")
   inventories    InventorySnapshot[]          @relation("InventoryCustomer")
+  // Module 7: Sell Tracking
+  sellIns              SellIn[]              @relation("CustomerSellIns")
+  sellOuts             SellOut[]             @relation("CustomerSellOuts")
+  customerInventories  CustomerInventory[]   @relation("CustomerInventories")
+  // Module 9: Delivery Profile
+  deliveryProfile      DeliveryProfile?      @relation("CustomerDeliveryProfile")
 
   @@unique([companyId, code])
   @@index([companyId])
@@ -383,6 +389,10 @@ model Product {
   deliveryLines DeliveryLine[]               @relation("DeliveryProduct")
   sellTracking  SellTracking[]               @relation("SellTrackingProduct")
   inventories   InventorySnapshot[]          @relation("InventoryProduct")
+  // Module 7: Sell Tracking
+  productSellIns        SellIn[]             @relation("ProductSellIns")
+  productSellOuts       SellOut[]            @relation("ProductSellOuts")
+  productInventories    CustomerInventory[]  @relation("ProductInventories")
 
   @@unique([companyId, sku])
   @@index([companyId])
@@ -452,6 +462,11 @@ model Promotion {
   clashesAsB     PromotionClash[] @relation("ClashPromotionB")
   // Migration Week 1 additions
   deliveryOrders DeliveryOrder[]  @relation("DeliveryPromotion")
+  // Module 7: Sell Tracking
+  sellIns             SellIn[]            @relation("PromotionSellIns")
+  sellOuts            SellOut[]           @relation("PromotionSellOuts")
+  // Module 9: Delivery Profile
+  promotionDeliveries PromotionDelivery[] @relation("PromotionDeliveries")
 
   @@index([customerId])
   @@index([fundId])
@@ -2624,6 +2639,7 @@ enum ScenarioStatus {
 }
 
 enum DeliveryStatus {
+  PLANNED
   PENDING
   CONFIRMED
   SCHEDULED
@@ -2633,6 +2649,7 @@ enum DeliveryStatus {
   DELIVERED
   PARTIAL
   RETURNED
+  FAILED
   CANCELLED
 }
 
@@ -3085,4 +3102,298 @@ model TargetAllocation {
   @@index([targetId])
   @@index([parentId])
   @@index([geographicUnitId])
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MODULE 7: SELL-IN / SELL-OUT TRACKING
+// ═══════════════════════════════════════════════════════════════
+
+model SellIn {
+  id              String       @id @default(cuid())
+  companyId       String
+
+  transactionCode String       @unique
+  transactionDate DateTime
+
+  promotionId     String?
+  promotion       Promotion?   @relation("PromotionSellIns", fields: [promotionId], references: [id])
+
+  customerId      String
+  customer        Customer     @relation("CustomerSellIns", fields: [customerId], references: [id])
+
+  channelId       String?
+  regionId        String?
+
+  productId       String
+  product         Product      @relation("ProductSellIns", fields: [productId], references: [id])
+
+  quantity        Int
+  quantityCase    Decimal?    @db.Decimal(18, 2)
+
+  grossValue      Decimal     @db.Decimal(18, 2)
+  discountValue   Decimal?    @db.Decimal(18, 2)
+  netValue        Decimal     @db.Decimal(18, 2)
+
+  sourceSystem    String?
+  sourceReference String?
+
+  periodYear      Int
+  periodMonth     Int
+  periodWeek      Int
+
+  importedAt      DateTime    @default(now())
+  importedById    String?
+
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  @@index([companyId, transactionDate])
+  @@index([companyId, promotionId])
+  @@index([companyId, customerId, productId])
+  @@index([companyId, periodYear, periodMonth])
+  @@map("sell_in")
+}
+
+model SellOut {
+  id              String       @id @default(cuid())
+  companyId       String
+
+  transactionCode String       @unique
+  transactionDate DateTime
+
+  promotionId     String?
+  promotion       Promotion?   @relation("PromotionSellOuts", fields: [promotionId], references: [id])
+
+  customerId      String
+  customer        Customer     @relation("CustomerSellOuts", fields: [customerId], references: [id])
+
+  channelId       String?
+  regionId        String?
+
+  productId       String
+  product         Product      @relation("ProductSellOuts", fields: [productId], references: [id])
+
+  quantity        Int
+  quantityCase    Decimal?    @db.Decimal(18, 2)
+
+  sellingPrice    Decimal     @db.Decimal(18, 2)
+  totalValue      Decimal     @db.Decimal(18, 2)
+
+  sourceSystem    String?
+  sourceReference String?
+
+  periodYear      Int
+  periodMonth     Int
+  periodWeek      Int
+
+  importedAt      DateTime    @default(now())
+  importedById    String?
+
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  @@index([companyId, transactionDate])
+  @@index([companyId, promotionId])
+  @@index([companyId, customerId, productId])
+  @@index([companyId, periodYear, periodMonth])
+  @@map("sell_out")
+}
+
+model CustomerInventory {
+  id              String       @id @default(cuid())
+  companyId       String
+
+  snapshotDate    DateTime
+
+  customerId      String
+  customer        Customer     @relation("CustomerInventories", fields: [customerId], references: [id])
+
+  productId       String
+  product         Product      @relation("ProductInventories", fields: [productId], references: [id])
+
+  openingStock    Int          @default(0)
+  receivedQty     Int          @default(0)
+  soldQty         Int          @default(0)
+  adjustments     Int          @default(0)
+  closingStock    Int          @default(0)
+
+  avgDailySales   Decimal?     @db.Decimal(18, 2)
+  daysOfStock     Int?
+
+  stockValue      Decimal?     @db.Decimal(18, 2)
+
+  periodYear      Int
+  periodMonth     Int
+  periodWeek      Int?
+
+  sourceSystem    String?
+
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  @@unique([companyId, customerId, productId, snapshotDate])
+  @@index([companyId, snapshotDate])
+  @@index([companyId, customerId])
+  @@map("customer_inventory")
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MODULE 9: DELIVERY PROFILE
+// ═══════════════════════════════════════════════════════════════
+
+enum DeliveryDay {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
+}
+
+enum ScheduleType {
+  ONE_TIME
+  RECURRING
+}
+
+enum DeliveryFrequency {
+  DAILY
+  WEEKLY
+  BIWEEKLY
+  MONTHLY
+}
+
+enum DeliveryPriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
+model DeliveryProfile {
+  id                   String              @id @default(cuid())
+  companyId            String
+
+  customerId           String              @unique
+  customer             Customer            @relation("CustomerDeliveryProfile", fields: [customerId], references: [id])
+
+  deliveryAddress      String?
+  deliveryCity         String?
+  deliveryRegion       String?
+  deliveryZone         String?
+
+  contactPerson        String?
+  contactPhone         String?
+  contactEmail         String?
+
+  preferredDays        DeliveryDay[]       @default([])
+  preferredTimeStart   String?
+  preferredTimeEnd     String?
+
+  standardLeadTime     Int                 @default(2)
+  expressLeadTime      Int?
+
+  maxDeliveriesPerWeek Int?
+  maxUnitsPerDelivery  Int?
+  warehouseCapacity    Int?
+
+  requiresAppointment  Boolean             @default(false)
+  requiresPOD          Boolean             @default(true)
+  specialInstructions  String?
+
+  blackoutDates        DateTime[]          @default([])
+  holidaySchedule      String?
+
+  routeCode            String?
+  routeSequence        Int?
+  distanceFromDC       Decimal?            @db.Decimal(10, 2)
+
+  avgDeliveryTime      Decimal?            @db.Decimal(5, 2)
+  onTimeRate           Decimal?            @db.Decimal(5, 2)
+
+  isActive             Boolean             @default(true)
+
+  createdById          String?
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
+
+  schedules            DeliverySchedule[]
+  promotionDeliveries  PromotionDelivery[]
+
+  @@index([companyId, isActive])
+  @@index([companyId, routeCode])
+  @@map("delivery_profiles")
+}
+
+model DeliverySchedule {
+  id               String              @id @default(cuid())
+  companyId        String
+
+  profileId        String
+  profile          DeliveryProfile     @relation(fields: [profileId], references: [id])
+
+  scheduleType     ScheduleType        @default(RECURRING)
+
+  frequency        DeliveryFrequency?
+  dayOfWeek        DeliveryDay?
+  dayOfMonth       Int?
+  weekOfMonth      Int?
+
+  specificDate     DateTime?
+
+  timeWindowStart  String?
+  timeWindowEnd    String?
+
+  estimatedUnits   Int?
+  estimatedValue   Decimal?            @db.Decimal(18, 2)
+  priority         DeliveryPriority    @default(NORMAL)
+
+  isActive         Boolean             @default(true)
+
+  effectiveFrom    DateTime            @default(now())
+  effectiveTo      DateTime?
+
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+
+  @@index([companyId, profileId])
+  @@index([companyId, scheduleType])
+  @@map("delivery_schedules")
+}
+
+model PromotionDelivery {
+  id               String              @id @default(cuid())
+  companyId        String
+
+  promotionId      String
+  promotion        Promotion           @relation("PromotionDeliveries", fields: [promotionId], references: [id])
+
+  profileId        String
+  profile          DeliveryProfile     @relation(fields: [profileId], references: [id])
+
+  plannedDate      DateTime
+  actualDate       DateTime?
+
+  plannedUnits     Int
+  actualUnits      Int?
+
+  plannedValue     Decimal             @db.Decimal(18, 2)
+  actualValue      Decimal?            @db.Decimal(18, 2)
+
+  status           DeliveryStatus      @default(PLANNED)
+  priority         DeliveryPriority    @default(NORMAL)
+
+  deliveryNote     String?
+  podReference     String?
+  podSignedAt      DateTime?
+  podSignedBy      String?
+
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+
+  @@index([companyId, promotionId])
+  @@index([companyId, profileId])
+  @@index([companyId, plannedDate])
+  @@index([companyId, status])
+  @@map("promotion_deliveries")
 }

@@ -26,10 +26,13 @@ const PromotionList = lazy(() => import('@/pages/promotions/PromotionList'));
 const PromotionDetail = lazy(() => import('@/pages/promotions/PromotionDetail'));
 const PromotionNew = lazy(() => import('@/pages/promotions/PromotionNew'));
 const PromotionEdit = lazy(() => import('@/pages/promotions/PromotionEdit'));
+const PromotionEfficiency = lazy(() => import('@/pages/promotions/Efficiency'));
+const PromotionDeployment = lazy(() => import('@/pages/promotions/Deployment'));
 
 const ClaimList = lazy(() => import('@/pages/claims/ClaimList'));
 const ClaimDetail = lazy(() => import('@/pages/claims/ClaimDetail'));
 const ClaimNew = lazy(() => import('@/pages/claims/ClaimNew'));
+const ClaimSettlement = lazy(() => import('@/pages/claims/Settlement'));
 
 const FundList = lazy(() => import('@/pages/funds/FundList'));
 const FundDetail = lazy(() => import('@/pages/funds/FundDetail'));
@@ -51,6 +54,11 @@ const Analytics = lazy(() => import('@/pages/analytics/Analytics'));
 const BudgetList = lazy(() => import('@/pages/budgets/BudgetList'));
 const BudgetNew = lazy(() => import('@/pages/budgets/BudgetNew'));
 const BudgetAllocation = lazy(() => import('@/pages/budgets/BudgetAllocation'));
+
+// New Budget Management pages (Phase 2)
+const BudgetDefinition = lazy(() => import('@/pages/budget/Definition'));
+const BudgetMonitoring = lazy(() => import('@/pages/budget/Monitoring'));
+const BudgetApproval = lazy(() => import('@/pages/budget/Approval'));
 const CalendarView = lazy(() => import('@/pages/calendar/CalendarView'));
 const TargetList = lazy(() => import('@/pages/targets/TargetList'));
 const TargetNew = lazy(() => import('@/pages/targets/TargetNew'));
@@ -90,6 +98,25 @@ const ScenarioCompare = lazy(() => import('@/pages/planning/scenarios/ScenarioCo
 // Planning pages - Clash Detection
 const ClashList = lazy(() => import('@/pages/planning/clashes/ClashList'));
 const ClashDetail = lazy(() => import('@/pages/planning/clashes/ClashDetail'));
+
+// Planning pages - TPO (Trade Promotion Optimization)
+const PlanningTPO = lazy(() => import('@/pages/planning/TPO'));
+
+// Budget Allocation (New - Phase 2)
+const BudgetAllocationNew = lazy(() => import('@/pages/budget/Allocation'));
+
+// Claims Payment (New - Phase 2)
+const ClaimsPayment = lazy(() => import('@/pages/claims/Payment'));
+
+// Analysis pages (New - Phase 2)
+const AnalysisROI = lazy(() => import('@/pages/analysis/ROI'));
+const AnalysisEfficiency = lazy(() => import('@/pages/analysis/Efficiency'));
+const AnalysisWhatIf = lazy(() => import('@/pages/analysis/WhatIf'));
+
+// Execution pages
+const ExecutionPSPBudget = lazy(() => import('@/pages/execution/PSPBudget'));
+const ExecutionSpending = lazy(() => import('@/pages/execution/Spending'));
+const ExecutionReallocation = lazy(() => import('@/pages/execution/Reallocation'));
 
 // Operations pages - Delivery
 const DeliveryList = lazy(() => import('@/pages/operations/delivery/DeliveryList'));
@@ -183,6 +210,12 @@ export default function AppRouter() {
         <Route path="/promotions/:id/edit" element={
           <SuspenseWrapper><PromotionEdit /></SuspenseWrapper>
         } />
+        <Route path="/promotions/efficiency" element={
+          <SuspenseWrapper><PromotionEfficiency /></SuspenseWrapper>
+        } />
+        <Route path="/promotions/deployment" element={
+          <SuspenseWrapper><PromotionDeployment /></SuspenseWrapper>
+        } />
 
         {/* Claims */}
         <Route path="/claims" element={
@@ -193,6 +226,12 @@ export default function AppRouter() {
         } />
         <Route path="/claims/:id" element={
           <SuspenseWrapper><ClaimDetail /></SuspenseWrapper>
+        } />
+        <Route path="/claims/settlement" element={
+          <SuspenseWrapper><ClaimSettlement /></SuspenseWrapper>
+        } />
+        <Route path="/claims/payment" element={
+          <SuspenseWrapper><ClaimsPayment /></SuspenseWrapper>
         } />
 
         {/* Funds */}
@@ -243,7 +282,7 @@ export default function AppRouter() {
           <SuspenseWrapper><CalendarView /></SuspenseWrapper>
         } />
 
-        {/* Budgets */}
+        {/* Budgets (Legacy) */}
         <Route path="/budgets" element={
           <SuspenseWrapper><BudgetList /></SuspenseWrapper>
         } />
@@ -252,6 +291,20 @@ export default function AppRouter() {
         } />
         <Route path="/budgets/allocation" element={
           <SuspenseWrapper><BudgetAllocation /></SuspenseWrapper>
+        } />
+
+        {/* Budget Management (New) */}
+        <Route path="/budget/definition" element={
+          <SuspenseWrapper><BudgetDefinition /></SuspenseWrapper>
+        } />
+        <Route path="/budget/allocation" element={
+          <SuspenseWrapper><BudgetAllocationNew /></SuspenseWrapper>
+        } />
+        <Route path="/budget/monitoring" element={
+          <SuspenseWrapper><BudgetMonitoring /></SuspenseWrapper>
+        } />
+        <Route path="/budget/approval" element={
+          <SuspenseWrapper><BudgetApproval /></SuspenseWrapper>
         } />
 
         {/* Targets */}
@@ -345,6 +398,22 @@ export default function AppRouter() {
         } />
         <Route path="/planning/clashes/:id" element={
           <SuspenseWrapper><ClashDetail /></SuspenseWrapper>
+        } />
+
+        {/* Planning - TPO (Trade Promotion Optimization) */}
+        <Route path="/planning/tpo" element={
+          <SuspenseWrapper><PlanningTPO /></SuspenseWrapper>
+        } />
+
+        {/* Execution */}
+        <Route path="/execution/psp-budget" element={
+          <SuspenseWrapper><ExecutionPSPBudget /></SuspenseWrapper>
+        } />
+        <Route path="/execution/spending" element={
+          <SuspenseWrapper><ExecutionSpending /></SuspenseWrapper>
+        } />
+        <Route path="/execution/reallocation" element={
+          <SuspenseWrapper><ExecutionReallocation /></SuspenseWrapper>
         } />
 
         {/* Operations - Delivery */}
@@ -463,6 +532,17 @@ export default function AppRouter() {
         } />
         <Route path="/bi/export" element={
           <SuspenseWrapper><ExportCenter /></SuspenseWrapper>
+        } />
+
+        {/* Analysis (New - Phase 2) */}
+        <Route path="/analysis/roi" element={
+          <SuspenseWrapper><AnalysisROI /></SuspenseWrapper>
+        } />
+        <Route path="/analysis/efficiency" element={
+          <SuspenseWrapper><AnalysisEfficiency /></SuspenseWrapper>
+        } />
+        <Route path="/analysis/what-if" element={
+          <SuspenseWrapper><AnalysisWhatIf /></SuspenseWrapper>
         } />
 
         {/* Settings */}

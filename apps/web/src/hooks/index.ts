@@ -27,3 +27,7 @@ export * from './planning';
 // Utility hooks
 export * from './useDebounce';
 export * from './useToast';
+
+// Sidebar hooks
+export * from './useSidebarCollapse';
+export * from './useNavigation';
