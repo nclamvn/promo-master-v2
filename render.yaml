@@ -1,33 +1,12 @@
 services:
-  # Frontend - Static Site
+  # Frontend - Node.js Web Service (for SPA routing)
   - type: web
-    name: promo-master-web
-    runtime: static
-    buildCommand: npm install && npm run build:web
-    staticPublishPath: apps/web/dist
+    name: promo-master-v2
+    runtime: node
+    buildCommand: cd apps/web && npm install && npm run build
+    startCommand: cd apps/web && npm start
     envVars:
       - key: VITE_API_URL
         value: https://promo-master-api.onrender.com
-    headers:
-      - path: /*
-        name: Cache-Control
-        value: public, max-age=0, must-revalidate
-    routes:
-      - type: rewrite
-        source: /*
-        destination: /index.html
-
-  # Backend - Node.js API (if not using Vercel)
-  # Uncomment if deploying API to Render
-  # - type: web
-  #   name: promo-master-api
-  #   runtime: node
-  #   buildCommand: npm install && npm run build:api
-  #   startCommand: npm run start:api
-  #   envVars:
-  #     - key: DATABASE_URL
-  #       sync: false
-  #     - key: JWT_SECRET
-  #       generateValue: true
-  #     - key: NODE_ENV
-  #       value: production
+      - key: NODE_ENV
+        value: production
