@@ -482,80 +482,56 @@ const getMethodLabel = (method: AllocationNode['allocationMethod']) => {
 const SummaryCards = ({ summary }: { summary: BudgetSummary }) => {
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-      <Card>
+      <Card className="relative overflow-hidden">
         <CardContent className="pt-4 pb-4">
-          <div className="flex items-center justify-between gap-2">
-            <div className="min-w-0 flex-1">
-              <p className="text-xs sm:text-sm text-muted-foreground truncate">Tổng ngân sách</p>
-              <CurrencyDisplay amount={summary.totalBudget} size="md" />
-            </div>
-            <Wallet className="h-6 w-6 sm:h-8 sm:w-8 text-blue-500 opacity-50 flex-shrink-0" />
-          </div>
+          <Wallet className="absolute -right-2 -bottom-2 h-16 w-16 text-blue-500/10" />
+          <p className="text-xs sm:text-sm text-muted-foreground mb-1">Tổng ngân sách</p>
+          <CurrencyDisplay amount={summary.totalBudget} size="md" />
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="relative overflow-hidden">
         <CardContent className="pt-4 pb-4">
-          <div className="flex items-center justify-between gap-2">
-            <div className="min-w-0 flex-1">
-              <p className="text-xs sm:text-sm text-muted-foreground truncate">Đã phân bổ</p>
-              <CurrencyDisplay amount={summary.allocated} size="md" valueClassName="text-emerald-600 dark:text-emerald-400" />
-              <p className="text-xs text-muted-foreground">{formatPercent(summary.allocated / summary.totalBudget * 100)}</p>
-            </div>
-            <CheckCircle2 className="h-6 w-6 sm:h-8 sm:w-8 text-emerald-500 opacity-50 flex-shrink-0" />
-          </div>
+          <CheckCircle2 className="absolute -right-2 -bottom-2 h-16 w-16 text-emerald-500/10" />
+          <p className="text-xs sm:text-sm text-muted-foreground mb-1">Đã phân bổ</p>
+          <CurrencyDisplay amount={summary.allocated} size="md" valueClassName="text-emerald-600 dark:text-emerald-400" />
+          <p className="text-xs text-muted-foreground mt-1">{formatPercent(summary.allocated / summary.totalBudget * 100)}</p>
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="relative overflow-hidden">
         <CardContent className="pt-4 pb-4">
-          <div className="flex items-center justify-between gap-2">
-            <div className="min-w-0 flex-1">
-              <p className="text-xs sm:text-sm text-muted-foreground truncate">Chưa phân bổ</p>
-              <CurrencyDisplay amount={summary.unallocated} size="md" valueClassName="text-amber-600 dark:text-amber-400" />
-              <p className="text-xs text-muted-foreground">{formatPercent(summary.unallocated / summary.totalBudget * 100)}</p>
-            </div>
-            <AlertTriangle className="h-6 w-6 sm:h-8 sm:w-8 text-amber-500 opacity-50 flex-shrink-0" />
-          </div>
+          <AlertTriangle className="absolute -right-2 -bottom-2 h-16 w-16 text-amber-500/10" />
+          <p className="text-xs sm:text-sm text-muted-foreground mb-1">Chưa phân bổ</p>
+          <CurrencyDisplay amount={summary.unallocated} size="md" valueClassName="text-amber-600 dark:text-amber-400" />
+          <p className="text-xs text-muted-foreground mt-1">{formatPercent(summary.unallocated / summary.totalBudget * 100)}</p>
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="relative overflow-hidden">
         <CardContent className="pt-4 pb-4">
-          <div className="flex items-center justify-between gap-2">
-            <div className="min-w-0 flex-1">
-              <p className="text-xs sm:text-sm text-muted-foreground truncate">Đã chi tiêu</p>
-              <CurrencyDisplay amount={summary.spent} size="md" valueClassName="text-violet-600 dark:text-violet-400" />
-              <p className="text-xs text-muted-foreground">{formatPercent(summary.spent / summary.totalBudget * 100)}</p>
-            </div>
-            <TrendingUp className="h-6 w-6 sm:h-8 sm:w-8 text-violet-500 opacity-50 flex-shrink-0" />
-          </div>
+          <TrendingUp className="absolute -right-2 -bottom-2 h-16 w-16 text-violet-500/10" />
+          <p className="text-xs sm:text-sm text-muted-foreground mb-1">Đã chi tiêu</p>
+          <CurrencyDisplay amount={summary.spent} size="md" valueClassName="text-violet-600 dark:text-violet-400" />
+          <p className="text-xs text-muted-foreground mt-1">{formatPercent(summary.spent / summary.totalBudget * 100)}</p>
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="relative overflow-hidden">
         <CardContent className="pt-4 pb-4">
-          <div className="flex items-center justify-between gap-2">
-            <div className="min-w-0 flex-1">
-              <p className="text-xs sm:text-sm text-muted-foreground truncate">Cam kết</p>
-              <CurrencyDisplay amount={summary.committed} size="md" valueClassName="text-orange-600 dark:text-orange-400" />
-              <p className="text-xs text-muted-foreground">{formatPercent(summary.committed / summary.totalBudget * 100)}</p>
-            </div>
-            <Clock className="h-6 w-6 sm:h-8 sm:w-8 text-orange-500 opacity-50 flex-shrink-0" />
-          </div>
+          <Clock className="absolute -right-2 -bottom-2 h-16 w-16 text-orange-500/10" />
+          <p className="text-xs sm:text-sm text-muted-foreground mb-1">Cam kết</p>
+          <CurrencyDisplay amount={summary.committed} size="md" valueClassName="text-orange-600 dark:text-orange-400" />
+          <p className="text-xs text-muted-foreground mt-1">{formatPercent(summary.committed / summary.totalBudget * 100)}</p>
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="relative overflow-hidden">
         <CardContent className="pt-4 pb-4">
-          <div className="flex items-center justify-between gap-2">
-            <div className="min-w-0 flex-1">
-              <p className="text-xs sm:text-sm text-muted-foreground truncate">Còn khả dụng</p>
-              <CurrencyDisplay amount={summary.available} size="md" valueClassName="text-blue-600 dark:text-blue-400" />
-              <p className="text-xs text-muted-foreground">{formatPercent(summary.available / summary.totalBudget * 100)}</p>
-            </div>
-            <DollarSign className="h-6 w-6 sm:h-8 sm:w-8 text-blue-500 opacity-50 flex-shrink-0" />
-          </div>
+          <DollarSign className="absolute -right-2 -bottom-2 h-16 w-16 text-blue-500/10" />
+          <p className="text-xs sm:text-sm text-muted-foreground mb-1">Còn khả dụng</p>
+          <CurrencyDisplay amount={summary.available} size="md" valueClassName="text-blue-600 dark:text-blue-400" />
+          <p className="text-xs text-muted-foreground mt-1">{formatPercent(summary.available / summary.totalBudget * 100)}</p>
         </CardContent>
       </Card>
     </div>

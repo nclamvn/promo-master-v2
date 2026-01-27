@@ -37,12 +37,19 @@ interface CurrencyDisplayProps {
 // Default exchange rate
 const DEFAULT_EXCHANGE_RATE = 25000;
 
+// Smart number formatting - removes trailing .0
+function formatNum(num: number, decimals: number = 1): string {
+  const fixed = num.toFixed(decimals);
+  // Remove trailing .0 or .00
+  return fixed.replace(/\.0+$/, '');
+}
+
 // Format number with compact units
 function formatCompact(
   amount: number,
   currency: CurrencyCode,
   exchangeRate: number
-): { value: string; unit: string; fullValue: string } {
+): { display: string; fullValue: string } {
   const convertedAmount = currency === 'VND' ? amount : amount / exchangeRate;
 
   // Full value for tooltip
@@ -51,30 +58,32 @@ function formatCompact(
     : `$${convertedAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
   if (currency === 'VND') {
+    // Vietnamese: số + đơn vị (50 tỷ, 1.5 triệu)
     if (Math.abs(convertedAmount) >= 1e12) {
-      return { value: (convertedAmount / 1e12).toFixed(1), unit: 'nghìn tỷ', fullValue };
+      return { display: `${formatNum(convertedAmount / 1e12)} nghìn tỷ`, fullValue };
     }
     if (Math.abs(convertedAmount) >= 1e9) {
-      return { value: (convertedAmount / 1e9).toFixed(1), unit: 'tỷ', fullValue };
+      return { display: `${formatNum(convertedAmount / 1e9)} tỷ`, fullValue };
     }
     if (Math.abs(convertedAmount) >= 1e6) {
-      return { value: (convertedAmount / 1e6).toFixed(1), unit: 'triệu', fullValue };
+      return { display: `${formatNum(convertedAmount / 1e6)} triệu`, fullValue };
     }
     if (Math.abs(convertedAmount) >= 1e3) {
-      return { value: (convertedAmount / 1e3).toFixed(0), unit: 'K', fullValue };
+      return { display: `${formatNum(convertedAmount / 1e3, 0)}K`, fullValue };
     }
-    return { value: convertedAmount.toLocaleString('vi-VN'), unit: '₫', fullValue };
+    return { display: `${convertedAmount.toLocaleString('vi-VN')} ₫`, fullValue };
   } else {
+    // USD: $2M, $1.5K (all in one string)
     if (Math.abs(convertedAmount) >= 1e9) {
-      return { value: `$${(convertedAmount / 1e9).toFixed(2)}`, unit: 'B', fullValue };
+      return { display: `$${formatNum(convertedAmount / 1e9, 2)}B`, fullValue };
     }
     if (Math.abs(convertedAmount) >= 1e6) {
-      return { value: `$${(convertedAmount / 1e6).toFixed(2)}`, unit: 'M', fullValue };
+      return { display: `$${formatNum(convertedAmount / 1e6, 2)}M`, fullValue };
     }
     if (Math.abs(convertedAmount) >= 1e3) {
-      return { value: `$${(convertedAmount / 1e3).toFixed(1)}`, unit: 'K', fullValue };
+      return { display: `$${formatNum(convertedAmount / 1e3)}K`, fullValue };
     }
-    return { value: `$${convertedAmount.toFixed(0)}`, unit: '', fullValue };
+    return { display: `$${formatNum(convertedAmount, 0)}`, fullValue };
   }
 }
 
@@ -120,18 +129,11 @@ export function CurrencyDisplay({
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
-          <div className={cn('inline-flex items-center gap-1', className)}>
-            {/* Value */}
-            <span className={cn(sizes.value, valueClassName)}>
-              {formatted.value}
+          <div className={cn('inline-flex items-baseline gap-1.5', className)}>
+            {/* Value with unit combined */}
+            <span className={cn(sizes.value, 'whitespace-nowrap', valueClassName)}>
+              {formatted.display}
             </span>
-
-            {/* Unit */}
-            {formatted.unit && (
-              <span className={cn(sizes.unit, 'text-muted-foreground')}>
-                {formatted.unit}
-              </span>
-            )}
 
             {/* Currency Toggle Badge */}
             {showToggle && (
@@ -141,7 +143,7 @@ export function CurrencyDisplay({
                   toggleCurrency();
                 }}
                 className={cn(
-                  'ml-1 rounded font-medium transition-all',
+                  'rounded font-medium transition-all flex-shrink-0',
                   'hover:scale-105 active:scale-95',
                   currency === 'VND'
                     ? 'bg-red-500/15 text-red-600 dark:text-red-400 hover:bg-red-500/25'
@@ -176,8 +178,8 @@ export function formatCurrencyCompact(
   currency: CurrencyCode = 'VND',
   exchangeRate: number = DEFAULT_EXCHANGE_RATE
 ): string {
-  const { value, unit } = formatCompact(amount, currency, exchangeRate);
-  return unit ? `${value} ${unit}` : value;
+  const { display } = formatCompact(amount, currency, exchangeRate);
+  return display;
 }
 
 /**
