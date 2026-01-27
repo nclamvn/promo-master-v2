@@ -10,14 +10,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   if (req.method !== 'POST') {
-    res.status(405).json({ error: 'Method not allowed' });
+    res.status(405).json({ success: false, error: { code: 'METHOD_NOT_ALLOWED', message: 'Method not allowed' } });
     return;
   }
 
   const { email, password } = req.body as { email?: string; password?: string };
 
   if (!email || !password) {
-    res.status(400).json({ error: 'Email and password are required' });
+    res.status(400).json({ success: false, error: { code: 'VALIDATION_ERROR', message: 'Email and password are required' } });
     return;
   }
 
@@ -36,17 +36,25 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     });
 
     if (!user || !user.isActive) {
-      res.status(401).json({ error: 'Invalid credentials' });
+      res.status(401).json({ success: false, error: { code: 'INVALID_CREDENTIALS', message: 'Invalid email or password' } });
       return;
     }
 
     const isValid = await bcrypt.compare(password, user.password);
     if (!isValid) {
-      res.status(401).json({ error: 'Invalid credentials' });
+      res.status(401).json({ success: false, error: { code: 'INVALID_CREDENTIALS', message: 'Invalid email or password' } });
       return;
     }
 
-    const token = signToken({
+    const accessToken = signToken({
+      userId: user.id,
+      companyId: user.companyId,
+      email: user.email,
+      role: user.role,
+    });
+
+    // Generate refresh token (longer expiry)
+    const refreshToken = signToken({
       userId: user.id,
       companyId: user.companyId,
       email: user.email,
@@ -54,17 +62,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     });
 
     res.status(200).json({
-      user: {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        role: user.role,
-        companyId: user.companyId,
+      success: true,
+      data: {
+        accessToken,
+        refreshToken,
+        user: {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          role: user.role,
+          companyId: user.companyId,
+        },
       },
-      token,
     });
   } catch (error) {
     console.error('Login error:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Internal server error' } });
   }
 }

@@ -1,10 +1,14 @@
 import { PrismaClient } from '@prisma/client';
+import { seedUsers } from './users';
 import { seedGeographicUnits } from './geographic-units';
 
 const prisma = new PrismaClient();
 
 async function main() {
   console.log('Starting database seed...');
+
+  // Seed Users first (creates company too)
+  await seedUsers();
 
   // Seed Geographic Units (hierarchy data)
   await seedGeographicUnits();
