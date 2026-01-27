@@ -90,7 +90,8 @@ import {
   Percent,
   DollarSign,
 } from 'lucide-react';
-import { cn, formatCurrency, formatPercent } from '@/lib/utils';
+import { cn, formatPercent } from '@/lib/utils';
+import { CurrencyDisplay, formatCurrencyCompact } from '@/components/ui/currency-display';
 
 // ============================================================================
 // TYPES
@@ -486,7 +487,7 @@ const SummaryCards = ({ summary }: { summary: BudgetSummary }) => {
           <div className="flex items-center justify-between gap-2">
             <div className="min-w-0 flex-1">
               <p className="text-xs sm:text-sm text-muted-foreground truncate">Tổng ngân sách</p>
-              <p className="text-sm sm:text-base lg:text-lg font-bold truncate">{formatCurrency(summary.totalBudget)}</p>
+              <CurrencyDisplay amount={summary.totalBudget} size="md" />
             </div>
             <Wallet className="h-6 w-6 sm:h-8 sm:w-8 text-blue-500 opacity-50 flex-shrink-0" />
           </div>
@@ -498,7 +499,7 @@ const SummaryCards = ({ summary }: { summary: BudgetSummary }) => {
           <div className="flex items-center justify-between gap-2">
             <div className="min-w-0 flex-1">
               <p className="text-xs sm:text-sm text-muted-foreground truncate">Đã phân bổ</p>
-              <p className="text-sm sm:text-base lg:text-lg font-bold text-emerald-600 dark:text-emerald-400 truncate">{formatCurrency(summary.allocated)}</p>
+              <CurrencyDisplay amount={summary.allocated} size="md" valueClassName="text-emerald-600 dark:text-emerald-400" />
               <p className="text-xs text-muted-foreground">{formatPercent(summary.allocated / summary.totalBudget * 100)}</p>
             </div>
             <CheckCircle2 className="h-6 w-6 sm:h-8 sm:w-8 text-emerald-500 opacity-50 flex-shrink-0" />
@@ -511,7 +512,7 @@ const SummaryCards = ({ summary }: { summary: BudgetSummary }) => {
           <div className="flex items-center justify-between gap-2">
             <div className="min-w-0 flex-1">
               <p className="text-xs sm:text-sm text-muted-foreground truncate">Chưa phân bổ</p>
-              <p className="text-sm sm:text-base lg:text-lg font-bold text-amber-600 dark:text-amber-400 truncate">{formatCurrency(summary.unallocated)}</p>
+              <CurrencyDisplay amount={summary.unallocated} size="md" valueClassName="text-amber-600 dark:text-amber-400" />
               <p className="text-xs text-muted-foreground">{formatPercent(summary.unallocated / summary.totalBudget * 100)}</p>
             </div>
             <AlertTriangle className="h-6 w-6 sm:h-8 sm:w-8 text-amber-500 opacity-50 flex-shrink-0" />
@@ -524,7 +525,7 @@ const SummaryCards = ({ summary }: { summary: BudgetSummary }) => {
           <div className="flex items-center justify-between gap-2">
             <div className="min-w-0 flex-1">
               <p className="text-xs sm:text-sm text-muted-foreground truncate">Đã chi tiêu</p>
-              <p className="text-sm sm:text-base lg:text-lg font-bold text-violet-600 dark:text-violet-400 truncate">{formatCurrency(summary.spent)}</p>
+              <CurrencyDisplay amount={summary.spent} size="md" valueClassName="text-violet-600 dark:text-violet-400" />
               <p className="text-xs text-muted-foreground">{formatPercent(summary.spent / summary.totalBudget * 100)}</p>
             </div>
             <TrendingUp className="h-6 w-6 sm:h-8 sm:w-8 text-violet-500 opacity-50 flex-shrink-0" />
@@ -537,7 +538,7 @@ const SummaryCards = ({ summary }: { summary: BudgetSummary }) => {
           <div className="flex items-center justify-between gap-2">
             <div className="min-w-0 flex-1">
               <p className="text-xs sm:text-sm text-muted-foreground truncate">Cam kết</p>
-              <p className="text-sm sm:text-base lg:text-lg font-bold text-orange-600 dark:text-orange-400 truncate">{formatCurrency(summary.committed)}</p>
+              <CurrencyDisplay amount={summary.committed} size="md" valueClassName="text-orange-600 dark:text-orange-400" />
               <p className="text-xs text-muted-foreground">{formatPercent(summary.committed / summary.totalBudget * 100)}</p>
             </div>
             <Clock className="h-6 w-6 sm:h-8 sm:w-8 text-orange-500 opacity-50 flex-shrink-0" />
@@ -550,7 +551,7 @@ const SummaryCards = ({ summary }: { summary: BudgetSummary }) => {
           <div className="flex items-center justify-between gap-2">
             <div className="min-w-0 flex-1">
               <p className="text-xs sm:text-sm text-muted-foreground truncate">Còn khả dụng</p>
-              <p className="text-sm sm:text-base lg:text-lg font-bold text-blue-600 dark:text-blue-400 truncate">{formatCurrency(summary.available)}</p>
+              <CurrencyDisplay amount={summary.available} size="md" valueClassName="text-blue-600 dark:text-blue-400" />
               <p className="text-xs text-muted-foreground">{formatPercent(summary.available / summary.totalBudget * 100)}</p>
             </div>
             <DollarSign className="h-6 w-6 sm:h-8 sm:w-8 text-blue-500 opacity-50 flex-shrink-0" />
@@ -639,10 +640,10 @@ const TreeNode = ({
         </div>
         
         {/* Budget Info */}
-        <div className="text-right w-32">
-          <div className="font-medium">{formatCurrency(node.totalBudget)}</div>
+        <div className="text-right w-36">
+          <CurrencyDisplay amount={node.totalBudget} size="sm" />
           <div className="text-xs text-muted-foreground">
-            Chi: {formatCurrency(node.spentBudget)}
+            Chi: {formatCurrencyCompact(node.spentBudget)}
           </div>
         </div>
         
@@ -833,7 +834,7 @@ const AllocationFormDialog = ({
               <div className="grid grid-cols-2 gap-2 text-sm">
                 <div>
                   <span className="text-muted-foreground">Chi tiêu năm trước:</span>
-                  <span className="ml-2 font-medium">{formatCurrency(node.lastYearSpend)}</span>
+                  <span className="ml-2 font-medium">{formatCurrencyCompact(node.lastYearSpend)}</span>
                 </div>
                 <div>
                   <span className="text-muted-foreground">Số khách hàng:</span>

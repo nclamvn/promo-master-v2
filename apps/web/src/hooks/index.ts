@@ -31,3 +31,6 @@ export * from './useToast';
 // Sidebar hooks
 export * from './useSidebarCollapse';
 export * from './useNavigation';
+
+// Currency hooks
+export * from './useCurrency';
