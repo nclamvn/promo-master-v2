@@ -38,8 +38,6 @@ export default defineConfig({
     outDir: 'dist',
     sourcemap: true,
     rollupOptions: {
-      // Exclude MSW from production build - it's only for development mocking
-      external: (id) => id.includes('msw') || id.includes('/mocks/'),
       output: {
         manualChunks: {
           vendor: ['react', 'react-dom', 'react-router-dom'],

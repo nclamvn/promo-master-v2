@@ -19,14 +19,8 @@ const queryClient = new QueryClient({
   },
 });
 
-// Enable MSW mocking (only in development)
+// Enable MSW mocking (for demo - works in both dev and production)
 async function enableMocking() {
-  // Only enable mocking in development mode
-  // This check allows Vite to tree-shake the mock import in production
-  if (import.meta.env.PROD) {
-    return;
-  }
-
   try {
     const { worker } = await import('./mocks/browser');
     await worker.start({
