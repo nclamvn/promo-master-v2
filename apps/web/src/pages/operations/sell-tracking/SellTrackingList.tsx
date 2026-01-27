@@ -26,7 +26,8 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { LoadingSpinner } from '@/components/shared/LoadingSpinner';
 import { useSellTrackingList, useSellTrackingSummary } from '@/hooks/operations';
-import { formatCurrency, formatNumber, formatPercent } from '@/lib/utils';
+import { formatNumber, formatPercent } from '@/lib/utils';
+import { CurrencyDisplay } from '@/components/ui/currency-display';
 import type { SellTrackingParams } from '@/types/operations';
 
 export default function SellTrackingList() {
@@ -238,19 +239,19 @@ export default function SellTrackingList() {
                       <TableCell className="text-right">
                         <div>{formatNumber(record.sellInQty)}</div>
                         <div className="text-xs text-muted-foreground">
-                          {formatCurrency(record.sellInValue)}
+                          <CurrencyDisplay amount={record.sellInValue} size="sm" />
                         </div>
                       </TableCell>
                       <TableCell className="text-right">
                         <div>{formatNumber(record.sellOutQty)}</div>
                         <div className="text-xs text-muted-foreground">
-                          {formatCurrency(record.sellOutValue)}
+                          <CurrencyDisplay amount={record.sellOutValue} size="sm" />
                         </div>
                       </TableCell>
                       <TableCell className="text-right">
                         <div>{formatNumber(record.stockQty)}</div>
                         <div className="text-xs text-muted-foreground">
-                          {formatCurrency(record.stockValue)}
+                          <CurrencyDisplay amount={record.stockValue} size="sm" />
                         </div>
                       </TableCell>
                       <TableCell className="text-right font-medium">

@@ -13,7 +13,8 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import { chartTheme, tooltipStyle, axisStyle, gridStyle } from './chart-theme';
-import { cn, formatCurrency } from '@/lib/utils';
+import { cn } from '@/lib/utils';
+import { formatCurrencyCompact } from '@/components/ui/currency-display';
 
 interface LineChartProps {
   title?: string;
@@ -34,12 +35,7 @@ const getFormatter = (formatValue?: 'currency' | 'number' | 'percent' | ((value:
   if (typeof formatValue === 'function') return formatValue;
   switch (formatValue) {
     case 'currency':
-      return (value: number) => {
-        if (value >= 1000000000) return `${(value / 1000000000).toFixed(1)}B`;
-        if (value >= 1000000) return `${(value / 1000000).toFixed(1)}M`;
-        if (value >= 1000) return `${(value / 1000).toFixed(0)}K`;
-        return formatCurrency(value);
-      };
+      return (value: number) => formatCurrencyCompact(value, 'VND');
     case 'percent':
       return (value: number) => `${value.toFixed(1)}%`;
     case 'number':

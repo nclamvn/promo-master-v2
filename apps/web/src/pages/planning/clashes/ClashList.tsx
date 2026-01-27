@@ -34,7 +34,7 @@ import {
 import { ClashCard } from '@/components/planning/ClashCard';
 import { LoadingSpinner } from '@/components/shared/LoadingSpinner';
 import { useToast } from '@/hooks/useToast';
-import { formatCurrency } from '@/lib/utils';
+import { CurrencyDisplay } from '@/components/ui/currency-display';
 import {
   useClashes,
   useClashStats,
@@ -145,7 +145,7 @@ export default function ClashList() {
             <CardContent>
               <div className="flex items-center gap-2">
                 <XCircle className="h-5 w-5 text-red-500" />
-                <span className="text-2xl font-bold text-red-600">
+                <span className="text-2xl font-bold text-red-600 dark:text-red-400">
                   {stats.unresolvedHigh}
                 </span>
               </div>
@@ -190,7 +190,7 @@ export default function ClashList() {
               <div className="flex items-center gap-2">
                 <TrendingDown className="h-5 w-5 text-yellow-500" />
                 <span className="text-2xl font-bold">
-                  {formatCurrency(stats.totalPotentialImpact)}
+                  <CurrencyDisplay amount={stats.totalPotentialImpact} size="lg" />
                 </span>
               </div>
             </CardContent>

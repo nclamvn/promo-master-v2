@@ -77,7 +77,8 @@ import {
   ArrowDownRight,
   Gauge,
 } from 'lucide-react';
-import { cn, formatCurrency, formatPercent, formatNumber } from '@/lib/utils';
+import { cn, formatPercent, formatNumber } from '@/lib/utils';
+import { CurrencyDisplay } from '@/components/ui/currency-display';
 
 // ============================================================================
 // TYPES
@@ -403,7 +404,7 @@ const SummarySection = ({ summary }: { summary: EfficiencySummary }) => {
         <CardContent className="pt-4 pb-4">
           <div className="space-y-1 min-w-0">
             <p className="text-xs text-muted-foreground truncate">Cost/Unit</p>
-            <p className="text-sm sm:text-base lg:text-lg font-bold truncate">{formatCurrency(summary.costPerUnit)}</p>
+            <CurrencyDisplay amount={summary.costPerUnit} size="md" />
           </div>
         </CardContent>
       </Card>
@@ -412,7 +413,7 @@ const SummarySection = ({ summary }: { summary: EfficiencySummary }) => {
         <CardContent className="pt-4 pb-4">
           <div className="space-y-1 min-w-0">
             <p className="text-xs text-muted-foreground truncate">Cost/Customer</p>
-            <p className="text-sm sm:text-base lg:text-lg font-bold truncate">{formatCurrency(summary.costPerCustomer)}</p>
+            <CurrencyDisplay amount={summary.costPerCustomer} size="md" />
           </div>
         </CardContent>
       </Card>
@@ -568,27 +569,27 @@ const PromotionsTable = ({ data }: { data: PromotionEfficiency[] }) => {
                   </div>
                 </TableCell>
                 <TableCell>{promo.type}</TableCell>
-                <TableCell className="text-right">{formatCurrency(promo.budgetAllocated)}</TableCell>
-                <TableCell className="text-right">{formatCurrency(promo.actualSpend)}</TableCell>
+                <TableCell className="text-right"><CurrencyDisplay amount={promo.budgetAllocated} size="sm" /></TableCell>
+                <TableCell className="text-right"><CurrencyDisplay amount={promo.actualSpend} size="sm" /></TableCell>
                 <TableCell className={cn(
                   'text-right font-medium',
-                  promo.spendVariance > 0 ? 'text-red-600' : promo.spendVariance < 0 ? 'text-green-600' : ''
+                  promo.spendVariance > 0 ? 'text-red-600 dark:text-red-400' : promo.spendVariance < 0 ? 'text-emerald-600 dark:text-emerald-400' : ''
                 )}>
                   {promo.spendVariance > 0 ? '+' : ''}{promo.spendVariance}%
                 </TableCell>
                 <TableCell className={cn(
                   'text-right font-medium',
-                  promo.volumeAchievement >= 100 ? 'text-green-600' : 'text-yellow-600'
+                  promo.volumeAchievement >= 100 ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'
                 )}>
                   {promo.volumeAchievement}%
                 </TableCell>
                 <TableCell className={cn(
                   'text-right font-medium',
-                  promo.revenueAchievement >= 100 ? 'text-green-600' : 'text-yellow-600'
+                  promo.revenueAchievement >= 100 ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'
                 )}>
                   {promo.revenueAchievement}%
                 </TableCell>
-                <TableCell className="text-right">{formatCurrency(promo.costPerUnit)}</TableCell>
+                <TableCell className="text-right"><CurrencyDisplay amount={promo.costPerUnit} size="sm" /></TableCell>
                 <TableCell>
                   <div className="flex items-center justify-center">
                     <div className={cn(

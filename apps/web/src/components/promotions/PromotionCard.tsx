@@ -7,7 +7,8 @@ import { Calendar, DollarSign, Users } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { PromotionStatusBadge } from './PromotionStatusBadge';
-import { formatCurrency, formatDate } from '@/lib/utils';
+import { formatDate } from '@/lib/utils';
+import { CurrencyDisplay } from '@/components/ui/currency-display';
 import type { Promotion } from '@/types';
 
 interface PromotionCardProps {
@@ -57,8 +58,8 @@ export function PromotionCard({ promotion }: PromotionCardProps) {
               </div>
               <Progress value={utilizationPercent} className="h-2" />
               <div className="flex justify-between text-xs text-muted-foreground">
-                <span>Spent: {formatCurrency(promotion.actualSpend)}</span>
-                <span>Budget: {formatCurrency(promotion.budget)}</span>
+                <span className="flex items-center gap-1">Spent: <CurrencyDisplay amount={promotion.actualSpend} size="sm" showToggle={false} /></span>
+                <span className="flex items-center gap-1">Budget: <CurrencyDisplay amount={promotion.budget} size="sm" showToggle={false} /></span>
               </div>
             </div>
           </div>

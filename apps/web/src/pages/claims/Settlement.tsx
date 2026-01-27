@@ -55,6 +55,7 @@ import {
   CreditCard,
   Building2,
 } from 'lucide-react';
+import { CurrencyDisplay } from '@/components/ui/currency-display';
 
 // Types
 interface ClaimSettlement {
@@ -150,16 +151,6 @@ const mockClaims: ClaimSettlement[] = [
     verifiedAt: '2026-01-17T10:00:00',
   },
 ];
-
-// Utility functions
-const formatCurrency = (value: number): string => {
-  if (value >= 1000000000) {
-    return `₫${(value / 1000000000).toFixed(1)}B`;
-  } else if (value >= 1000000) {
-    return `₫${(value / 1000000).toFixed(0)}M`;
-  }
-  return `₫${value.toLocaleString('vi-VN')}`;
-};
 
 const getStatusBadge = (status: ClaimSettlement['status']) => {
   const config = {
@@ -296,10 +287,10 @@ export default function ClaimsSettlementPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Pending Amount</CardTitle>
-            <DollarSign className="h-4 w-4 text-yellow-600" />
+            <DollarSign className="h-4 w-4 text-amber-600 dark:text-amber-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(stats.totalPendingAmount)}</div>
+            <div className="text-2xl font-bold"><CurrencyDisplay amount={stats.totalPendingAmount} size="lg" /></div>
             <p className="text-xs text-muted-foreground">To be settled</p>
           </CardContent>
         </Card>
@@ -307,11 +298,11 @@ export default function ClaimsSettlementPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Settled (MTD)</CardTitle>
-            <CheckCircle className="h-4 w-4 text-green-600" />
+            <CheckCircle className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">
-              {formatCurrency(stats.settledMTD)}
+            <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
+              <CurrencyDisplay amount={stats.settledMTD} size="lg" showToggle={false} />
             </div>
             <p className="text-xs text-muted-foreground">Paid this month</p>
           </CardContent>
@@ -395,12 +386,12 @@ export default function ClaimsSettlementPage() {
                       <div className="text-xs text-muted-foreground">{claim.customerCode}</div>
                     </TableCell>
                     <TableCell className="text-right font-mono">
-                      {formatCurrency(claim.claimAmount)}
+                      <CurrencyDisplay amount={claim.claimAmount} size="sm" />
                     </TableCell>
                     <TableCell className="text-right font-mono">
                       {claim.verifiedAmount > 0 ? (
-                        <span className={claim.adjustments < 0 ? 'text-yellow-600' : 'text-green-600'}>
-                          {formatCurrency(claim.verifiedAmount)}
+                        <span className={claim.adjustments < 0 ? 'text-amber-600 dark:text-amber-400' : 'text-emerald-600 dark:text-emerald-400'}>
+                          <CurrencyDisplay amount={claim.verifiedAmount} size="sm" showToggle={false} />
                         </span>
                       ) : (
                         <span className="text-muted-foreground">-</span>
@@ -408,7 +399,7 @@ export default function ClaimsSettlementPage() {
                     </TableCell>
                     <TableCell className="text-right font-mono font-medium">
                       {claim.settlementAmount > 0 ? (
-                        formatCurrency(claim.settlementAmount)
+                        <CurrencyDisplay amount={claim.settlementAmount} size="sm" />
                       ) : (
                         <span className="text-muted-foreground">-</span>
                       )}
@@ -467,13 +458,14 @@ export default function ClaimsSettlementPage() {
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Total Amount</p>
-                  <p className="text-lg font-bold">
-                    {formatCurrency(
-                      mockClaims
+                  <div className="text-lg font-bold">
+                    <CurrencyDisplay
+                      amount={mockClaims
                         .filter((c) => selectedClaims.includes(c.id))
-                        .reduce((sum, c) => sum + c.settlementAmount, 0)
-                    )}
-                  </p>
+                        .reduce((sum, c) => sum + c.settlementAmount, 0)}
+                      size="md"
+                    />
+                  </div>
                 </div>
               </div>
             </div>

@@ -4,7 +4,8 @@
 
 import { PieChart as RechartsPieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import { chartTheme, tooltipStyle } from './chart-theme';
-import { cn, formatCurrency } from '@/lib/utils';
+import { cn } from '@/lib/utils';
+import { formatCurrencyCompact } from '@/components/ui/currency-display';
 
 interface PieChartData {
   name: string;
@@ -30,7 +31,7 @@ const getFormatter = (formatValue?: 'currency' | 'number' | 'percent' | ((value:
   if (typeof formatValue === 'function') return formatValue;
   switch (formatValue) {
     case 'currency':
-      return (value: number) => formatCurrency(value);
+      return (value: number) => formatCurrencyCompact(value, 'VND');
     case 'percent':
       return (value: number) => `${value.toFixed(1)}%`;
     case 'number':

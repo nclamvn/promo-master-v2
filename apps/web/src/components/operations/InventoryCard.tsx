@@ -7,7 +7,8 @@ import { Package, TrendingUp, TrendingDown, Calendar } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { StockAlertBadge, ExpiryBadge } from './StockAlertBadge';
-import { formatCurrency, formatNumber } from '@/lib/utils';
+import { formatNumber } from '@/lib/utils';
+import { CurrencyDisplay } from '@/components/ui/currency-display';
 import type { StockStatus } from '@/types/operations';
 
 interface InventoryCardProps {
@@ -65,7 +66,7 @@ export function InventoryCard({
           </div>
           <div>
             <p className="text-xs text-muted-foreground">Value</p>
-            <p className="text-lg font-bold">{formatCurrency(value)}</p>
+            <p className="text-lg font-bold"><CurrencyDisplay amount={value} size="sm" /></p>
           </div>
         </div>
 
@@ -129,7 +130,7 @@ export function InventorySummaryCard({
 
   const iconColors = {
     default: 'text-muted-foreground',
-    success: 'text-green-600 dark:text-green-400',
+    success: 'text-emerald-600 dark:text-emerald-400',
     warning: 'text-yellow-600 dark:text-yellow-400',
     danger: 'text-red-600 dark:text-red-400',
   };
@@ -150,13 +151,13 @@ export function InventorySummaryCard({
         {trend !== undefined && (
           <div className="flex items-center mt-1">
             {trend > 0 ? (
-              <TrendingUp className="h-3 w-3 text-green-600 mr-1" />
+              <TrendingUp className="h-3 w-3 text-emerald-600 dark:text-emerald-400 mr-1" />
             ) : trend < 0 ? (
-              <TrendingDown className="h-3 w-3 text-red-600 mr-1" />
+              <TrendingDown className="h-3 w-3 text-red-600 dark:text-red-400 mr-1" />
             ) : null}
             <span
               className={`text-xs ${
-                trend > 0 ? 'text-green-600' : trend < 0 ? 'text-red-600' : 'text-muted-foreground'
+                trend > 0 ? 'text-emerald-600 dark:text-emerald-400' : trend < 0 ? 'text-red-600 dark:text-red-400' : 'text-muted-foreground'
               }`}
             >
               {trend > 0 ? '+' : ''}{trend}% vs last period

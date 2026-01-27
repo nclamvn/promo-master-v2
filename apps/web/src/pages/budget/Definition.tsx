@@ -67,6 +67,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { CurrencyDisplay } from '@/components/ui/currency-display';
 
 // Types
 interface BudgetDefinition {
@@ -175,19 +176,6 @@ const mockBudgets: BudgetDefinition[] = [
     updatedAt: '2025-12-31',
   },
 ];
-
-// Utility functions
-const formatCurrency = (value: number): string => {
-  if (value >= 1000000000) {
-    return `₫${(value / 1000000000).toFixed(1)}B`;
-  } else if (value >= 1000000) {
-    return `₫${(value / 1000000).toFixed(0)}M`;
-  }
-  return new Intl.NumberFormat('vi-VN', {
-    style: 'currency',
-    currency: 'VND',
-  }).format(value);
-};
 
 const getStatusBadge = (status: BudgetDefinition['status']) => {
   const statusConfig = {
@@ -331,7 +319,7 @@ export default function BudgetDefinitionPage() {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(summaryStats.totalBudget)}</div>
+            <div className="text-2xl font-bold"><CurrencyDisplay amount={summaryStats.totalBudget} size="lg" /></div>
             <p className="text-xs text-muted-foreground">
               FY{selectedYear} total defined
             </p>
@@ -344,7 +332,7 @@ export default function BudgetDefinitionPage() {
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(summaryStats.totalAllocated)}</div>
+            <div className="text-2xl font-bold"><CurrencyDisplay amount={summaryStats.totalAllocated} size="lg" /></div>
             <Progress
               value={(summaryStats.totalAllocated / summaryStats.totalBudget) * 100}
               className="mt-2"
@@ -361,8 +349,8 @@ export default function BudgetDefinitionPage() {
             <Calendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">
-              {formatCurrency(summaryStats.totalRemaining)}
+            <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
+              <CurrencyDisplay amount={summaryStats.totalRemaining} size="lg" />
             </div>
             <p className="text-xs text-muted-foreground">Available for allocation</p>
           </CardContent>
@@ -469,17 +457,17 @@ export default function BudgetDefinitionPage() {
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right font-mono">
-                      {formatCurrency(budget.totalAmount)}
+                      <CurrencyDisplay amount={budget.totalAmount} size="sm" />
                     </TableCell>
                     <TableCell className="text-right">
-                      <div className="font-mono">{formatCurrency(budget.allocatedAmount)}</div>
+                      <div className="font-mono"><CurrencyDisplay amount={budget.allocatedAmount} size="sm" /></div>
                       <Progress
                         value={(budget.allocatedAmount / budget.totalAmount) * 100}
                         className="mt-1 h-1"
                       />
                     </TableCell>
-                    <TableCell className="text-right font-mono text-green-600">
-                      {formatCurrency(budget.remainingAmount)}
+                    <TableCell className="text-right font-mono text-emerald-600 dark:text-emerald-400">
+                      <CurrencyDisplay amount={budget.remainingAmount} size="sm" />
                     </TableCell>
                     <TableCell>{getStatusBadge(budget.status)}</TableCell>
                     <TableCell>
@@ -518,7 +506,7 @@ export default function BudgetDefinitionPage() {
                             </DropdownMenuItem>
                           )}
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem className="text-red-600">
+                          <DropdownMenuItem className="text-red-600 dark:text-red-400">
                             <Trash2 className="mr-2 h-4 w-4" />
                             Delete
                           </DropdownMenuItem>

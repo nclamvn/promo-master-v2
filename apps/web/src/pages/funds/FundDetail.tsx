@@ -31,7 +31,8 @@ import {
 import { PromotionStatusBadge } from '@/components/promotions/PromotionStatusBadge';
 import { LoadingSpinner } from '@/components/shared/LoadingSpinner';
 import { useFund, useDeleteFund } from '@/hooks/useFunds';
-import { formatCurrency, formatDate } from '@/lib/utils';
+import { formatDate } from '@/lib/utils';
+import { CurrencyDisplay } from '@/components/ui/currency-display';
 import type { Fund, Promotion, FundType } from '@/types';
 
 // Demo data
@@ -188,7 +189,7 @@ export default function FundDetail() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(fundData.totalBudget)}</div>
+            <CurrencyDisplay amount={fundData.totalBudget} size="lg" />
           </CardContent>
         </Card>
 
@@ -199,7 +200,7 @@ export default function FundDetail() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(fundData.allocatedBudget)}</div>
+            <CurrencyDisplay amount={fundData.allocatedBudget} size="lg" />
             <p className="text-sm text-muted-foreground">{allocatedPercent}% of total</p>
           </CardContent>
         </Card>
@@ -211,8 +212,8 @@ export default function FundDetail() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className={`text-2xl font-bold ${getUtilizationColor(utilizationPercent)}`}>
-              {formatCurrency(fundData.utilizedBudget)}
+            <div className={getUtilizationColor(utilizationPercent)}>
+              <CurrencyDisplay amount={fundData.utilizedBudget} size="lg" />
             </div>
             <p className="text-sm text-muted-foreground">{utilizationPercent}% of total</p>
           </CardContent>
@@ -225,8 +226,8 @@ export default function FundDetail() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">
-              {formatCurrency(fundData.availableBudget)}
+            <div className="text-emerald-600 dark:text-emerald-400">
+              <CurrencyDisplay amount={fundData.availableBudget} size="lg" />
             </div>
           </CardContent>
         </Card>
@@ -246,8 +247,8 @@ export default function FundDetail() {
             </div>
             <Progress value={allocatedPercent} className="h-3" />
             <div className="flex justify-between text-xs text-muted-foreground">
-              <span>{formatCurrency(fundData.allocatedBudget)}</span>
-              <span>{formatCurrency(fundData.totalBudget)}</span>
+              <CurrencyDisplay amount={fundData.allocatedBudget} size="sm" showToggle={false} />
+              <CurrencyDisplay amount={fundData.totalBudget} size="sm" showToggle={false} />
             </div>
           </div>
 
@@ -260,8 +261,8 @@ export default function FundDetail() {
             </div>
             <Progress value={utilizationPercent} className="h-3 [&>div]:bg-green-500" />
             <div className="flex justify-between text-xs text-muted-foreground">
-              <span>{formatCurrency(fundData.utilizedBudget)}</span>
-              <span>{formatCurrency(fundData.totalBudget)}</span>
+              <CurrencyDisplay amount={fundData.utilizedBudget} size="sm" showToggle={false} />
+              <CurrencyDisplay amount={fundData.totalBudget} size="sm" showToggle={false} />
             </div>
           </div>
         </CardContent>
@@ -356,7 +357,7 @@ export default function FundDetail() {
                         <p className="text-sm text-muted-foreground">{promo.name}</p>
                       </div>
                       <div className="text-right">
-                        <p className="font-medium">{formatCurrency(promo.budget)}</p>
+                        <CurrencyDisplay amount={promo.budget} size="sm" />
                         <PromotionStatusBadge status={promo.status} />
                       </div>
                     </div>

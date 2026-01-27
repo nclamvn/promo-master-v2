@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { AccrualStatusBadge } from './AccrualStatusBadge';
-import { formatCurrency } from '@/lib/utils';
+import { CurrencyDisplay } from '@/components/ui/currency-display';
 import { Calendar, FileText, ArrowRight } from 'lucide-react';
 import type { AccrualEntry } from '@/types/finance';
 
@@ -42,9 +42,7 @@ export function AccrualCard({ accrual, onPost, onReverse }: AccrualCardProps) {
             <span>Period: {accrual.period}</span>
           </div>
           <div className="text-right">
-            <span className="text-lg font-semibold">
-              {formatCurrency(accrual.amount)}
-            </span>
+            <CurrencyDisplay amount={accrual.amount} size="md" />
           </div>
         </div>
 

@@ -17,7 +17,8 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useState } from 'react';
-import { formatCurrency, formatNumber } from '@/lib/utils';
+import { formatNumber } from '@/lib/utils';
+import { formatCurrencyCompact } from '@/components/ui/currency-display';
 
 interface TrendDataPoint {
   period: string;
@@ -55,7 +56,7 @@ export function SellTrendChart({
 
   const formatValue = (value: number) => {
     if (viewMode === 'value') {
-      return formatCurrency(value);
+      return formatCurrencyCompact(value, 'VND');
     }
     return formatNumber(value);
   };

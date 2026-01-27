@@ -40,7 +40,8 @@ import {
   useApproveClaim,
   useRejectClaim,
 } from '@/hooks/useClaims';
-import { formatCurrency, formatDate } from '@/lib/utils';
+import { formatDate } from '@/lib/utils';
+import { CurrencyDisplay } from '@/components/ui/currency-display';
 import type { Claim } from '@/types';
 
 // Demo data
@@ -198,7 +199,7 @@ export default function ClaimDetail() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(claimData.claimAmount)}</div>
+            <CurrencyDisplay amount={claimData.claimAmount} size="lg" />
           </CardContent>
         </Card>
 
@@ -209,8 +210,8 @@ export default function ClaimDetail() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">
-              {claimData.approvedAmount ? formatCurrency(claimData.approvedAmount) : '-'}
+            <div className="text-emerald-600 dark:text-emerald-400">
+              {claimData.approvedAmount ? <CurrencyDisplay amount={claimData.approvedAmount} size="lg" /> : '-'}
             </div>
           </CardContent>
         </Card>
@@ -222,8 +223,8 @@ export default function ClaimDetail() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-purple-600">
-              {claimData.paidAmount ? formatCurrency(claimData.paidAmount) : '-'}
+            <div className="text-purple-600 dark:text-purple-400">
+              {claimData.paidAmount ? <CurrencyDisplay amount={claimData.paidAmount} size="lg" /> : '-'}
             </div>
           </CardContent>
         </Card>
@@ -264,7 +265,7 @@ export default function ClaimDetail() {
                 <p className="text-sm text-muted-foreground flex items-center gap-1">
                   <DollarSign className="h-4 w-4" /> Amount
                 </p>
-                <p className="font-medium">{formatCurrency(claimData.claimAmount)}</p>
+                <CurrencyDisplay amount={claimData.claimAmount} size="sm" />
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Status</p>

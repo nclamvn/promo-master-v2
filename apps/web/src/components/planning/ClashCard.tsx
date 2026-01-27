@@ -14,7 +14,8 @@ import {
   DollarSign,
 } from 'lucide-react';
 import { ClashStatusBadge, ClashSeverityBadge } from './ClashStatusBadge';
-import { formatCurrency, formatDate } from '@/lib/utils';
+import { formatDate } from '@/lib/utils';
+import { CurrencyDisplay } from '@/components/ui/currency-display';
 import type { Clash } from '@/hooks/planning/useClashes';
 
 interface ClashCardProps {
@@ -119,12 +120,12 @@ export function ClashCard({ clash, onResolve, onDismiss }: ClashCardProps) {
 
         {/* Potential Impact */}
         {clash.potentialImpact > 0 && (
-          <div className="flex items-center gap-2 p-2 bg-yellow-500/10 dark:bg-yellow-500/20 rounded border border-yellow-500/30">
-            <DollarSign className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
-            <span className="text-sm">
+          <div className="flex items-center gap-2 p-2 bg-amber-500/10 dark:bg-amber-500/20 rounded border border-amber-500/30">
+            <DollarSign className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+            <span className="text-sm flex items-center gap-1">
               Potential Impact:{' '}
-              <span className="font-semibold text-yellow-700 dark:text-yellow-300">
-                {formatCurrency(clash.potentialImpact)}
+              <span className="font-semibold text-amber-700 dark:text-amber-300">
+                <CurrencyDisplay amount={clash.potentialImpact} size="sm" />
               </span>
             </span>
           </div>

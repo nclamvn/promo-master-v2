@@ -34,7 +34,8 @@ import {
   useDisputeDeduction,
   useResolveDeduction,
 } from '@/hooks/useDeductions';
-import { formatCurrency, formatDate } from '@/lib/utils';
+import { formatDate } from '@/lib/utils';
+import { CurrencyDisplay } from '@/components/ui/currency-display';
 import { useToast } from '@/hooks/useToast';
 
 export default function DeductionDetailPage() {
@@ -176,7 +177,7 @@ export default function DeductionDetailPage() {
                 <Label className="text-muted-foreground">Amount</Label>
                 <div className="flex items-center gap-2 font-medium text-lg">
                   <DollarSign className="h-4 w-4 text-muted-foreground" />
-                  {formatCurrency(deduction.amount)}
+                  <CurrencyDisplay amount={deduction.amount} size="sm" />
                 </div>
               </div>
               <div>
@@ -235,7 +236,7 @@ export default function DeductionDetailPage() {
         {deduction.matchedClaim && (
           <Card className="md:col-span-2">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-green-600">
+              <CardTitle className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400">
                 <CheckCircle className="h-5 w-5" />
                 Matched Claim
               </CardTitle>
@@ -251,7 +252,7 @@ export default function DeductionDetailPage() {
                 </div>
                 <div>
                   <Label className="text-muted-foreground">Amount</Label>
-                  <div className="font-medium">{formatCurrency(deduction.matchedClaim.amount)}</div>
+                  <div className="font-medium"><CurrencyDisplay amount={deduction.matchedClaim.amount} size="sm" /></div>
                 </div>
                 <div>
                   <Label className="text-muted-foreground">Status</Label>
@@ -368,7 +369,7 @@ export default function DeductionDetailPage() {
                   placeholder="0.00"
                 />
                 <p className="text-sm text-muted-foreground">
-                  Remainder will be written off: {formatCurrency(Math.max(0, deduction.amount - (parseFloat(partialAmount) || 0)))}
+                  Remainder will be written off: <CurrencyDisplay amount={Math.max(0, deduction.amount - (parseFloat(partialAmount) || 0))} size="sm" />
                 </p>
               </div>
             )}

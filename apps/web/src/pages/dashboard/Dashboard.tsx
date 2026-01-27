@@ -28,7 +28,8 @@ import { BarChart } from '@/components/charts/BarChart';
 import { PieChart } from '@/components/charts/PieChart';
 import { PageLoading } from '@/components/shared/LoadingSpinner';
 import { useDashboardStats, useSpendTrend, useStatusDistribution, useTopCustomers } from '@/hooks/useDashboard';
-import { formatCurrency, formatRelativeTime } from '@/lib/utils';
+import { formatRelativeTime } from '@/lib/utils';
+import { formatCurrencyCompact } from '@/components/ui/currency-display';
 import { cn } from '@/lib/utils';
 
 // Status colors for charts
@@ -193,14 +194,14 @@ export default function Dashboard() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <KPICard
           title="Total Budget"
-          value={formatCurrency(dashboardStats.totalBudget)}
+          amount={dashboardStats.totalBudget}
           trend={{ value: 12, period: 'vs last year' }}
           status="success"
           icon={DollarSign}
         />
         <KPICard
           title="Total Spend"
-          value={formatCurrency(dashboardStats.utilizedBudget)}
+          amount={dashboardStats.utilizedBudget}
           previousValue={`${utilizationPercent}% utilized`}
           sparkline={sparklineData}
           status={Number(utilizationPercent) > 80 ? 'warning' : 'success'}
@@ -226,13 +227,13 @@ export default function Dashboard() {
       <div className="grid grid-cols-3 lg:grid-cols-6 gap-3">
         <KPICard
           title="Remaining Budget"
-          value={formatCurrency(remaining)}
+          amount={remaining}
           compact
           status="neutral"
         />
         <KPICard
           title="Avg. Claim Value"
-          value={formatCurrency(850000000 / Math.max(dashboardStats.pendingClaims, 1))}
+          amount={850000000 / Math.max(dashboardStats.pendingClaims, 1)}
           compact
           status="neutral"
         />
@@ -298,7 +299,7 @@ export default function Dashboard() {
             title="Claims by Status"
             data={demoClaimsByStatus}
             dataKey="value"
-            formatValue={formatCurrency}
+            formatValue={(v) => formatCurrencyCompact(v)}
             height={250}
           />
         </div>
@@ -309,7 +310,7 @@ export default function Dashboard() {
             title="Top Customers by Spend"
             data={topCustomers}
             dataKey="value"
-            formatValue={formatCurrency}
+            formatValue={(v) => formatCurrencyCompact(v)}
             height={250}
           />
         </div>

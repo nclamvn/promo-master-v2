@@ -29,7 +29,8 @@ import { LoadingSpinner } from '@/components/shared/LoadingSpinner';
 import { SearchInput } from '@/components/shared/SearchInput';
 import { ClaimStatusBadge } from '@/components/claims/ClaimStatusBadge';
 import { useClaims, useDeleteClaim } from '@/hooks/useClaims';
-import { formatCurrency, formatDate } from '@/lib/utils';
+import { formatDate } from '@/lib/utils';
+import { CurrencyDisplay } from '@/components/ui/currency-display';
 import type { Claim, ClaimStatus } from '@/types';
 
 type ViewMode = 'table' | 'grid';
@@ -309,10 +310,10 @@ export default function ClaimList() {
         header: 'Amount',
         cell: ({ row }) => (
           <div>
-            <p className="font-medium">{formatCurrency(row.original.claimAmount)}</p>
+            <CurrencyDisplay amount={row.original.claimAmount} size="sm" />
             {row.original.approvedAmount && (
-              <p className="text-sm text-green-600">
-                Approved: {formatCurrency(row.original.approvedAmount)}
+              <p className="text-sm text-emerald-600 dark:text-emerald-400">
+                Approved: <CurrencyDisplay amount={row.original.approvedAmount} size="sm" showToggle={false} />
               </p>
             )}
           </div>
@@ -477,16 +478,14 @@ export default function ClaimList() {
                     </div>
 
                     <div className="pt-2 border-t">
-                      <div className="flex justify-between">
+                      <div className="flex justify-between items-center">
                         <span className="text-sm text-muted-foreground">Claimed</span>
-                        <span className="font-medium">{formatCurrency(claim.claimAmount)}</span>
+                        <CurrencyDisplay amount={claim.claimAmount} size="sm" />
                       </div>
                       {claim.approvedAmount && (
-                        <div className="flex justify-between mt-1">
+                        <div className="flex justify-between items-center mt-1">
                           <span className="text-sm text-muted-foreground">Approved</span>
-                          <span className="font-medium text-green-600">
-                            {formatCurrency(claim.approvedAmount)}
-                          </span>
+                          <CurrencyDisplay amount={claim.approvedAmount} size="sm" valueClassName="text-emerald-600 dark:text-emerald-400" />
                         </div>
                       )}
                     </div>

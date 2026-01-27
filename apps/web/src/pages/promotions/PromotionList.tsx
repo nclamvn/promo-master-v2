@@ -23,7 +23,8 @@ import { PromotionFilters } from '@/components/promotions/PromotionFilters';
 import { PromotionCard } from '@/components/promotions/PromotionCard';
 import { PromotionStatusBadge } from '@/components/promotions/PromotionStatusBadge';
 import { usePromotions, useDeletePromotion } from '@/hooks/usePromotions';
-import { formatCurrency, formatDate } from '@/lib/utils';
+import { formatDate } from '@/lib/utils';
+import { CurrencyDisplay } from '@/components/ui/currency-display';
 import type { Promotion, PromotionStatus } from '@/types';
 
 type ViewMode = 'table' | 'grid';
@@ -250,9 +251,9 @@ export default function PromotionList() {
         header: 'Budget',
         cell: ({ row }) => (
           <div>
-            <p className="font-medium">{formatCurrency(row.original.budget)}</p>
+            <CurrencyDisplay amount={row.original.budget} size="sm" />
             <p className="text-sm text-muted-foreground">
-              Spent: {formatCurrency(row.original.actualSpend)}
+              Spent: <CurrencyDisplay amount={row.original.actualSpend} size="sm" showToggle={false} />
             </p>
           </div>
         ),

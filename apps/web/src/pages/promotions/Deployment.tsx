@@ -48,6 +48,7 @@ import {
   RefreshCw,
   XCircle,
 } from 'lucide-react';
+import { CurrencyDisplay, formatCurrencyCompact } from '@/components/ui/currency-display';
 
 // Types
 interface DeploymentPromotion {
@@ -154,14 +155,6 @@ const mockChecklist: ChecklistItem[] = [
   { id: '12', category: 'Approval', item: 'Final approval obtained', status: 'PENDING', required: true },
 ];
 
-// Utility functions
-const formatCurrency = (value: number): string => {
-  if (value >= 1000000000) {
-    return `₫${(value / 1000000000).toFixed(1)}B`;
-  }
-  return `₫${(value / 1000000).toFixed(0)}M`;
-};
-
 const formatDate = (dateStr: string): string => {
   return new Date(dateStr).toLocaleDateString('vi-VN', {
     day: '2-digit',
@@ -190,13 +183,13 @@ const getStatusBadge = (status: DeploymentPromotion['deploymentStatus']) => {
 const getChecklistStatusIcon = (status: ChecklistItem['status']) => {
   switch (status) {
     case 'COMPLETED':
-      return <CheckCircle className="h-4 w-4 text-green-600" />;
+      return <CheckCircle className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />;
     case 'FAILED':
-      return <XCircle className="h-4 w-4 text-red-600" />;
+      return <XCircle className="h-4 w-4 text-red-600 dark:text-red-400" />;
     case 'SKIPPED':
       return <Clock className="h-4 w-4 text-gray-400" />;
     default:
-      return <Clock className="h-4 w-4 text-yellow-600" />;
+      return <Clock className="h-4 w-4 text-amber-600 dark:text-amber-400" />;
   }
 };
 
@@ -264,10 +257,10 @@ export default function PromotionDeploymentPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Deployed</CardTitle>
-            <Rocket className="h-4 w-4 text-green-600" />
+            <Rocket className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">{stats.deployed}</div>
+            <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{stats.deployed}</div>
             <p className="text-xs text-muted-foreground">Live in DMS</p>
           </CardContent>
         </Card>
@@ -275,10 +268,10 @@ export default function PromotionDeploymentPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Ready</CardTitle>
-            <CheckCircle className="h-4 w-4 text-blue-600" />
+            <CheckCircle className="h-4 w-4 text-blue-600 dark:text-blue-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-blue-600">{stats.ready}</div>
+            <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">{stats.ready}</div>
             <p className="text-xs text-muted-foreground">Awaiting deployment</p>
           </CardContent>
         </Card>
@@ -286,10 +279,10 @@ export default function PromotionDeploymentPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">In Progress</CardTitle>
-            <Clock className="h-4 w-4 text-yellow-600" />
+            <Clock className="h-4 w-4 text-amber-600 dark:text-amber-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-yellow-600">{stats.pending}</div>
+            <div className="text-2xl font-bold text-amber-600 dark:text-amber-400">{stats.pending}</div>
             <p className="text-xs text-muted-foreground">Preparing or deploying</p>
           </CardContent>
         </Card>
@@ -344,7 +337,7 @@ export default function PromotionDeploymentPage() {
                         </span>
                         <span className="flex items-center gap-1">
                           <DollarSign className="h-3 w-3" />
-                          {formatCurrency(promo.budget)}
+                          {formatCurrencyCompact(promo.budget, 'VND')}
                         </span>
                       </div>
                     </div>
@@ -486,7 +479,7 @@ export default function PromotionDeploymentPage() {
               <div className="p-4 bg-muted rounded-lg">
                 <p className="font-medium">{selectedPromotion.name}</p>
                 <p className="text-2xl font-bold mt-2">
-                  {formatCurrency(selectedPromotion.budget)}
+                  <CurrencyDisplay amount={selectedPromotion.budget} size="lg" />
                 </p>
               </div>
             )}
@@ -541,7 +534,7 @@ export default function PromotionDeploymentPage() {
                     </div>
                     <div>
                       <span className="text-muted-foreground">Budget:</span>
-                      <p>{formatCurrency(selectedPromotion.budget)}</p>
+                      <p>{formatCurrencyCompact(selectedPromotion.budget, 'VND')}</p>
                     </div>
                   </div>
                 </div>

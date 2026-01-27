@@ -11,7 +11,7 @@ import { KPICard } from '@/components/charts/KPICard';
 import { LineChart } from '@/components/charts/LineChart';
 import { BarChart } from '@/components/charts/BarChart';
 import { Progress } from '@/components/ui/progress';
-import { formatCurrency } from '@/lib/utils';
+import { CurrencyDisplay, formatCurrencyCompact } from '@/components/ui/currency-display';
 import {
   DollarSign,
   Target,
@@ -91,8 +91,8 @@ export default function WeeklyKPI() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <KPICard
           title="Total Spend"
-          value={formatCurrency(totalActual)}
-          subtitle={`Target: ${formatCurrency(totalTarget)}`}
+          amount={totalActual}
+          subtitle={`Target: ${formatCurrencyCompact(totalTarget)}`}
           icon={DollarSign}
           trend={{ value: 8.5, label: 'vs last week' }}
         />
@@ -154,13 +154,13 @@ export default function WeeklyKPI() {
                 <div key={promo.name} className="space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="font-medium">{promo.name}</span>
-                    <span className="text-sm text-muted-foreground">
-                      {formatCurrency(promo.spend)} / {formatCurrency(promo.target)}
+                    <span className="text-sm text-muted-foreground flex items-center gap-1">
+                      <CurrencyDisplay amount={promo.spend} size="sm" showToggle={false} /> / <CurrencyDisplay amount={promo.target} size="sm" showToggle={false} />
                     </span>
                   </div>
                   <div className="flex items-center gap-3">
                     <Progress value={Math.min(progress, 100)} className="flex-1" />
-                    <span className={`text-sm font-medium ${progress >= 100 ? 'text-green-600' : progress >= 80 ? 'text-yellow-600' : 'text-red-600'}`}>
+                    <span className={`text-sm font-medium ${progress >= 100 ? 'text-emerald-600 dark:text-emerald-400' : progress >= 80 ? 'text-amber-600 dark:text-amber-400' : 'text-red-600 dark:text-red-400'}`}>
                       {progress.toFixed(0)}%
                     </span>
                   </div>
@@ -196,9 +196,9 @@ export default function WeeklyKPI() {
                   <span className="font-medium">{item.status}</span>
                 </div>
                 <p className="mt-2 text-2xl font-bold">{item.count}</p>
-                <p className="text-sm text-muted-foreground">
-                  {formatCurrency(item.amount)}
-                </p>
+                <div className="text-sm text-muted-foreground">
+                  <CurrencyDisplay amount={item.amount} size="sm" />
+                </div>
               </div>
             ))}
           </div>

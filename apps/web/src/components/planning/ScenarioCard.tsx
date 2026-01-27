@@ -23,7 +23,8 @@ import {
   BarChart3,
 } from 'lucide-react';
 import { ScenarioStatusBadge } from './ScenarioStatusBadge';
-import { formatCurrency, formatPercent } from '@/lib/utils';
+import { formatPercent } from '@/lib/utils';
+import { CurrencyDisplay } from '@/components/ui/currency-display';
 import type { Scenario } from '@/hooks/planning/useScenarios';
 
 interface ScenarioCardProps {
@@ -124,7 +125,7 @@ export function ScenarioCard({
           </div>
           <div className="flex items-center gap-1">
             <DollarSign className="h-4 w-4" />
-            {formatCurrency(parameters.budget)} budget
+            <CurrencyDisplay amount={parameters.budget} size="sm" showToggle={false} /> budget
           </div>
           <div className="flex items-center gap-1">
             <TrendingUp className="h-4 w-4" />
@@ -137,15 +138,15 @@ export function ScenarioCard({
           <div className="grid grid-cols-4 gap-4 pt-4 border-t">
             <div>
               <p className="text-xs text-muted-foreground">ROI</p>
-              <p className={`text-lg font-semibold ${results.roi >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+              <p className={`text-lg font-semibold ${results.roi >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
                 {formatPercent(results.roi)}
               </p>
             </div>
             <div>
               <p className="text-xs text-muted-foreground">Net Margin</p>
-              <p className={`text-lg font-semibold ${results.netMargin >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                {formatCurrency(results.netMargin)}
-              </p>
+              <div className={results.netMargin >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}>
+                <CurrencyDisplay amount={results.netMargin} size="md" />
+              </div>
             </div>
             <div>
               <p className="text-xs text-muted-foreground">Sales Lift</p>

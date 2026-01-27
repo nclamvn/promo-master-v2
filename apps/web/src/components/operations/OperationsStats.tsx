@@ -17,7 +17,8 @@ import {
   Target,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { cn, formatCurrency, formatNumber, formatPercent } from '@/lib/utils';
+import { cn, formatNumber, formatPercent } from '@/lib/utils';
+import { CurrencyDisplay, formatCurrencyCompact } from '@/components/ui/currency-display';
 
 interface StatCardProps {
   title: string;
@@ -50,7 +51,7 @@ export function StatCard({
 
   const iconColors = {
     default: 'text-muted-foreground',
-    success: 'text-green-600 dark:text-green-400',
+    success: 'text-emerald-600 dark:text-emerald-400',
     warning: 'text-yellow-600 dark:text-yellow-400',
     danger: 'text-red-600 dark:text-red-400',
     info: 'text-blue-600 dark:text-blue-400',
@@ -70,14 +71,14 @@ export function StatCard({
         {trend !== undefined && (
           <div className="flex items-center mt-1">
             {trend > 0 ? (
-              <TrendingUp className="h-3 w-3 text-green-600 mr-1" />
+              <TrendingUp className="h-3 w-3 text-emerald-600 dark:text-emerald-400 mr-1" />
             ) : trend < 0 ? (
-              <TrendingDown className="h-3 w-3 text-red-600 mr-1" />
+              <TrendingDown className="h-3 w-3 text-red-600 dark:text-red-400 mr-1" />
             ) : null}
             <span
               className={cn(
                 'text-xs',
-                trend > 0 ? 'text-green-600' : trend < 0 ? 'text-red-600' : 'text-muted-foreground'
+                trend > 0 ? 'text-emerald-600 dark:text-emerald-400' : trend < 0 ? 'text-red-600 dark:text-red-400' : 'text-muted-foreground'
               )}
             >
               {trend > 0 ? '+' : ''}
@@ -215,7 +216,7 @@ export function InventoryStats({
     <div className="grid gap-4 md:grid-cols-5">
       <StatCard
         title="Total Value"
-        value={formatCurrency(totalValue)}
+        value={formatCurrencyCompact(totalValue, 'VND')}
         icon={<DollarSign className="h-4 w-4" />}
       />
       <StatCard

@@ -5,7 +5,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Trophy, Medal, Award } from 'lucide-react';
-import { formatCurrency, formatPercent } from '@/lib/utils';
+import { formatPercent } from '@/lib/utils';
+import { formatCurrencyCompact } from '@/components/ui/currency-display';
 import type { CompareResult } from '@/hooks/planning/useScenarios';
 
 interface ComparisonChartProps {
@@ -21,7 +22,7 @@ const METRIC_CONFIG: Record<
   }
 > = {
   roi: { label: 'ROI (%)', format: formatPercent, higherIsBetter: true },
-  netMargin: { label: 'Net Margin', format: formatCurrency, higherIsBetter: true },
+  netMargin: { label: 'Net Margin', format: (v) => formatCurrencyCompact(v, 'VND'), higherIsBetter: true },
   salesLiftPercent: {
     label: 'Sales Lift (%)',
     format: formatPercent,
@@ -34,26 +35,26 @@ const METRIC_CONFIG: Record<
   },
   incrementalSales: {
     label: 'Incremental Sales',
-    format: formatCurrency,
+    format: (v) => formatCurrencyCompact(v, 'VND'),
     higherIsBetter: true,
   },
   promotionCost: {
     label: 'Promotion Cost',
-    format: formatCurrency,
+    format: (v) => formatCurrencyCompact(v, 'VND'),
     higherIsBetter: false,
   },
   costPerIncrementalUnit: {
     label: 'Cost per Unit',
-    format: formatCurrency,
+    format: (v) => formatCurrencyCompact(v, 'VND'),
     higherIsBetter: false,
   },
-  grossMargin: { label: 'Gross Margin', format: formatCurrency, higherIsBetter: true },
+  grossMargin: { label: 'Gross Margin', format: (v) => formatCurrencyCompact(v, 'VND'), higherIsBetter: true },
 };
 
 function RankIcon({ rank }: { rank: number }) {
-  if (rank === 0) return <Trophy className="h-4 w-4 text-yellow-600" />;
+  if (rank === 0) return <Trophy className="h-4 w-4 text-amber-600 dark:text-amber-400" />;
   if (rank === 1) return <Medal className="h-4 w-4 text-gray-500" />;
-  if (rank === 2) return <Award className="h-4 w-4 text-orange-600" />;
+  if (rank === 2) return <Award className="h-4 w-4 text-orange-600 dark:text-orange-400" />;
   return null;
 }
 
@@ -84,7 +85,7 @@ export function ComparisonChart({ comparison }: ComparisonChartProps) {
               <div
                 key={scenario.id}
                 className={`flex items-center gap-2 px-3 py-2 rounded-lg border ${
-                  scenario.id === overallWinner ? 'bg-green-50 border-green-300' : ''
+                  scenario.id === overallWinner ? 'bg-emerald-50 dark:bg-emerald-950 border-emerald-300 dark:border-emerald-700' : ''
                 }`}
               >
                 <div
@@ -158,12 +159,12 @@ export function ComparisonChart({ comparison }: ComparisonChartProps) {
                           <td
                             key={scenario.id}
                             className={`text-right py-3 px-4 ${
-                              isWinner ? 'bg-green-50 font-semibold' : ''
+                              isWinner ? 'bg-emerald-50 dark:bg-emerald-950 font-semibold' : ''
                             }`}
                           >
                             <div className="flex items-center justify-end gap-2">
                               {rank >= 0 && rank < 3 && <RankIcon rank={rank} />}
-                              <span className={isWinner ? 'text-green-700' : ''}>
+                              <span className={isWinner ? 'text-emerald-700 dark:text-emerald-300' : ''}>
                                 {config.format(value)}
                               </span>
                             </div>
@@ -198,7 +199,7 @@ export function ComparisonChart({ comparison }: ComparisonChartProps) {
                   <div className="flex justify-between text-sm">
                     <span className="font-medium">{scenario.name}</span>
                     <span
-                      className={roi >= 0 ? 'text-green-600' : 'text-red-600'}
+                      className={roi >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}
                     >
                       {formatPercent(roi)}
                     </span>
@@ -206,7 +207,7 @@ export function ComparisonChart({ comparison }: ComparisonChartProps) {
                   <div className="h-6 bg-muted rounded-full overflow-hidden">
                     <div
                       className={`h-full rounded-full transition-all ${
-                        roi >= 0 ? 'bg-green-500' : 'bg-red-500'
+                        roi >= 0 ? 'bg-emerald-500' : 'bg-red-500'
                       }`}
                       style={{
                         width: `${width}%`,
@@ -242,9 +243,9 @@ export function ComparisonChart({ comparison }: ComparisonChartProps) {
                   <div className="flex justify-between text-sm">
                     <span className="font-medium">{scenario.name}</span>
                     <span
-                      className={margin >= 0 ? 'text-green-600' : 'text-red-600'}
+                      className={margin >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}
                     >
-                      {formatCurrency(margin)}
+                      {formatCurrencyCompact(margin, 'VND')}
                     </span>
                   </div>
                   <div className="h-6 bg-muted rounded-full overflow-hidden">
@@ -264,10 +265,10 @@ export function ComparisonChart({ comparison }: ComparisonChartProps) {
       </Card>
 
       {/* Recommendation */}
-      <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
+      <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950 dark:to-indigo-950 border-blue-200 dark:border-blue-800">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Trophy className="h-5 w-5 text-yellow-600" />
+            <Trophy className="h-5 w-5 text-amber-600 dark:text-amber-400" />
             AI Recommendation
           </CardTitle>
         </CardHeader>

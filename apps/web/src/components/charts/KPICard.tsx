@@ -5,10 +5,14 @@
 import { ReactNode, isValidElement, createElement } from 'react';
 import { TrendingUp, TrendingDown, Minus, ArrowRight, LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { CurrencyDisplay } from '@/components/ui/currency-display';
 
 interface KPICardProps {
   title: string;
-  value: string | number;
+  /** Display value as string/number (ignored if amount is provided) */
+  value?: string | number;
+  /** Amount in VND - enables currency mode with VND/USD toggle */
+  amount?: number;
   previousValue?: string | number;
   subtitle?: string;
   unit?: string;
@@ -27,6 +31,7 @@ interface KPICardProps {
 export function KPICard({
   title,
   value,
+  amount,
   previousValue,
   subtitle,
   unit,
@@ -37,6 +42,13 @@ export function KPICard({
   className,
   compact = false,
 }: KPICardProps) {
+  // Render value - either CurrencyDisplay (if amount) or plain text
+  const renderValue = (size: 'sm' | 'md' | 'lg' = 'lg') => {
+    if (amount !== undefined) {
+      return <CurrencyDisplay amount={amount} size={size} />;
+    }
+    return <>{value}</>;
+  };
   const getTrendIcon = () => {
     if (!trend) return null;
     if (trend.value > 0) return <TrendingUp className="h-3.5 w-3.5" />;
@@ -152,8 +164,8 @@ export function KPICard({
           <span className="text-xs text-foreground-muted uppercase tracking-wide">{title}</span>
         </div>
         <div className="flex items-center gap-3">
-          <span className="text-lg font-bold font-mono tabular-nums">{value}</span>
-          {unit && <span className="text-xs text-foreground-subtle">{unit}</span>}
+          <span className="text-lg font-bold font-mono tabular-nums">{renderValue('sm')}</span>
+          {unit && !amount && <span className="text-xs text-foreground-subtle">{unit}</span>}
           {trend && (
             <span className={cn('flex items-center gap-1 text-xs font-medium', getTrendColor())}>
               {getTrendIcon()}
@@ -208,9 +220,9 @@ export function KPICard({
           <div>
             <div className="flex items-baseline gap-1.5">
               <span className="text-3xl font-bold text-foreground font-mono tabular-nums tracking-tight">
-                {value}
+                {renderValue('lg')}
               </span>
-              {unit && (
+              {unit && !amount && (
                 <span className="text-sm font-medium text-foreground-muted ml-1">{unit}</span>
               )}
             </div>

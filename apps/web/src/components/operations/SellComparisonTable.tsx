@@ -13,7 +13,8 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
-import { formatCurrency, formatNumber, formatPercent } from '@/lib/utils';
+import { formatNumber, formatPercent } from '@/lib/utils';
+import { CurrencyDisplay } from '@/components/ui/currency-display';
 
 interface ComparisonRow {
   groupKey: string;
@@ -82,14 +83,14 @@ export function SellComparisonTable({
 
     if (growth > 0) {
       return (
-        <span className="flex items-center text-green-600 text-sm">
+        <span className="flex items-center text-emerald-600 dark:text-emerald-400 text-sm">
           <TrendingUp className="h-3 w-3 mr-1" />
           +{growth.toFixed(1)}%
         </span>
       );
     } else if (growth < 0) {
       return (
-        <span className="flex items-center text-red-600 text-sm">
+        <span className="flex items-center text-red-600 dark:text-red-400 text-sm">
           <TrendingDown className="h-3 w-3 mr-1" />
           {growth.toFixed(1)}%
         </span>
@@ -155,9 +156,9 @@ export function SellComparisonTable({
                 >
                   <TableCell className="font-medium">{row.groupName}</TableCell>
                   <TableCell className="text-right">{formatNumber(row.sellIn.qty)}</TableCell>
-                  <TableCell className="text-right">{formatCurrency(row.sellIn.value)}</TableCell>
+                  <TableCell className="text-right"><CurrencyDisplay amount={row.sellIn.value} size="sm" /></TableCell>
                   <TableCell className="text-right">{formatNumber(row.sellOut.qty)}</TableCell>
-                  <TableCell className="text-right">{formatCurrency(row.sellOut.value)}</TableCell>
+                  <TableCell className="text-right"><CurrencyDisplay amount={row.sellOut.value} size="sm" /></TableCell>
                   <TableCell className="text-right">{formatNumber(row.stock.qty)}</TableCell>
                   <TableCell className="text-center">
                     {getSellThroughBadge(row.sellThroughRate)}
@@ -173,9 +174,9 @@ export function SellComparisonTable({
               <TableRow className="bg-muted/50 font-semibold">
                 <TableCell>Total</TableCell>
                 <TableCell className="text-right">{formatNumber(totals.sellInQty)}</TableCell>
-                <TableCell className="text-right">{formatCurrency(totals.sellInValue)}</TableCell>
+                <TableCell className="text-right"><CurrencyDisplay amount={totals.sellInValue} size="sm" /></TableCell>
                 <TableCell className="text-right">{formatNumber(totals.sellOutQty)}</TableCell>
-                <TableCell className="text-right">{formatCurrency(totals.sellOutValue)}</TableCell>
+                <TableCell className="text-right"><CurrencyDisplay amount={totals.sellOutValue} size="sm" /></TableCell>
                 <TableCell className="text-right">{formatNumber(totals.stockQty)}</TableCell>
                 <TableCell className="text-center">
                   {getSellThroughBadge(avgSellThrough)}

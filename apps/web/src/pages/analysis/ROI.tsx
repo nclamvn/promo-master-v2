@@ -70,7 +70,8 @@ import {
   CheckCircle2,
   XCircle,
 } from 'lucide-react';
-import { cn, formatCurrency, formatPercent } from '@/lib/utils';
+import { cn, formatPercent } from '@/lib/utils';
+import { CurrencyDisplay } from '@/components/ui/currency-display';
 
 // ============================================================================
 // TYPES
@@ -275,7 +276,7 @@ const SummarySection = ({ summary }: { summary: ROISummary }) => {
         <CardContent className="pt-4 pb-4">
           <div className="space-y-1 min-w-0">
             <p className="text-xs text-muted-foreground truncate">Tổng đầu tư</p>
-            <p className="text-sm sm:text-base lg:text-lg font-bold truncate">{formatCurrency(summary.totalInvestment)}</p>
+            <CurrencyDisplay amount={summary.totalInvestment} size="md" />
           </div>
         </CardContent>
       </Card>
@@ -284,7 +285,9 @@ const SummarySection = ({ summary }: { summary: ROISummary }) => {
         <CardContent className="pt-4 pb-4">
           <div className="space-y-1 min-w-0">
             <p className="text-xs text-muted-foreground truncate">Doanh thu</p>
-            <p className="text-sm sm:text-base lg:text-lg font-bold text-blue-600 dark:text-blue-400 truncate">{formatCurrency(summary.totalRevenue)}</p>
+            <div className="text-blue-600 dark:text-blue-400">
+              <CurrencyDisplay amount={summary.totalRevenue} size="md" />
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -293,7 +296,9 @@ const SummarySection = ({ summary }: { summary: ROISummary }) => {
         <CardContent className="pt-4 pb-4">
           <div className="space-y-1 min-w-0">
             <p className="text-xs text-muted-foreground truncate">Incremental</p>
-            <p className="text-sm sm:text-base lg:text-lg font-bold text-emerald-600 dark:text-emerald-400 truncate">{formatCurrency(summary.incrementalRevenue)}</p>
+            <div className="text-emerald-600 dark:text-emerald-400">
+              <CurrencyDisplay amount={summary.incrementalRevenue} size="md" />
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -605,9 +610,9 @@ const PromotionsTable = ({ data }: { data: PromotionROI[] }) => {
                 </TableCell>
                 <TableCell>{promo.type}</TableCell>
                 <TableCell>{promo.channel}</TableCell>
-                <TableCell className="text-right">{formatCurrency(promo.investment)}</TableCell>
-                <TableCell className="text-right">{formatCurrency(promo.revenue)}</TableCell>
-                <TableCell className="text-right text-green-600">{formatCurrency(promo.incrementalRevenue)}</TableCell>
+                <TableCell className="text-right"><CurrencyDisplay amount={promo.investment} size="sm" /></TableCell>
+                <TableCell className="text-right"><CurrencyDisplay amount={promo.revenue} size="sm" /></TableCell>
+                <TableCell className="text-right text-emerald-600 dark:text-emerald-400"><CurrencyDisplay amount={promo.incrementalRevenue} size="sm" showToggle={false} /></TableCell>
                 <TableCell className={cn('text-right font-bold', getROIColor(promo.roi))}>
                   {promo.roi}%
                 </TableCell>

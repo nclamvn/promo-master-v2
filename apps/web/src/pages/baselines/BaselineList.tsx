@@ -17,7 +17,8 @@ import {
 import { DataTable } from '@/components/shared/DataTable';
 import { Pagination } from '@/components/shared/Pagination';
 import { Badge } from '@/components/ui/badge';
-import { formatCurrency, formatNumber } from '@/lib/utils';
+import { formatNumber } from '@/lib/utils';
+import { formatCurrencyCompact } from '@/components/ui/currency-display';
 import type { ColumnDef } from '@tanstack/react-table';
 import type { Baseline } from '@/types';
 
@@ -118,7 +119,7 @@ const columns: ColumnDef<Baseline>[] = [
     cell: ({ row }) => {
       const type = row.original.baselineType;
       if (type === 'REVENUE' || type === 'PRICE' || type === 'COST') {
-        return formatCurrency(row.original.baselineValue);
+        return formatCurrencyCompact(row.original.baselineValue, 'VND');
       }
       return formatNumber(row.original.baselineValue);
     },
@@ -130,7 +131,7 @@ const columns: ColumnDef<Baseline>[] = [
       if (!row.original.actualValue) return '-';
       const type = row.original.baselineType;
       if (type === 'REVENUE' || type === 'PRICE' || type === 'COST') {
-        return formatCurrency(row.original.actualValue);
+        return formatCurrencyCompact(row.original.actualValue, 'VND');
       }
       return formatNumber(row.original.actualValue);
     },
@@ -147,11 +148,11 @@ const columns: ColumnDef<Baseline>[] = [
 
       return (
         <div className="flex items-center gap-1">
-          {isPositive && <TrendingUp className="h-4 w-4 text-green-600" />}
-          {isNegative && <TrendingDown className="h-4 w-4 text-red-600" />}
+          {isPositive && <TrendingUp className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />}
+          {isNegative && <TrendingDown className="h-4 w-4 text-red-600 dark:text-red-400" />}
           {variance === 0 && <Minus className="h-4 w-4 text-gray-400" />}
           <span className={
-            isPositive ? 'text-green-600' : isNegative ? 'text-red-600' : 'text-gray-500'
+            isPositive ? 'text-emerald-600 dark:text-emerald-400' : isNegative ? 'text-red-600 dark:text-red-400' : 'text-gray-500'
           }>
             {isPositive ? '+' : ''}{variance.toFixed(2)}%
           </span>
@@ -215,7 +216,7 @@ export default function BaselineList() {
             <CardTitle className="text-sm font-medium">Average Variance</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className={`text-2xl font-bold ${avgVariance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+            <div className={`text-2xl font-bold ${avgVariance >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
               {avgVariance >= 0 ? '+' : ''}{avgVariance.toFixed(2)}%
             </div>
           </CardContent>
@@ -223,19 +224,19 @@ export default function BaselineList() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Above Baseline</CardTitle>
-            <TrendingUp className="h-4 w-4 text-green-500" />
+            <TrendingUp className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">{positiveVariances}</div>
+            <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{positiveVariances}</div>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Below Baseline</CardTitle>
-            <TrendingDown className="h-4 w-4 text-red-500" />
+            <TrendingDown className="h-4 w-4 text-red-600 dark:text-red-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-600">{negativeVariances}</div>
+            <div className="text-2xl font-bold text-red-600 dark:text-red-400">{negativeVariances}</div>
           </CardContent>
         </Card>
       </div>

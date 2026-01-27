@@ -27,7 +27,7 @@ import { DatePicker } from "@/components/ui/date-picker";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { usePromotionOptions } from "@/hooks/usePromotions";
 import { claimFormSchema, type ClaimFormValues } from "@/lib/validations";
-import { formatCurrency } from "@/lib/utils";
+import { CurrencyDisplay } from "@/components/ui/currency-display";
 
 interface PromotionOption {
   value: string;
@@ -109,10 +109,10 @@ export function ClaimForm({
 
             {selectedPromotion && (
               <div className="rounded-lg bg-muted p-4">
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-muted-foreground flex items-center gap-1">
                   Available Budget:{" "}
                   <span className="font-medium text-foreground">
-                    {formatCurrency(selectedPromotion.availableBudget || 0)}
+                    <CurrencyDisplay amount={selectedPromotion.availableBudget || 0} size="sm" />
                   </span>
                 </p>
               </div>

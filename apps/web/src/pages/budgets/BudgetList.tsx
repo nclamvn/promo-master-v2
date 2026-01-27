@@ -19,7 +19,7 @@ import { Pagination } from '@/components/shared/Pagination';
 import { SearchInput } from '@/components/shared/SearchInput';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { formatCurrency } from '@/lib/utils';
+import { CurrencyDisplay } from '@/components/ui/currency-display';
 import type { ColumnDef } from '@tanstack/react-table';
 import type { Budget } from '@/types';
 
@@ -104,7 +104,7 @@ const columns: ColumnDef<Budget>[] = [
   {
     accessorKey: 'totalAmount',
     header: 'Total',
-    cell: ({ row }) => formatCurrency(row.original.totalAmount),
+    cell: ({ row }) => <CurrencyDisplay amount={row.original.totalAmount} size="sm" />,
   },
   {
     id: 'utilization',
@@ -195,7 +195,7 @@ export default function BudgetList() {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(totalBudget)}</div>
+            <div className="text-2xl font-bold"><CurrencyDisplay amount={totalBudget} size="lg" /></div>
           </CardContent>
         </Card>
         <Card>
@@ -204,7 +204,7 @@ export default function BudgetList() {
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(totalSpent)}</div>
+            <div className="text-2xl font-bold"><CurrencyDisplay amount={totalSpent} size="lg" /></div>
             <p className="text-xs text-muted-foreground">
               {((totalSpent / totalBudget) * 100).toFixed(1)}% of total
             </p>
@@ -216,8 +216,8 @@ export default function BudgetList() {
             <DollarSign className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">
-              {formatCurrency(totalAvailable)}
+            <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
+              <CurrencyDisplay amount={totalAvailable} size="lg" />
             </div>
           </CardContent>
         </Card>

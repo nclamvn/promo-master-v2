@@ -22,7 +22,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { StockAlertBadge } from './StockAlertBadge';
-import { formatCurrency, formatNumber, formatDate } from '@/lib/utils';
+import { formatNumber, formatDate } from '@/lib/utils';
+import { CurrencyDisplay } from '@/components/ui/currency-display';
 import type { InventorySnapshot, StockStatus } from '@/types/operations';
 
 interface InventoryTableProps {
@@ -148,7 +149,7 @@ export function InventoryTable({ data, onRowClick, onDelete }: InventoryTablePro
                   </TableCell>
                   <TableCell>{item.location || '-'}</TableCell>
                   <TableCell className="font-medium">{formatNumber(item.quantity)}</TableCell>
-                  <TableCell>{formatCurrency(item.value)}</TableCell>
+                  <TableCell><CurrencyDisplay amount={item.value} size="sm" /></TableCell>
                   <TableCell>
                     {item.expiryDate ? (
                       <div className="flex items-center gap-2">
@@ -180,7 +181,7 @@ export function InventoryTable({ data, onRowClick, onDelete }: InventoryTablePro
                         </DropdownMenuItem>
                         {onDelete && (
                           <DropdownMenuItem
-                            className="text-red-600"
+                            className="text-red-600 dark:text-red-400"
                             onClick={(e) => {
                               e.stopPropagation();
                               onDelete(item.id);

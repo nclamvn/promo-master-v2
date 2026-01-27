@@ -5,7 +5,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { JournalStatusBadge } from './JournalStatusBadge';
-import { formatCurrency, formatDate } from '@/lib/utils';
+import { formatDate } from '@/lib/utils';
+import { CurrencyDisplay } from '@/components/ui/currency-display';
 import { FileText, Eye, Send, RotateCcw } from 'lucide-react';
 import type { Journal } from '@/hooks/useJournals';
 
@@ -59,7 +60,7 @@ export function JournalCard({ journal, onView, onPost, onReverse }: JournalCardP
         <div className="flex items-center justify-between pt-2 border-t">
           <div>
             <div className="text-xs text-muted-foreground">Total</div>
-            <div className="font-semibold text-lg">{formatCurrency(journal.totalDebit)}</div>
+            <div className="font-semibold text-lg"><CurrencyDisplay amount={journal.totalDebit} size="sm" /></div>
           </div>
           <div className="flex gap-1">
             {onView && (

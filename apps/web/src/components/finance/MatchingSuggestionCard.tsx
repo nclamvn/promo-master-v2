@@ -5,7 +5,8 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { formatCurrency, formatDate } from '@/lib/utils';
+import { formatDate } from '@/lib/utils';
+import { CurrencyDisplay } from '@/components/ui/currency-display';
 import { Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -76,7 +77,7 @@ export function MatchingSuggestionCard({
             </p>
           </div>
           <div className="text-right">
-            <p className="font-semibold">{formatCurrency(suggestion.claim.amount)}</p>
+            <p className="font-semibold"><CurrencyDisplay amount={suggestion.claim.amount} size="sm" /></p>
             <div className="flex items-center gap-1 mt-1">
               <div
                 className={cn('h-2 w-2 rounded-full', getConfidenceColor(suggestion.confidence))}

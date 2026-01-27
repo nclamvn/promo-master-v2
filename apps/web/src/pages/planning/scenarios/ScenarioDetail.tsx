@@ -34,7 +34,8 @@ import {
 import { ScenarioStatusBadge, ScenarioResults } from '@/components/planning';
 import { LoadingSpinner } from '@/components/shared/LoadingSpinner';
 import { useToast } from '@/hooks/useToast';
-import { formatCurrency, formatDate } from '@/lib/utils';
+import { formatDate } from '@/lib/utils';
+import { CurrencyDisplay } from '@/components/ui/currency-display';
 import {
   useScenario,
   useScenarioVersions,
@@ -224,7 +225,7 @@ export default function ScenarioDetail() {
               <div>
                 <p className="text-sm text-muted-foreground">Budget</p>
                 <p className="text-lg font-semibold">
-                  {formatCurrency(scenario.parameters.budget)}
+                  <CurrencyDisplay amount={scenario.parameters.budget} size="md" />
                 </p>
               </div>
             </div>
@@ -316,7 +317,7 @@ export default function ScenarioDetail() {
                 <div>
                   <p className="text-sm text-muted-foreground">Budget</p>
                   <p className="font-medium">
-                    {formatCurrency(scenario.parameters.budget)}
+                    <CurrencyDisplay amount={scenario.parameters.budget} size="sm" />
                   </p>
                 </div>
                 <div>
@@ -357,13 +358,13 @@ export default function ScenarioDetail() {
                     Baseline Sales/Day
                   </p>
                   <p className="font-medium">
-                    {formatCurrency(scenario.assumptions.baselineSalesPerDay)}
+                    <CurrencyDisplay amount={scenario.assumptions.baselineSalesPerDay} size="sm" />
                   </p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Avg Order Value</p>
                   <p className="font-medium">
-                    {formatCurrency(scenario.assumptions.averageOrderValue)}
+                    <CurrencyDisplay amount={scenario.assumptions.averageOrderValue} size="sm" />
                   </p>
                 </div>
                 <div>
@@ -425,7 +426,7 @@ export default function ScenarioDetail() {
                           <div className="flex gap-4 mt-2 text-sm">
                             <span>ROI: {version.summary.roi}%</span>
                             <span>
-                              Margin: {formatCurrency(version.summary.netMargin)}
+                              Margin: <CurrencyDisplay amount={version.summary.netMargin} size="sm" />
                             </span>
                             <span>Lift: {version.summary.salesLiftPercent}%</span>
                           </div>

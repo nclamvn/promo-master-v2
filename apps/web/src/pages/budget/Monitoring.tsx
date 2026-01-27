@@ -48,6 +48,7 @@ import {
   Zap,
 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { CurrencyDisplay } from '@/components/ui/currency-display';
 
 // Mock data
 const trendData = [
@@ -104,14 +105,6 @@ const alerts = [
     time: '1 day ago',
   },
 ];
-
-// Utility function
-const formatCurrency = (value: number): string => {
-  if (value >= 1000) {
-    return `₫${(value / 1000).toFixed(1)}B`;
-  }
-  return `₫${value}M`;
-};
 
 export default function BudgetMonitoringPage() {
   const [selectedPeriod, setSelectedPeriod] = useState('Q1-2026');
@@ -170,8 +163,8 @@ export default function BudgetMonitoringPage() {
           <CardContent>
             <div className="text-2xl font-bold">₫15.6B</div>
             <div className="flex items-center mt-2">
-              <TrendingUp className="h-4 w-4 text-green-600 mr-1" />
-              <span className="text-xs text-green-600">+12% vs last Q</span>
+              <TrendingUp className="h-4 w-4 text-emerald-600 dark:text-emerald-400 mr-1" />
+              <span className="text-xs text-emerald-600 dark:text-emerald-400">+12% vs last Q</span>
             </div>
           </CardContent>
         </Card>
@@ -195,7 +188,7 @@ export default function BudgetMonitoringPage() {
             <Zap className="h-4 w-4 text-yellow-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">₫12.4B</div>
+            <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">₫12.4B</div>
             <Badge variant="outline" className="mt-2">
               44% remaining
             </Badge>
@@ -367,7 +360,7 @@ export default function BudgetMonitoringPage() {
                           />
                           <span className="font-medium">{channel.name}</span>
                         </div>
-                        <span className="font-mono">{formatCurrency(channel.value)}</span>
+                        <span className="font-mono"><CurrencyDisplay amount={channel.value * 1000000} size="sm" /></span>
                       </div>
                       <Progress value={channel.percentage * 2.3} className="h-2" />
                     </div>

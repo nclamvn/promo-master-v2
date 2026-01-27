@@ -54,6 +54,7 @@ import {
   Area,
   Line,
 } from 'recharts';
+import { CurrencyDisplay, formatCurrencyCompact } from '@/components/ui/currency-display';
 
 // Types
 interface PSPItem {
@@ -142,14 +143,6 @@ const channelData = [
   { channel: 'HORECA', planned: 300, committed: 250, actual: 200 },
 ];
 
-// Utility functions
-const formatCurrency = (value: number): string => {
-  if (Math.abs(value) >= 1000000000) {
-    return `₫${(value / 1000000000).toFixed(1)}B`;
-  }
-  return `₫${(value / 1000000).toFixed(0)}M`;
-};
-
 const getStatusBadge = (status: PSPItem['status']) => {
   const config = {
     ON_TRACK: { label: 'On Track', variant: 'success' as const, icon: CheckCircle },
@@ -229,7 +222,7 @@ export default function PSPBudgetPage() {
             <Target className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(totalPlanned)}</div>
+            <div className="text-2xl font-bold"><CurrencyDisplay amount={totalPlanned} size="lg" /></div>
             <p className="text-xs text-muted-foreground">Total planned for period</p>
           </CardContent>
         </Card>
@@ -237,10 +230,10 @@ export default function PSPBudgetPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Committed</CardTitle>
-            <DollarSign className="h-4 w-4 text-blue-600" />
+            <DollarSign className="h-4 w-4 text-blue-600 dark:text-blue-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-blue-600">{formatCurrency(totalCommitted)}</div>
+            <div className="text-2xl font-bold text-blue-600 dark:text-blue-400"><CurrencyDisplay amount={totalCommitted} size="lg" showToggle={false} /></div>
             <Progress value={(totalCommitted / totalPlanned) * 100} className="mt-2" />
             <p className="text-xs text-muted-foreground mt-1">
               {((totalCommitted / totalPlanned) * 100).toFixed(0)}% of planned
@@ -251,10 +244,10 @@ export default function PSPBudgetPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Actual Spend</CardTitle>
-            <TrendingUp className="h-4 w-4 text-green-600" />
+            <TrendingUp className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">{formatCurrency(totalActual)}</div>
+            <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400"><CurrencyDisplay amount={totalActual} size="lg" showToggle={false} /></div>
             <Progress value={(totalActual / totalCommitted) * 100} className="mt-2" />
             <p className="text-xs text-muted-foreground mt-1">
               {((totalActual / totalCommitted) * 100).toFixed(0)}% of committed
@@ -265,10 +258,10 @@ export default function PSPBudgetPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Over Budget</CardTitle>
-            <AlertTriangle className="h-4 w-4 text-red-600" />
+            <AlertTriangle className="h-4 w-4 text-red-600 dark:text-red-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-600">{overBudgetCount}</div>
+            <div className="text-2xl font-bold text-red-600 dark:text-red-400">{overBudgetCount}</div>
             <p className="text-xs text-muted-foreground">Promotions exceeding budget</p>
           </CardContent>
         </Card>
@@ -288,7 +281,7 @@ export default function PSPBudgetPage() {
                 <XAxis dataKey="week" />
                 <YAxis tickFormatter={(v) => `${v / 1000}B`} />
                 <Tooltip
-                  formatter={(value) => formatCurrency(Number(value) * 1000000)}
+                  formatter={(value) => formatCurrencyCompact(Number(value) * 1000000, 'VND')}
                 />
                 <Legend />
                 <Area
@@ -329,7 +322,7 @@ export default function PSPBudgetPage() {
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis type="number" tickFormatter={(v) => `${v}M`} />
                 <YAxis type="category" dataKey="channel" width={70} />
-                <Tooltip formatter={(value) => formatCurrency(Number(value) * 1000000)} />
+                <Tooltip formatter={(value) => formatCurrencyCompact(Number(value) * 1000000, 'VND')} />
                 <Legend />
                 <Bar dataKey="planned" fill="#94a3b8" name="Planned" />
                 <Bar dataKey="committed" fill="#3b82f6" name="Committed" />
@@ -374,20 +367,20 @@ export default function PSPBudgetPage() {
                       <Badge variant="outline">{item.channel}</Badge>
                     </TableCell>
                     <TableCell className="text-right font-mono">
-                      {formatCurrency(item.plannedBudget)}
+                      <CurrencyDisplay amount={item.plannedBudget} size="sm" />
                     </TableCell>
-                    <TableCell className="text-right font-mono text-blue-600">
-                      {formatCurrency(item.committedBudget)}
+                    <TableCell className="text-right font-mono text-blue-600 dark:text-blue-400">
+                      <CurrencyDisplay amount={item.committedBudget} size="sm" showToggle={false} />
                     </TableCell>
-                    <TableCell className="text-right font-mono text-green-600">
-                      {formatCurrency(item.actualSpend)}
+                    <TableCell className="text-right font-mono text-emerald-600 dark:text-emerald-400">
+                      <CurrencyDisplay amount={item.actualSpend} size="sm" showToggle={false} />
                     </TableCell>
                     <TableCell
                       className={`text-right font-mono ${
-                        item.remaining < 0 ? 'text-red-600' : ''
+                        item.remaining < 0 ? 'text-red-600 dark:text-red-400' : ''
                       }`}
                     >
-                      {formatCurrency(item.remaining)}
+                      <CurrencyDisplay amount={item.remaining} size="sm" showToggle={false} />
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-2">

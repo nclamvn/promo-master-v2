@@ -30,7 +30,8 @@ import { LoadingSpinner } from '@/components/shared/LoadingSpinner';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { JournalStatusBadge } from '@/components/finance/JournalStatusBadge';
 import { useJournal, usePostJournal, useReverseJournal } from '@/hooks/useJournals';
-import { formatCurrency, formatDate } from '@/lib/utils';
+import { formatDate } from '@/lib/utils';
+import { CurrencyDisplay } from '@/components/ui/currency-display';
 import { useToast } from '@/hooks/useToast';
 
 export default function JournalDetailPage() {
@@ -157,14 +158,14 @@ export default function JournalDetailPage() {
                 <Label className="text-muted-foreground">Total Debit</Label>
                 <div className="flex items-center gap-2 font-medium">
                   <DollarSign className="h-4 w-4 text-muted-foreground" />
-                  {formatCurrency(journal.totalDebit)}
+                  <CurrencyDisplay amount={journal.totalDebit} size="sm" />
                 </div>
               </div>
               <div>
                 <Label className="text-muted-foreground">Total Credit</Label>
                 <div className="flex items-center gap-2 font-medium">
                   <DollarSign className="h-4 w-4 text-muted-foreground" />
-                  {formatCurrency(journal.totalCredit)}
+                  <CurrencyDisplay amount={journal.totalCredit} size="sm" />
                 </div>
               </div>
             </div>
@@ -281,17 +282,17 @@ export default function JournalDetailPage() {
                     <TableCell>{line.accountName}</TableCell>
                     <TableCell className="text-muted-foreground">{line.description || '-'}</TableCell>
                     <TableCell className="text-right">
-                      {line.debit > 0 ? formatCurrency(line.debit) : '-'}
+                      {line.debit > 0 ? <CurrencyDisplay amount={line.debit} size="sm" /> : '-'}
                     </TableCell>
                     <TableCell className="text-right">
-                      {line.credit > 0 ? formatCurrency(line.credit) : '-'}
+                      {line.credit > 0 ? <CurrencyDisplay amount={line.credit} size="sm" /> : '-'}
                     </TableCell>
                   </TableRow>
                 ))}
                 <TableRow className="font-bold bg-muted/50">
                   <TableCell colSpan={4} className="text-right">Total</TableCell>
-                  <TableCell className="text-right">{formatCurrency(journal.totalDebit)}</TableCell>
-                  <TableCell className="text-right">{formatCurrency(journal.totalCredit)}</TableCell>
+                  <TableCell className="text-right"><CurrencyDisplay amount={journal.totalDebit} size="sm" /></TableCell>
+                  <TableCell className="text-right"><CurrencyDisplay amount={journal.totalCredit} size="sm" /></TableCell>
                 </TableRow>
               </TableBody>
             </Table>

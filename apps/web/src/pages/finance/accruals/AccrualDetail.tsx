@@ -30,7 +30,8 @@ import { LoadingSpinner } from '@/components/shared/LoadingSpinner';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { AccrualStatusBadge } from '@/components/finance/AccrualStatusBadge';
 import { useAccrual, useUpdateAccrual, usePostAccrual, useReverseAccrual } from '@/hooks/useAccruals';
-import { formatCurrency, formatDate } from '@/lib/utils';
+import { formatDate } from '@/lib/utils';
+import { CurrencyDisplay } from '@/components/ui/currency-display';
 import { useToast } from '@/hooks/useToast';
 import { GL_ACCOUNTS } from '@/types/finance';
 
@@ -219,7 +220,7 @@ export default function AccrualDetailPage() {
                 ) : (
                   <div className="flex items-center gap-2 font-medium text-lg">
                     <DollarSign className="h-4 w-4 text-muted-foreground" />
-                    {formatCurrency(accrual.amount)}
+                    <CurrencyDisplay amount={accrual.amount} size="sm" />
                   </div>
                 )}
               </div>
@@ -268,7 +269,7 @@ export default function AccrualDetailPage() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label className="text-muted-foreground">Budget</Label>
-                <div className="font-medium">{formatCurrency(accrual.promotion?.budget || 0)}</div>
+                <div className="font-medium"><CurrencyDisplay amount={accrual.promotion?.budget || 0} size="sm" /></div>
               </div>
               <div>
                 <Label className="text-muted-foreground">Status</Label>
@@ -311,7 +312,7 @@ export default function AccrualDetailPage() {
                 </div>
                 <div>
                   <Label className="text-muted-foreground">Amount</Label>
-                  <div className="font-medium">{formatCurrency(accrual.glJournal.amount)}</div>
+                  <div className="font-medium"><CurrencyDisplay amount={accrual.glJournal.amount} size="sm" /></div>
                 </div>
               </div>
               <div className="mt-4">

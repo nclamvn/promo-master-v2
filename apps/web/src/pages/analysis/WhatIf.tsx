@@ -80,7 +80,8 @@ import {
   Sliders,
   Zap,
 } from 'lucide-react';
-import { cn, formatCurrency, formatPercent, formatNumber } from '@/lib/utils';
+import { cn, formatPercent, formatNumber } from '@/lib/utils';
+import { CurrencyDisplay, formatCurrencyCompact } from '@/components/ui/currency-display';
 
 // ============================================================================
 // TYPES
@@ -305,21 +306,21 @@ const ScenarioCard = ({
         <div className="grid grid-cols-2 gap-2">
           <div className="p-2 bg-background rounded border">
             <p className="text-xs text-muted-foreground">ROI</p>
-            <p className={cn('text-lg font-bold', results.roi >= 100 ? 'text-green-600' : 'text-yellow-600')}>
+            <p className={cn('text-lg font-bold', results.roi >= 100 ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400')}>
               {results.roi}%
             </p>
           </div>
           <div className="p-2 bg-background rounded border">
             <p className="text-xs text-muted-foreground">Incremental</p>
-            <p className="text-lg font-bold text-blue-600">{formatCurrency(results.incrementalRevenue)}</p>
+            <div className="text-lg font-bold text-blue-600 dark:text-blue-400"><CurrencyDisplay amount={results.incrementalRevenue} size="md" showToggle={false} /></div>
           </div>
         </div>
-        
+
         {/* Key Params */}
         <div className="space-y-1 text-sm">
           <div className="flex justify-between">
             <span className="text-muted-foreground">Budget:</span>
-            <span className="font-medium">{formatCurrency(params.budget)}</span>
+            <span className="font-medium"><CurrencyDisplay amount={params.budget} size="sm" showToggle={false} /></span>
           </div>
           <div className="flex justify-between">
             <span className="text-muted-foreground">Discount:</span>
@@ -331,7 +332,7 @@ const ScenarioCard = ({
           </div>
           <div className="flex justify-between">
             <span className="text-muted-foreground">Uplift:</span>
-            <span className="font-medium text-green-600">+{params.expectedUplift}%</span>
+            <span className="font-medium text-emerald-600 dark:text-emerald-400">+{params.expectedUplift}%</span>
           </div>
         </div>
       </CardContent>
@@ -402,7 +403,7 @@ const ComparisonTable = ({ scenarios, results }: { scenarios: ScenarioParams[], 
 
   const formatValue = (value: number | undefined, unit: string) => {
     if (value === undefined) return '-';
-    if (unit === 'currency') return formatCurrency(value);
+    if (unit === 'currency') return formatCurrencyCompact(value, 'VND');
     if (unit === '%') return `${value}%`;
     if (unit === 'units') return formatNumber(value);
     if (unit === 'days') return `${value} ngày`;
@@ -575,7 +576,7 @@ const InsightsPanel = ({ scenarios, results }: { scenarios: ScenarioParams[], re
             Best Profit
           </div>
           <p className="text-sm text-blue-600 mt-1">
-            {scenarios[bestProfit]?.name} mang lại lợi nhuận cao nhất ({formatCurrency(results[bestProfit]?.profitImpact)})
+            {scenarios[bestProfit]?.name} mang lại lợi nhuận cao nhất ({formatCurrencyCompact(results[bestProfit]?.profitImpact, 'VND')})
           </p>
         </div>
         
@@ -741,7 +742,7 @@ export default function AnalysisWhatIfPage() {
                   step={100000000}
                   unit=""
                   onChange={(v) => updateScenario(activeIndex, { ...activeScenario, budget: v })}
-                  formatValue={(v) => formatCurrency(v)}
+                  formatValue={(v) => formatCurrencyCompact(v, 'VND')}
                 />
                 
                 <ParamSlider

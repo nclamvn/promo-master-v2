@@ -18,7 +18,8 @@ import { DataTable } from '@/components/shared/DataTable';
 import { Pagination } from '@/components/shared/Pagination';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { formatCurrency, formatNumber } from '@/lib/utils';
+import { formatNumber } from '@/lib/utils';
+import { formatCurrencyCompact } from '@/components/ui/currency-display';
 import type { ColumnDef } from '@tanstack/react-table';
 import type { Target } from '@/types';
 
@@ -120,7 +121,7 @@ const columns: ColumnDef<Target>[] = [
     accessorKey: 'targetValue',
     header: 'Target',
     cell: ({ row }) => {
-      if (row.original.targetType === 'REVENUE') return formatCurrency(row.original.targetValue);
+      if (row.original.targetType === 'REVENUE') return formatCurrencyCompact(row.original.targetValue, 'VND');
       return formatNumber(row.original.targetValue);
     },
   },
@@ -132,13 +133,13 @@ const columns: ColumnDef<Target>[] = [
       return (
         <div className="w-32">
           <div className="flex items-center justify-between text-xs mb-1">
-            <span className={rate >= 100 ? 'text-green-600' : rate >= 80 ? 'text-yellow-600' : 'text-red-600'}>
+            <span className={rate >= 100 ? 'text-emerald-600 dark:text-emerald-400' : rate >= 80 ? 'text-amber-600 dark:text-amber-400' : 'text-red-600 dark:text-red-400'}>
               {rate}%
             </span>
             {rate >= 100 ? (
-              <TrendingUp className="h-3 w-3 text-green-600" />
+              <TrendingUp className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
             ) : (
-              <TrendingDown className="h-3 w-3 text-red-600" />
+              <TrendingDown className="h-3 w-3 text-red-600 dark:text-red-400" />
             )}
           </div>
           <Progress value={Math.min(rate, 100)} className="h-2" />
@@ -229,7 +230,7 @@ export default function TargetList() {
             <TrendingUp className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">{achievedTargets}</div>
+            <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{achievedTargets}</div>
             <p className="text-xs text-muted-foreground">
               {((achievedTargets / totalTargets) * 100).toFixed(0)}% of total
             </p>
@@ -241,7 +242,7 @@ export default function TargetList() {
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className={`text-2xl font-bold ${avgAchievement >= 100 ? 'text-green-600' : avgAchievement >= 80 ? 'text-yellow-600' : 'text-red-600'}`}>
+            <div className={`text-2xl font-bold ${avgAchievement >= 100 ? 'text-emerald-600 dark:text-emerald-400' : avgAchievement >= 80 ? 'text-amber-600 dark:text-amber-400' : 'text-red-600 dark:text-red-400'}`}>
               {avgAchievement.toFixed(1)}%
             </div>
           </CardContent>

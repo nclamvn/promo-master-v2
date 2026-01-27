@@ -23,7 +23,8 @@ import { LoadingSpinner } from '@/components/shared/LoadingSpinner';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { ChequeStatusBadge } from '@/components/finance/ChequeStatusBadge';
 import { useCheque, useClearCheque, useVoidCheque } from '@/hooks/useCheques';
-import { formatCurrency, formatDate } from '@/lib/utils';
+import { formatDate } from '@/lib/utils';
+import { CurrencyDisplay } from '@/components/ui/currency-display';
 import { useToast } from '@/hooks/useToast';
 
 export default function ChequeDetailPage() {
@@ -148,7 +149,7 @@ export default function ChequeDetailPage() {
                 <Label className="text-muted-foreground">Amount</Label>
                 <div className="flex items-center gap-2 font-medium text-lg">
                   <DollarSign className="h-4 w-4 text-muted-foreground" />
-                  {formatCurrency(cheque.amount)}
+                  <CurrencyDisplay amount={cheque.amount} size="sm" />
                 </div>
               </div>
               <div>
@@ -244,7 +245,7 @@ export default function ChequeDetailPage() {
         {cheque.claim && (
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-green-600">
+              <CardTitle className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400">
                 <CheckCircle className="h-5 w-5" />
                 Linked Claim
               </CardTitle>
@@ -260,12 +261,12 @@ export default function ChequeDetailPage() {
                 </div>
                 <div>
                   <Label className="text-muted-foreground">Claimed Amount</Label>
-                  <div className="font-medium">{formatCurrency(cheque.claim.claimedAmount || 0)}</div>
+                  <div className="font-medium"><CurrencyDisplay amount={cheque.claim.claimedAmount || 0} size="sm" /></div>
                 </div>
                 {cheque.claim.approvedAmount && (
                   <div>
                     <Label className="text-muted-foreground">Approved Amount</Label>
-                    <div className="font-medium">{formatCurrency(cheque.claim.approvedAmount)}</div>
+                    <div className="font-medium"><CurrencyDisplay amount={cheque.claim.approvedAmount} size="sm" /></div>
                   </div>
                 )}
                 {cheque.claim.promotion && (

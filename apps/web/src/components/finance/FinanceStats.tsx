@@ -3,7 +3,7 @@
  */
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { formatCurrency } from '@/lib/utils';
+import { CurrencyDisplay } from '@/components/ui/currency-display';
 import { TrendingUp, TrendingDown, Clock, CheckCircle, XCircle, DollarSign } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -19,9 +19,9 @@ interface StatCardProps {
 export function StatCard({ title, value, subValue, icon, trend, variant = 'default' }: StatCardProps) {
   const variantColors = {
     default: 'text-foreground',
-    success: 'text-green-600',
-    warning: 'text-yellow-600',
-    destructive: 'text-red-600',
+    success: 'text-emerald-600 dark:text-emerald-400',
+    warning: 'text-amber-600 dark:text-amber-400',
+    destructive: 'text-red-600 dark:text-red-400',
   };
 
   return (
@@ -34,7 +34,7 @@ export function StatCard({ title, value, subValue, icon, trend, variant = 'defau
       </CardHeader>
       <CardContent>
         <div className={cn('text-2xl font-bold', variantColors[variant])}>
-          {typeof value === 'number' ? formatCurrency(value) : value}
+          {typeof value === 'number' ? <CurrencyDisplay amount={value} size="lg" /> : value}
         </div>
         {subValue && (
           <p className="text-xs text-muted-foreground flex items-center mt-1">

@@ -27,7 +27,7 @@ import {
   useDeleteTemplate,
   useApplyTemplate,
 } from '@/hooks/planning/useTemplates';
-import { formatCurrency } from '@/lib/utils';
+import { CurrencyDisplay } from '@/components/ui/currency-display';
 import { useToast } from '@/hooks/useToast';
 import type { PromotionTemplate } from '@/types/planning';
 
@@ -157,7 +157,7 @@ export default function TemplateListPage() {
       accessorKey: 'defaultBudget',
       header: 'Budget',
       cell: ({ row }) =>
-        row.original.defaultBudget ? formatCurrency(row.original.defaultBudget) : '-',
+        row.original.defaultBudget ? <CurrencyDisplay amount={row.original.defaultBudget} size="sm" /> : '-',
     },
     {
       accessorKey: 'usageCount',
@@ -245,7 +245,7 @@ export default function TemplateListPage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-green-600">{data.summary.active}</div>
+              <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{data.summary.active}</div>
             </CardContent>
           </Card>
           <Card>

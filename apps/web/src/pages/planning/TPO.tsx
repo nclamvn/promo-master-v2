@@ -60,6 +60,7 @@ import {
   PolarRadiusAxis,
   Radar,
 } from 'recharts';
+import { CurrencyDisplay } from '@/components/ui/currency-display';
 
 // Types
 interface AIRecommendation {
@@ -152,16 +153,6 @@ const scenarioData = [
   { month: 'May', conservative: 4000, balanced: 5000, aggressive: 6200 },
   { month: 'Jun', conservative: 4200, balanced: 5200, aggressive: 6500 },
 ];
-
-// Utility functions
-const formatCurrency = (value: number): string => {
-  if (value >= 1000000000) {
-    return `₫${(value / 1000000000).toFixed(1)}B`;
-  } else if (value >= 1000000) {
-    return `₫${(value / 1000000).toFixed(0)}M`;
-  }
-  return `₫${value.toLocaleString('vi-VN')}`;
-};
 
 const getCategoryIcon = (category: AIRecommendation['category']) => {
   const icons = {
@@ -287,7 +278,7 @@ export default function TPOPage() {
             <TrendingUp className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(totalPotentialRevenue)}</div>
+            <div className="text-2xl font-bold"><CurrencyDisplay amount={totalPotentialRevenue} size="lg" /></div>
             <p className="text-xs text-muted-foreground">from accepted insights</p>
           </CardContent>
         </Card>
@@ -360,9 +351,9 @@ export default function TPOPage() {
                             {/* Impact metrics */}
                             <div className="flex items-center gap-6 mt-3">
                               <div className="flex items-center gap-1">
-                                <TrendingUp className="h-4 w-4 text-green-500" />
+                                <TrendingUp className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
                                 <span className="text-sm font-medium">
-                                  +{formatCurrency(rec.impact.revenue)}
+                                  +<CurrencyDisplay amount={rec.impact.revenue} size="sm" />
                                 </span>
                                 <span className="text-xs text-muted-foreground">revenue</span>
                               </div>
@@ -374,8 +365,7 @@ export default function TPOPage() {
                               <div className="flex items-center gap-1">
                                 <DollarSign className="h-4 w-4 text-orange-500" />
                                 <span className="text-sm font-medium">
-                                  {rec.impact.cost >= 0 ? '+' : ''}
-                                  {formatCurrency(rec.impact.cost)}
+                                  {rec.impact.cost >= 0 ? '+' : ''}<CurrencyDisplay amount={rec.impact.cost} size="sm" />
                                 </span>
                                 <span className="text-xs text-muted-foreground">cost</span>
                               </div>
@@ -640,15 +630,15 @@ export default function TPOPage() {
                 <CardContent className="space-y-2">
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Budget</span>
-                    <span className="font-mono">{formatCurrency(scenario.budget)}</span>
+                    <span className="font-mono"><CurrencyDisplay amount={scenario.budget} size="sm" /></span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Expected ROI</span>
-                    <span className="font-mono text-green-600">{scenario.roi}%</span>
+                    <span className="font-mono text-emerald-600 dark:text-emerald-400">{scenario.roi}%</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Projected Revenue</span>
-                    <span className="font-mono">{formatCurrency(scenario.revenue)}</span>
+                    <span className="font-mono"><CurrencyDisplay amount={scenario.revenue} size="sm" /></span>
                   </div>
                 </CardContent>
               </Card>

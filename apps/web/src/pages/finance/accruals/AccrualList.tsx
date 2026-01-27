@@ -40,7 +40,8 @@ import { AccrualStatusBadge } from '@/components/finance/AccrualStatusBadge';
 import { AccrualStats } from '@/components/finance/FinanceStats';
 import { AccrualCard } from '@/components/finance/AccrualCard';
 import { useAccruals, usePostAccrual, usePostAccrualBatch, useReverseAccrual } from '@/hooks/useAccruals';
-import { formatCurrency, formatDate } from '@/lib/utils';
+import { formatDate } from '@/lib/utils';
+import { CurrencyDisplay } from '@/components/ui/currency-display';
 import { useToast } from '@/hooks/useToast';
 import type { AccrualEntry, AccrualStatus } from '@/types/finance';
 import { GL_ACCOUNTS } from '@/types/finance';
@@ -212,7 +213,7 @@ export default function AccrualListPage() {
     {
       accessorKey: 'amount',
       header: 'Amount',
-      cell: ({ row }) => formatCurrency(row.original.amount),
+      cell: ({ row }) => <CurrencyDisplay amount={row.original.amount} size="sm" />,
     },
     {
       accessorKey: 'status',

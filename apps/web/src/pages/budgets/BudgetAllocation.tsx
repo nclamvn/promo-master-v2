@@ -11,6 +11,7 @@ import {
   ArrowRight, AlertCircle, Eye, Edit2,
   FolderTree, GitBranch, Layers, BarChart3, Download, Copy, Loader2
 } from 'lucide-react';
+import { CurrencyDisplay } from '@/components/ui/currency-display';
 import {
   useGeographicUnitsTree,
   useBudgetAllocationTree,
@@ -39,16 +40,6 @@ interface PathItem {
   name: string;
   type: string;
 }
-
-// Utility Functions
-const formatCurrency = (value: number): string => {
-  if (value >= 1000000000) {
-    return `${(value / 1000000000).toFixed(1)}B`;
-  } else if (value >= 1000000) {
-    return `${(value / 1000000).toFixed(0)}M`;
-  }
-  return value.toLocaleString('vi-VN');
-};
 
 const formatFullCurrency = (value: number): string => {
   return new Intl.NumberFormat('vi-VN').format(value) + ' ₫';
@@ -176,7 +167,7 @@ const TreeNodeComponent = ({ node, level = 0, expanded, onToggle, onSelect, sele
         <div className="flex items-center gap-6 flex-shrink-0">
           <div className="text-right w-28">
             <div className="text-sm font-semibold text-foreground tabular-nums">
-              {formatCurrency(node.total)}
+              <CurrencyDisplay amount={node.total} size="sm" />
             </div>
             <div className="text-xs text-foreground-subtle">Tổng</div>
           </div>
@@ -306,7 +297,7 @@ const FlowVisualization = ({ node, path }: FlowVisualizationProps) => {
               <Icon className="w-5 h-5" style={{ color: config.color }} strokeWidth={1.75} />
               <div>
                 <div className="font-semibold" style={{ color: config.color }}>{node.name}</div>
-                <div className="text-sm text-foreground-muted">{formatCurrency(node.total)}</div>
+                <div className="text-sm text-foreground-muted"><CurrencyDisplay amount={node.total} size="sm" /></div>
               </div>
             </div>
           </div>
@@ -342,7 +333,7 @@ const FlowVisualization = ({ node, path }: FlowVisualizationProps) => {
                       <span className="font-medium text-foreground text-sm truncate">{child.name}</span>
                     </div>
                     <div className="text-sm font-semibold text-foreground mb-2">
-                      {formatCurrency(child.total)}
+                      <CurrencyDisplay amount={child.total} size="sm" />
                     </div>
                     <div className="h-1.5 bg-muted rounded-full overflow-hidden">
                       <div

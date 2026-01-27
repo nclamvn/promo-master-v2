@@ -32,7 +32,8 @@ import {
 import { ClashStatusBadge, ClashSeverityBadge } from '@/components/planning/ClashStatusBadge';
 import { LoadingSpinner } from '@/components/shared/LoadingSpinner';
 import { useToast } from '@/hooks/useToast';
-import { formatCurrency, formatDate } from '@/lib/utils';
+import { formatDate } from '@/lib/utils';
+import { CurrencyDisplay } from '@/components/ui/currency-display';
 import {
   useClash,
   useResolveClash,
@@ -287,12 +288,12 @@ export default function ClashDetail() {
                     <DollarSign className="h-4 w-4" />
                     <span className="text-sm">Budget at Risk</span>
                   </div>
-                  <p className="font-semibold text-red-600">
-                    {formatCurrency(analysis.budgetAtRisk.total)}
+                  <p className="font-semibold text-red-600 dark:text-red-400">
+                    <CurrencyDisplay amount={analysis.budgetAtRisk.total} size="sm" />
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    A: {formatCurrency(analysis.budgetAtRisk.promotionA)} |
-                    B: {formatCurrency(analysis.budgetAtRisk.promotionB)}
+                    A: <CurrencyDisplay amount={analysis.budgetAtRisk.promotionA} size="sm" /> |
+                    B: <CurrencyDisplay amount={analysis.budgetAtRisk.promotionB} size="sm" />
                   </p>
                 </div>
                 <div>

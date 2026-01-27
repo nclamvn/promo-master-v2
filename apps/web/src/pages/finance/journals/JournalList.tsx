@@ -43,7 +43,8 @@ import {
   useReverseJournal,
   Journal,
 } from '@/hooks/useJournals';
-import { formatCurrency, formatDate } from '@/lib/utils';
+import { formatDate } from '@/lib/utils';
+import { CurrencyDisplay } from '@/components/ui/currency-display';
 import { useToast } from '@/hooks/useToast';
 
 type ViewMode = 'table' | 'grid';
@@ -146,7 +147,7 @@ export default function JournalListPage() {
     {
       accessorKey: 'totalDebit',
       header: 'Amount',
-      cell: ({ row }) => formatCurrency(row.original.totalDebit),
+      cell: ({ row }) => <CurrencyDisplay amount={row.original.totalDebit} size="sm" />,
     },
     {
       accessorKey: 'status',

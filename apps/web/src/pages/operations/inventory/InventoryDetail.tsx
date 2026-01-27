@@ -21,7 +21,8 @@ import {
 import { LoadingSpinner } from '@/components/shared/LoadingSpinner';
 import { useInventorySnapshot, useDeleteInventorySnapshot, useInventoryHistory } from '@/hooks/operations';
 import { useToast } from '@/hooks/useToast';
-import { formatCurrency, formatNumber, formatDate } from '@/lib/utils';
+import { formatNumber, formatDate } from '@/lib/utils';
+import { CurrencyDisplay } from '@/components/ui/currency-display';
 
 export default function InventoryDetail() {
   const { id } = useParams<{ id: string }>();
@@ -157,7 +158,7 @@ export default function InventoryDetail() {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Value</p>
-                <p className="text-2xl font-bold">{formatCurrency(snapshot.value)}</p>
+                <p className="text-2xl font-bold"><CurrencyDisplay amount={snapshot.value} size="md" /></p>
               </div>
             </div>
 
@@ -229,8 +230,8 @@ export default function InventoryDetail() {
                       <span
                         className={
                           historyData.overallTrend.quantityGrowth >= 0
-                            ? 'text-green-600'
-                            : 'text-red-600'
+                            ? 'text-emerald-600 dark:text-emerald-400'
+                            : 'text-red-600 dark:text-red-400'
                         }
                       >
                         {historyData.overallTrend.quantityGrowth > 0 ? '+' : ''}
@@ -242,8 +243,8 @@ export default function InventoryDetail() {
                       <span
                         className={
                           historyData.overallTrend.valueGrowth >= 0
-                            ? 'text-green-600'
-                            : 'text-red-600'
+                            ? 'text-emerald-600 dark:text-emerald-400'
+                            : 'text-red-600 dark:text-red-400'
                         }
                       >
                         {historyData.overallTrend.valueGrowth > 0 ? '+' : ''}

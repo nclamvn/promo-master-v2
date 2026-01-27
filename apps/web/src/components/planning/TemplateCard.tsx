@@ -11,7 +11,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { formatCurrency } from '@/lib/utils';
+import { CurrencyDisplay, formatCurrencyCompact } from '@/components/ui/currency-display';
 import { MoreVertical, Pencil, Play, Eye, Trash2, Copy } from 'lucide-react';
 import type { PromotionTemplate } from '@/types/planning';
 
@@ -102,7 +102,7 @@ export function TemplateCard({
           <div>
             <span className="text-muted-foreground">Budget:</span>
             <span className="ml-1 font-medium">
-              {template.defaultBudget ? formatCurrency(template.defaultBudget) : 'N/A'}
+              {template.defaultBudget ? formatCurrencyCompact(template.defaultBudget) : 'N/A'}
             </span>
           </div>
         </div>
@@ -118,7 +118,7 @@ export function TemplateCard({
               <Badge variant="outline" className="text-xs">
                 {template.mechanics.discountType === 'PERCENTAGE'
                   ? `${template.mechanics.discountValue}%`
-                  : formatCurrency(template.mechanics.discountValue)}
+                  : formatCurrencyCompact(template.mechanics.discountValue)}
               </Badge>
             )}
             {template.mechanics.stackable && (

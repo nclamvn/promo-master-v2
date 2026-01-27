@@ -51,6 +51,7 @@ import {
   Scatter,
   ZAxis,
 } from 'recharts';
+import { CurrencyDisplay, formatCurrencyCompact } from '@/components/ui/currency-display';
 
 // Types
 interface PromotionEfficiency {
@@ -131,22 +132,12 @@ const scatterData = [
   { investment: 2500, roi: 55, volume: 18000, name: 'Promo F' },
 ];
 
-// Utility functions
-const formatCurrency = (value: number): string => {
-  if (value >= 1000000000) {
-    return `₫${(value / 1000000000).toFixed(1)}B`;
-  } else if (value >= 1000000) {
-    return `₫${(value / 1000000).toFixed(0)}M`;
-  }
-  return `₫${value.toLocaleString('vi-VN')}`;
-};
-
 const getStatusBadge = (status: PromotionEfficiency['status']) => {
   const config = {
-    EXCELLENT: { label: 'Excellent', variant: 'success' as const, color: 'text-green-600' },
-    GOOD: { label: 'Good', variant: 'default' as const, color: 'text-blue-600' },
-    AVERAGE: { label: 'Average', variant: 'warning' as const, color: 'text-yellow-600' },
-    POOR: { label: 'Poor', variant: 'destructive' as const, color: 'text-red-600' },
+    EXCELLENT: { label: 'Excellent', variant: 'success' as const, color: 'text-emerald-600 dark:text-emerald-400' },
+    GOOD: { label: 'Good', variant: 'default' as const, color: 'text-blue-600 dark:text-blue-400' },
+    AVERAGE: { label: 'Average', variant: 'warning' as const, color: 'text-amber-600 dark:text-amber-400' },
+    POOR: { label: 'Poor', variant: 'destructive' as const, color: 'text-red-600 dark:text-red-400' },
   };
   return <Badge variant={config[status].variant}>{config[status].label}</Badge>;
 };
@@ -213,14 +204,14 @@ export default function PromotionEfficiencyPage() {
             <Percent className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className={`text-2xl font-bold ${avgROI >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+            <div className={`text-2xl font-bold ${avgROI >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
               {avgROI.toFixed(1)}%
             </div>
             <div className="flex items-center mt-1">
               {avgROI >= 30 ? (
-                <TrendingUp className="h-4 w-4 text-green-600 mr-1" />
+                <TrendingUp className="h-4 w-4 text-emerald-600 dark:text-emerald-400 mr-1" />
               ) : (
-                <TrendingDown className="h-4 w-4 text-red-600 mr-1" />
+                <TrendingDown className="h-4 w-4 text-red-600 dark:text-red-400 mr-1" />
               )}
               <span className="text-xs text-muted-foreground">
                 {avgROI >= 30 ? 'Above target' : 'Below target (30%)'}
@@ -246,7 +237,7 @@ export default function PromotionEfficiencyPage() {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(totalInvestment)}</div>
+            <div className="text-2xl font-bold"><CurrencyDisplay amount={totalInvestment} size="lg" /></div>
             <p className="text-xs text-muted-foreground">Across {mockPromotions.length} promotions</p>
           </CardContent>
         </Card>
@@ -254,10 +245,10 @@ export default function PromotionEfficiencyPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Incremental Revenue</CardTitle>
-            <TrendingUp className="h-4 w-4 text-green-600" />
+            <TrendingUp className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">{formatCurrency(totalRevenue)}</div>
+            <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400"><CurrencyDisplay amount={totalRevenue} size="lg" showToggle={false} /></div>
             <p className="text-xs text-muted-foreground">
               {((totalRevenue / totalInvestment - 1) * 100).toFixed(0)}% return
             </p>
@@ -299,7 +290,7 @@ export default function PromotionEfficiencyPage() {
                     }
                   />
                   <p className="text-xs text-muted-foreground">
-                    {formatCurrency(calculatorInputs.investment)}
+                    {formatCurrencyCompact(calculatorInputs.investment, 'VND')}
                   </p>
                 </div>
 
@@ -326,7 +317,7 @@ export default function PromotionEfficiencyPage() {
                     }
                   />
                   <p className="text-xs text-muted-foreground">
-                    {formatCurrency(calculatorInputs.baselineRevenue)}
+                    {formatCurrencyCompact(calculatorInputs.baselineRevenue, 'VND')}
                   </p>
                 </div>
 
@@ -362,13 +353,13 @@ export default function PromotionEfficiencyPage() {
                       <div className="p-4 bg-muted rounded-lg">
                         <p className="text-sm text-muted-foreground truncate">Incremental Revenue</p>
                         <p className="text-sm sm:text-base lg:text-lg font-bold truncate">
-                          {formatCurrency(calculatorResults.incrementalRevenue)}
+                          {formatCurrencyCompact(calculatorResults.incrementalRevenue, 'VND')}
                         </p>
                       </div>
                       <div className="p-4 bg-muted rounded-lg">
                         <p className="text-sm text-muted-foreground truncate">Incremental Profit</p>
                         <p className="text-sm sm:text-base lg:text-lg font-bold truncate">
-                          {formatCurrency(calculatorResults.incrementalProfit)}
+                          {formatCurrencyCompact(calculatorResults.incrementalProfit, 'VND')}
                         </p>
                       </div>
                     </div>
@@ -385,18 +376,18 @@ export default function PromotionEfficiencyPage() {
                       <div className="flex items-center justify-center gap-2 mt-2">
                         {calculatorResults.roi >= 30 ? (
                           <>
-                            <CheckCircle className="h-4 w-4 text-green-600" />
-                            <span className="text-sm text-green-600">Above target (30%)</span>
+                            <CheckCircle className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                            <span className="text-sm text-emerald-600 dark:text-emerald-400">Above target (30%)</span>
                           </>
                         ) : calculatorResults.roi >= 0 ? (
                           <>
-                            <AlertTriangle className="h-4 w-4 text-yellow-600" />
-                            <span className="text-sm text-yellow-600">Below target</span>
+                            <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                            <span className="text-sm text-amber-600 dark:text-amber-400">Below target</span>
                           </>
                         ) : (
                           <>
-                            <AlertTriangle className="h-4 w-4 text-red-600" />
-                            <span className="text-sm text-red-600">Negative ROI</span>
+                            <AlertTriangle className="h-4 w-4 text-red-600 dark:text-red-400" />
+                            <span className="text-sm text-red-600 dark:text-red-400">Negative ROI</span>
                           </>
                         )}
                       </div>
@@ -404,11 +395,11 @@ export default function PromotionEfficiencyPage() {
 
                     <div className="p-4 bg-blue-50 dark:bg-blue-950 rounded-lg">
                       <div className="flex items-start gap-2">
-                        <Info className="h-4 w-4 text-blue-600 mt-0.5" />
+                        <Info className="h-4 w-4 text-blue-600 dark:text-blue-400 mt-0.5" />
                         <div>
                           <p className="text-sm font-medium">Break-even Point</p>
                           <p className="text-sm text-muted-foreground">
-                            Need {formatCurrency(calculatorResults.breakeven)} incremental revenue to break even
+                            Need {formatCurrencyCompact(calculatorResults.breakeven, 'VND')} incremental revenue to break even
                           </p>
                         </div>
                       </div>
@@ -513,13 +504,13 @@ export default function PromotionEfficiencyPage() {
                           <Badge variant="outline">{promo.type}</Badge>
                         </TableCell>
                         <TableCell className="text-right font-mono">
-                          {formatCurrency(promo.investment)}
+                          <CurrencyDisplay amount={promo.investment} size="sm" />
                         </TableCell>
-                        <TableCell className="text-right font-mono text-green-600">
-                          {formatCurrency(promo.incrementalRevenue)}
+                        <TableCell className="text-right font-mono text-emerald-600 dark:text-emerald-400">
+                          <CurrencyDisplay amount={promo.incrementalRevenue} size="sm" showToggle={false} />
                         </TableCell>
                         <TableCell className="text-right">
-                          <span className={promo.roi >= 0 ? 'text-green-600' : 'text-red-600'}>
+                          <span className={promo.roi >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}>
                             {promo.roi}%
                           </span>
                         </TableCell>

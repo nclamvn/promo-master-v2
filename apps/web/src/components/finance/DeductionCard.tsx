@@ -6,7 +6,8 @@ import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { DeductionStatusBadge } from './DeductionStatusBadge';
-import { formatCurrency, formatDate } from '@/lib/utils';
+import { formatDate } from '@/lib/utils';
+import { CurrencyDisplay } from '@/components/ui/currency-display';
 import { FileText, Calendar, ArrowRight, Link as LinkIcon } from 'lucide-react';
 import type { Deduction } from '@/types/finance';
 
@@ -42,9 +43,7 @@ export function DeductionCard({ deduction, onMatch, onDispute }: DeductionCardPr
             <span>Inv: {deduction.invoiceNumber}</span>
           </div>
           <div className="text-right">
-            <span className="text-lg font-semibold">
-              {formatCurrency(deduction.amount)}
-            </span>
+            <CurrencyDisplay amount={deduction.amount} size="md" />
           </div>
         </div>
 
@@ -54,7 +53,7 @@ export function DeductionCard({ deduction, onMatch, onDispute }: DeductionCardPr
         </div>
 
         {deduction.matchedClaim && (
-          <div className="flex items-center gap-2 text-sm text-green-600">
+          <div className="flex items-center gap-2 text-sm text-emerald-600 dark:text-emerald-400">
             <LinkIcon className="h-4 w-4" />
             <span>Matched: {deduction.matchedClaim.code}</span>
           </div>

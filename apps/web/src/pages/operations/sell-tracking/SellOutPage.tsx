@@ -21,7 +21,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { formatCurrency, formatNumber, formatPercent } from '@/lib/utils';
+import { formatNumber, formatPercent } from '@/lib/utils';
+import { CurrencyDisplay, formatCurrencyCompact } from '@/components/ui/currency-display';
 import api from '@/lib/api';
 import { useQuery } from '@tanstack/react-query';
 
@@ -98,7 +99,7 @@ export default function SellOutPage() {
         />
         <StatCard
           title="Total Value"
-          value={formatCurrency(data?.totals?.value || 0)}
+          value={formatCurrencyCompact(data?.totals?.value || 0, 'VND')}
         />
         <StatCard
           title="Avg Sell-Through"
@@ -223,7 +224,7 @@ export default function SellOutPage() {
                             {formatNumber(row.quantity)}
                           </TableCell>
                           <TableCell className="text-right">
-                            {formatCurrency(row.value)}
+                            <CurrencyDisplay amount={row.value} size="sm" />
                           </TableCell>
                           <TableCell className="text-center">
                             {getSellThroughBadge(row.sellThroughRate || 0)}
@@ -234,9 +235,9 @@ export default function SellOutPage() {
                                 <span
                                   className={
                                     row.growthPercent > 0
-                                      ? 'text-green-600'
+                                      ? 'text-emerald-600 dark:text-emerald-400'
                                       : row.growthPercent < 0
-                                      ? 'text-red-600'
+                                      ? 'text-red-600 dark:text-red-400'
                                       : ''
                                   }
                                 >

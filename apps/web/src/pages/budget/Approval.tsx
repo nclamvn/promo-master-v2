@@ -53,6 +53,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { CurrencyDisplay } from '@/components/ui/currency-display';
 
 // Types
 interface ApprovalRequest {
@@ -225,16 +226,6 @@ const mockRequests: ApprovalRequest[] = [
   },
 ];
 
-// Utility functions
-const formatCurrency = (value: number): string => {
-  if (value >= 1000000000) {
-    return `₫${(value / 1000000000).toFixed(1)}B`;
-  } else if (value >= 1000000) {
-    return `₫${(value / 1000000).toFixed(0)}M`;
-  }
-  return `₫${value.toLocaleString('vi-VN')}`;
-};
-
 const formatDate = (dateString: string): string => {
   return new Date(dateString).toLocaleDateString('vi-VN', {
     day: '2-digit',
@@ -356,7 +347,7 @@ export default function BudgetApprovalPage() {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(stats.totalAmount)}</div>
+            <div className="text-2xl font-bold"><CurrencyDisplay amount={stats.totalAmount} size="lg" /></div>
             <p className="text-xs text-muted-foreground">total value</p>
           </CardContent>
         </Card>
@@ -364,10 +355,10 @@ export default function BudgetApprovalPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Approved (MTD)</CardTitle>
-            <CheckCircle className="h-4 w-4 text-green-600" />
+            <CheckCircle className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">{stats.approved}</div>
+            <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{stats.approved}</div>
             <p className="text-xs text-muted-foreground">this month</p>
           </CardContent>
         </Card>
@@ -375,10 +366,10 @@ export default function BudgetApprovalPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Rejected (MTD)</CardTitle>
-            <XCircle className="h-4 w-4 text-red-600" />
+            <XCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-600">{stats.rejected}</div>
+            <div className="text-2xl font-bold text-red-600 dark:text-red-400">{stats.rejected}</div>
             <p className="text-xs text-muted-foreground">this month</p>
           </CardContent>
         </Card>
@@ -446,10 +437,10 @@ export default function BudgetApprovalPage() {
                     </TableCell>
                     <TableCell>{getRequestTypeBadge(request.requestType)}</TableCell>
                     <TableCell className="text-right">
-                      <div className="font-mono">{formatCurrency(request.amount)}</div>
+                      <div className="font-mono"><CurrencyDisplay amount={request.amount} size="sm" /></div>
                       {request.previousAmount && (
                         <div className="text-xs text-muted-foreground">
-                          from {formatCurrency(request.previousAmount)}
+                          from <CurrencyDisplay amount={request.previousAmount} size="sm" />
                         </div>
                       )}
                     </TableCell>
@@ -512,7 +503,7 @@ export default function BudgetApprovalPage() {
                             <Button
                               variant="ghost"
                               size="sm"
-                              className="text-green-600"
+                              className="text-emerald-600 dark:text-emerald-400"
                               onClick={() => {
                                 setSelectedRequest(request);
                                 setIsApproveDialogOpen(true);
@@ -523,7 +514,7 @@ export default function BudgetApprovalPage() {
                             <Button
                               variant="ghost"
                               size="sm"
-                              className="text-red-600"
+                              className="text-red-600 dark:text-red-400"
                               onClick={() => {
                                 setSelectedRequest(request);
                                 setIsApproveDialogOpen(true);
@@ -562,7 +553,7 @@ export default function BudgetApprovalPage() {
                 <div>
                   <Label className="text-muted-foreground">Amount</Label>
                   <div className="mt-1 font-mono font-medium">
-                    {formatCurrency(selectedRequest.amount)}
+                    <CurrencyDisplay amount={selectedRequest.amount} size="md" />
                   </div>
                 </div>
                 <div>

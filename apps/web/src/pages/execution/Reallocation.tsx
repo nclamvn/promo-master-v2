@@ -52,6 +52,7 @@ import {
   Eye,
   Send,
 } from 'lucide-react';
+import { CurrencyDisplay, formatCurrencyCompact } from '@/components/ui/currency-display';
 
 // Types
 interface ReallocationRequest {
@@ -128,14 +129,6 @@ const availableSources = [
   { id: '5', name: 'Miền Bắc Region', type: 'REGION', available: 2000000000 },
   { id: '6', name: 'Miền Nam Region', type: 'REGION', available: 500000000 },
 ];
-
-// Utility functions
-const formatCurrency = (value: number): string => {
-  if (value >= 1000000000) {
-    return `₫${(value / 1000000000).toFixed(1)}B`;
-  }
-  return `₫${(value / 1000000).toFixed(0)}M`;
-};
 
 const formatDate = (dateStr: string): string => {
   return new Date(dateStr).toLocaleDateString('vi-VN', {
@@ -241,7 +234,7 @@ export default function ReallocationPage() {
                         <div className="flex items-center justify-between w-full">
                           <span>{source.name}</span>
                           <span className="text-muted-foreground ml-2">
-                            ({formatCurrency(source.available)} available)
+                            ({formatCurrencyCompact(source.available, 'VND')} available)
                           </span>
                         </div>
                       </SelectItem>
@@ -285,7 +278,7 @@ export default function ReallocationPage() {
                 />
                 {newRequest.amount && (
                   <p className="text-xs text-muted-foreground">
-                    {formatCurrency(Number(newRequest.amount))}
+                    {formatCurrencyCompact(Number(newRequest.amount), 'VND')}
                   </p>
                 )}
               </div>
@@ -329,10 +322,10 @@ export default function ReallocationPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Pending Amount</CardTitle>
-            <DollarSign className="h-4 w-4 text-yellow-600" />
+            <DollarSign className="h-4 w-4 text-amber-600 dark:text-amber-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(stats.totalPending)}</div>
+            <div className="text-2xl font-bold"><CurrencyDisplay amount={stats.totalPending} size="lg" /></div>
             <p className="text-xs text-muted-foreground">To be approved</p>
           </CardContent>
         </Card>
@@ -340,10 +333,10 @@ export default function ReallocationPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Approved (MTD)</CardTitle>
-            <CheckCircle className="h-4 w-4 text-green-600" />
+            <CheckCircle className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">{stats.approved}</div>
+            <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{stats.approved}</div>
             <p className="text-xs text-muted-foreground">This month</p>
           </CardContent>
         </Card>
@@ -351,11 +344,11 @@ export default function ReallocationPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Approved Amount</CardTitle>
-            <ArrowLeftRight className="h-4 w-4 text-green-600" />
+            <ArrowLeftRight className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">
-              {formatCurrency(stats.totalApproved)}
+            <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
+              <CurrencyDisplay amount={stats.totalApproved} size="lg" showToggle={false} />
             </div>
             <p className="text-xs text-muted-foreground">Transferred MTD</p>
           </CardContent>
@@ -408,7 +401,7 @@ export default function ReallocationPage() {
                       </div>
                     </TableCell>
                     <TableCell className="text-right font-mono font-medium">
-                      {formatCurrency(request.amount)}
+                      <CurrencyDisplay amount={request.amount} size="sm" />
                     </TableCell>
                     <TableCell>
                       <div className="text-sm">{request.requestedBy}</div>
@@ -463,7 +456,7 @@ export default function ReallocationPage() {
                 </div>
                 <div className="text-center mt-4 pt-4 border-t">
                   <p className="text-sm text-muted-foreground">Amount</p>
-                  <p className="text-2xl font-bold">{formatCurrency(selectedRequest.amount)}</p>
+                  <div className="text-2xl font-bold"><CurrencyDisplay amount={selectedRequest.amount} size="lg" /></div>
                 </div>
               </div>
 

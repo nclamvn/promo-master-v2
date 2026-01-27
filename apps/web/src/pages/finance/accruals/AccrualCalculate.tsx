@@ -28,7 +28,7 @@ import {
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { LoadingSpinner } from '@/components/shared/LoadingSpinner';
 import { usePreviewAccruals, useCalculateAccruals } from '@/hooks/useAccruals';
-import { formatCurrency } from '@/lib/utils';
+import { CurrencyDisplay } from '@/components/ui/currency-display';
 import { useToast } from '@/hooks/useToast';
 
 type CalculationMethod = 'PERCENTAGE' | 'PRO_RATA';
@@ -301,13 +301,13 @@ export default function AccrualCalculatePage() {
                           </div>
                         </TableCell>
                         <TableCell className="text-right">
-                          {formatCurrency(entry.promotion.budget)}
+                          <CurrencyDisplay amount={entry.promotion.budget} size="sm" />
                         </TableCell>
                         <TableCell className="text-right">
-                          {formatCurrency(entry.promotion.spentAmount)}
+                          <CurrencyDisplay amount={entry.promotion.spentAmount} size="sm" />
                         </TableCell>
                         <TableCell className="text-right font-medium">
-                          {formatCurrency(entry.amount)}
+                          <CurrencyDisplay amount={entry.amount} size="sm" />
                         </TableCell>
                       </TableRow>
                     ))}
@@ -318,7 +318,7 @@ export default function AccrualCalculatePage() {
                         Total Accrual Amount
                       </TableCell>
                       <TableCell className="text-right font-bold text-lg">
-                        {formatCurrency(totalAmount)}
+                        <CurrencyDisplay amount={totalAmount} size="sm" />
                       </TableCell>
                     </TableRow>
                   </TableFooter>

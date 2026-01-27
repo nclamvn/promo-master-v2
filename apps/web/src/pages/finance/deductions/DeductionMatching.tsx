@@ -20,7 +20,8 @@ import {
   useMatchingSuggestions,
   useMatchDeduction,
 } from '@/hooks/useDeductions';
-import { formatCurrency, formatDate } from '@/lib/utils';
+import { formatDate } from '@/lib/utils';
+import { CurrencyDisplay } from '@/components/ui/currency-display';
 import { useToast } from '@/hooks/useToast';
 
 export default function DeductionMatchingPage() {
@@ -141,7 +142,7 @@ export default function DeductionMatchingPage() {
             <Separator />
             <div>
               <Label className="text-muted-foreground">Amount</Label>
-              <div className="text-2xl font-bold">{formatCurrency(deduction.amount)}</div>
+              <div className="text-2xl font-bold"><CurrencyDisplay amount={deduction.amount} size="sm" /></div>
             </div>
             {deduction.reason && (
               <div>

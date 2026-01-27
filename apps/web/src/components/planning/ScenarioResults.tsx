@@ -13,7 +13,8 @@ import {
   Target,
   Wallet,
 } from 'lucide-react';
-import { formatCurrency, formatPercent, formatNumber } from '@/lib/utils';
+import { formatPercent, formatNumber } from '@/lib/utils';
+import { formatCurrencyCompact } from '@/components/ui/currency-display';
 import type { ScenarioResults as Results } from '@/hooks/planning/useScenarios';
 
 interface ScenarioResultsProps {
@@ -32,9 +33,9 @@ interface MetricCardProps {
 function MetricCard({ title, value, subtitle, icon, trend }: MetricCardProps) {
   const trendColor =
     trend === 'up'
-      ? 'text-green-600'
+      ? 'text-emerald-600 dark:text-emerald-400'
       : trend === 'down'
-        ? 'text-red-600'
+        ? 'text-red-600 dark:text-red-400'
         : 'text-muted-foreground';
 
   return (
@@ -73,7 +74,7 @@ export function ScenarioResults({
           />
           <MetricCard
             title="Net Margin"
-            value={formatCurrency(results.netMargin)}
+            value={formatCurrencyCompact(results.netMargin, 'VND')}
             icon={<DollarSign className="h-5 w-5" />}
             trend={results.netMargin >= 0 ? 'up' : 'down'}
           />
@@ -105,19 +106,19 @@ export function ScenarioResults({
             <div>
               <p className="text-sm text-muted-foreground">Baseline Sales</p>
               <p className="text-xl font-semibold">
-                {formatCurrency(results.baselineSales)}
+                {formatCurrencyCompact(results.baselineSales, 'VND')}
               </p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Projected Sales</p>
-              <p className="text-xl font-semibold text-green-600">
-                {formatCurrency(results.projectedSales)}
+              <p className="text-xl font-semibold text-emerald-600 dark:text-emerald-400">
+                {formatCurrencyCompact(results.projectedSales, 'VND')}
               </p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Incremental Sales</p>
-              <p className="text-xl font-semibold text-blue-600">
-                {formatCurrency(results.incrementalSales)}
+              <p className="text-xl font-semibold text-blue-600 dark:text-blue-400">
+                {formatCurrencyCompact(results.incrementalSales, 'VND')}
               </p>
               <p className="text-xs text-muted-foreground">
                 +{formatPercent(results.salesLiftPercent)} lift
@@ -139,14 +140,14 @@ export function ScenarioResults({
           <div className="grid grid-cols-3 gap-6">
             <div>
               <p className="text-sm text-muted-foreground">Promotion Cost</p>
-              <p className="text-xl font-semibold text-red-600">
-                {formatCurrency(results.promotionCost)}
+              <p className="text-xl font-semibold text-red-600 dark:text-red-400">
+                {formatCurrencyCompact(results.promotionCost, 'VND')}
               </p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Funding Required</p>
               <p className="text-xl font-semibold">
-                {formatCurrency(results.fundingRequired)}
+                {formatCurrencyCompact(results.fundingRequired, 'VND')}
               </p>
               <p className="text-xs text-muted-foreground">
                 Includes 10% buffer
@@ -155,7 +156,7 @@ export function ScenarioResults({
             <div>
               <p className="text-sm text-muted-foreground">Cost per Unit</p>
               <p className="text-xl font-semibold">
-                {formatCurrency(results.costPerIncrementalUnit)}
+                {formatCurrencyCompact(results.costPerIncrementalUnit, 'VND')}
               </p>
               <p className="text-xs text-muted-foreground">Per incremental unit</p>
             </div>
@@ -176,21 +177,21 @@ export function ScenarioResults({
             <div>
               <p className="text-sm text-muted-foreground">Gross Margin</p>
               <p className="text-xl font-semibold">
-                {formatCurrency(results.grossMargin)}
+                {formatCurrencyCompact(results.grossMargin, 'VND')}
               </p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Net Margin</p>
               <p
-                className={`text-xl font-semibold ${results.netMargin >= 0 ? 'text-green-600' : 'text-red-600'}`}
+                className={`text-xl font-semibold ${results.netMargin >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}
               >
-                {formatCurrency(results.netMargin)}
+                {formatCurrencyCompact(results.netMargin, 'VND')}
               </p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">ROI</p>
               <p
-                className={`text-xl font-semibold ${results.roi >= 0 ? 'text-green-600' : 'text-red-600'}`}
+                className={`text-xl font-semibold ${results.roi >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}
               >
                 {formatPercent(results.roi)}
               </p>
@@ -217,7 +218,7 @@ export function ScenarioResults({
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Incremental Units</p>
-              <p className="text-xl font-semibold text-blue-600">
+              <p className="text-xl font-semibold text-blue-600 dark:text-blue-400">
                 {formatNumber(results.incrementalUnits)}
               </p>
             </div>
@@ -257,23 +258,23 @@ export function ScenarioResults({
                       <td className="py-2 px-3">{day.date}</td>
                       <td className="text-right py-2 px-3">{day.day}</td>
                       <td className="text-right py-2 px-3">
-                        {formatCurrency(day.baselineSales)}
+                        {formatCurrencyCompact(day.baselineSales, 'VND')}
                       </td>
-                      <td className="text-right py-2 px-3 text-green-600">
-                        {formatCurrency(day.projectedSales)}
+                      <td className="text-right py-2 px-3 text-emerald-600 dark:text-emerald-400">
+                        {formatCurrencyCompact(day.projectedSales, 'VND')}
                       </td>
-                      <td className="text-right py-2 px-3 text-red-600">
-                        {formatCurrency(day.promotionCost)}
+                      <td className="text-right py-2 px-3 text-red-600 dark:text-red-400">
+                        {formatCurrencyCompact(day.promotionCost, 'VND')}
                       </td>
                       <td
-                        className={`text-right py-2 px-3 ${day.cumulativeROI >= 0 ? 'text-green-600' : 'text-red-600'}`}
+                        className={`text-right py-2 px-3 ${day.cumulativeROI >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}
                       >
                         {formatPercent(day.cumulativeROI)}
                       </td>
                       <td
-                        className={`text-right py-2 px-3 ${day.cumulativeNetMargin >= 0 ? 'text-green-600' : 'text-red-600'}`}
+                        className={`text-right py-2 px-3 ${day.cumulativeNetMargin >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}
                       >
-                        {formatCurrency(day.cumulativeNetMargin)}
+                        {formatCurrencyCompact(day.cumulativeNetMargin, 'VND')}
                       </td>
                     </tr>
                   ))}

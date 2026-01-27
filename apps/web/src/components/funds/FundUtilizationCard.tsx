@@ -4,7 +4,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { formatCurrency } from '@/lib/utils';
+import { CurrencyDisplay } from '@/components/ui/currency-display';
 import type { Fund } from '@/types';
 
 interface FundUtilizationCardProps {
@@ -33,8 +33,8 @@ export function FundUtilizationCard({ fund }: FundUtilizationCardProps) {
           </div>
           <Progress value={allocatedPercent} className="h-2" />
           <div className="flex justify-between text-xs text-muted-foreground">
-            <span>{formatCurrency(fund.allocatedBudget)}</span>
-            <span>{formatCurrency(fund.totalBudget)}</span>
+            <CurrencyDisplay amount={fund.allocatedBudget} size="sm" showToggle={false} />
+            <CurrencyDisplay amount={fund.totalBudget} size="sm" showToggle={false} />
           </div>
         </div>
 
@@ -45,23 +45,21 @@ export function FundUtilizationCard({ fund }: FundUtilizationCardProps) {
           </div>
           <Progress value={utilizationPercent} className="h-2 [&>div]:bg-green-500" />
           <div className="flex justify-between text-xs text-muted-foreground">
-            <span>{formatCurrency(fund.utilizedBudget)}</span>
-            <span>{formatCurrency(fund.totalBudget)}</span>
+            <CurrencyDisplay amount={fund.utilizedBudget} size="sm" showToggle={false} />
+            <CurrencyDisplay amount={fund.totalBudget} size="sm" showToggle={false} />
           </div>
         </div>
 
         <div className="grid grid-cols-2 gap-4 pt-2 border-t">
           <div>
             <p className="text-sm text-muted-foreground">Available</p>
-            <p className="text-lg font-semibold text-green-600">
-              {formatCurrency(fund.availableBudget)}
-            </p>
+            <div className="text-emerald-600 dark:text-emerald-400">
+              <CurrencyDisplay amount={fund.availableBudget} size="md" />
+            </div>
           </div>
           <div>
             <p className="text-sm text-muted-foreground">Total Budget</p>
-            <p className="text-lg font-semibold">
-              {formatCurrency(fund.totalBudget)}
-            </p>
+            <CurrencyDisplay amount={fund.totalBudget} size="md" />
           </div>
         </div>
       </CardContent>

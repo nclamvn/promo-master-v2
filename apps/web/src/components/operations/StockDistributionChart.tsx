@@ -18,7 +18,8 @@ import {
 } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { formatCurrency, formatNumber } from '@/lib/utils';
+import { formatNumber } from '@/lib/utils';
+import { formatCurrencyCompact } from '@/components/ui/currency-display';
 import type { StockStatus } from '@/types/operations';
 
 interface StockByStatus {
@@ -129,10 +130,10 @@ export function StockDistributionChart({
                   margin={{ top: 5, right: 30, left: 100, bottom: 5 }}
                 >
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis type="number" tickFormatter={(v) => formatCurrency(v)} />
+                  <XAxis type="number" tickFormatter={(v) => formatCurrencyCompact(v, 'VND')} />
                   <YAxis dataKey="category" type="category" width={90} />
                   {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                  <Tooltip formatter={((value: any) => value !== undefined && value !== null ? formatCurrency(value) : '-') as any} />
+                  <Tooltip formatter={((value: any) => value !== undefined && value !== null ? formatCurrencyCompact(value, 'VND') : '-') as any} />
                   <Bar dataKey="value" fill="#3b82f6" radius={[0, 4, 4, 0]}>
                     {byCategory.slice(0, 8).map((_, index) => (
                       <Cell key={`cell-${index}`} fill={CATEGORY_COLORS[index % CATEGORY_COLORS.length]} />
@@ -159,12 +160,12 @@ export function StockDistributionChart({
                     textAnchor="end"
                     height={80}
                   />
-                  <YAxis tickFormatter={(v) => formatCurrency(v)} />
+                  <YAxis tickFormatter={(v) => formatCurrencyCompact(v, 'VND')} />
                   <Tooltip
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     formatter={((value: any, name: string) => [
                       value !== undefined && value !== null
-                        ? name === 'value' ? formatCurrency(value) : formatNumber(value)
+                        ? name === 'value' ? formatCurrencyCompact(value, 'VND') : formatNumber(value)
                         : '-',
                       name === 'value' ? 'Value' : 'Quantity',
                     ]) as any}
@@ -211,7 +212,7 @@ export function StockValueChart({ data, title = 'Stock Value Over Time' }: Stock
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               formatter={((value: any, name: string) => [
                 value !== undefined && value !== null
-                  ? name === 'totalValue' ? formatCurrency(value) : formatNumber(value)
+                  ? name === 'totalValue' ? formatCurrencyCompact(value, 'VND') : formatNumber(value)
                   : '-',
                 name === 'totalValue' ? 'Value' : 'Quantity',
               ]) as any}

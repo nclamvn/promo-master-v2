@@ -46,7 +46,8 @@ import {
   Cheque,
 } from '@/hooks/useCheques';
 import { useCustomers } from '@/hooks/useCustomers';
-import { formatCurrency, formatDate } from '@/lib/utils';
+import { formatDate } from '@/lib/utils';
+import { CurrencyDisplay } from '@/components/ui/currency-display';
 import { useToast } from '@/hooks/useToast';
 
 type ViewMode = 'table' | 'grid';
@@ -197,7 +198,7 @@ export default function ChequeListPage() {
     {
       accessorKey: 'amount',
       header: 'Amount',
-      cell: ({ row }) => formatCurrency(row.original.amount),
+      cell: ({ row }) => <CurrencyDisplay amount={row.original.amount} size="sm" />,
     },
     {
       accessorKey: 'bankName',

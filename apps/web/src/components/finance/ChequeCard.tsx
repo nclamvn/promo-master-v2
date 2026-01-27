@@ -5,7 +5,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ChequeStatusBadge } from './ChequeStatusBadge';
-import { formatCurrency, formatDate } from '@/lib/utils';
+import { formatDate } from '@/lib/utils';
+import { CurrencyDisplay } from '@/components/ui/currency-display';
 import { CreditCard, Eye, CheckCircle, XCircle } from 'lucide-react';
 import type { Cheque } from '@/hooks/useCheques';
 
@@ -59,7 +60,7 @@ export function ChequeCard({ cheque, onView, onClear, onVoid }: ChequeCardProps)
         <div className="flex items-center justify-between pt-2 border-t">
           <div>
             <div className="text-xs text-muted-foreground">Amount</div>
-            <div className="font-semibold text-lg">{formatCurrency(cheque.amount)}</div>
+            <div className="font-semibold text-lg"><CurrencyDisplay amount={cheque.amount} size="sm" /></div>
           </div>
           <div className="flex gap-1">
             {onView && (

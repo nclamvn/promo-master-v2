@@ -27,7 +27,8 @@ import {
 import { LoadingSpinner } from '@/components/shared/LoadingSpinner';
 import { SnapshotImportDialog } from '@/components/operations/SnapshotImportDialog';
 import { StockValueChart } from '@/components/operations/StockDistributionChart';
-import { formatCurrency, formatNumber } from '@/lib/utils';
+import { formatNumber } from '@/lib/utils';
+import { CurrencyDisplay } from '@/components/ui/currency-display';
 import api from '@/lib/api';
 import { useQuery } from '@tanstack/react-query';
 
@@ -121,7 +122,7 @@ export default function InventorySnapshots() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {formatCurrency(data?.totals?.value || 0)}
+              <CurrencyDisplay amount={data?.totals?.value || 0} size="md" />
             </div>
           </CardContent>
         </Card>
@@ -230,7 +231,7 @@ export default function InventorySnapshots() {
                           {formatNumber(row.totalQuantity)}
                         </TableCell>
                         <TableCell className="text-right">
-                          {formatCurrency(row.totalValue)}
+                          <CurrencyDisplay amount={row.totalValue} size="sm" />
                         </TableCell>
                         <TableCell className="text-right">{row.snapshotCount}</TableCell>
                       </TableRow>
@@ -286,7 +287,7 @@ export default function InventorySnapshots() {
                             {formatNumber(snapshot.quantity)}
                           </TableCell>
                           <TableCell className="text-right">
-                            {formatCurrency(snapshot.value)}
+                            <CurrencyDisplay amount={snapshot.value} size="sm" />
                           </TableCell>
                           <TableCell>{snapshot.expiryDate || '-'}</TableCell>
                         </TableRow>

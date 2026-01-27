@@ -4,7 +4,8 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { formatCurrency, formatDate } from '@/lib/utils';
+import { formatDate } from '@/lib/utils';
+import { formatCurrencyCompact } from '@/components/ui/currency-display';
 import { Clock, DollarSign, Tag, Users, Package, History } from 'lucide-react';
 import type { PromotionTemplate, TemplateVersion } from '@/types/planning';
 
@@ -64,7 +65,7 @@ export function TemplatePreview({ template, versions, recentPromotions }: Templa
               <div>
                 <p className="text-sm font-medium">Budget</p>
                 <p className="text-sm text-muted-foreground">
-                  {template.defaultBudget ? formatCurrency(template.defaultBudget) : 'Not set'}
+                  {template.defaultBudget ? formatCurrencyCompact(template.defaultBudget, 'VND') : 'Not set'}
                 </p>
               </div>
             </div>
@@ -110,7 +111,7 @@ export function TemplatePreview({ template, versions, recentPromotions }: Templa
                   <p className="text-sm text-muted-foreground">
                     {template.mechanics.discountType === 'PERCENTAGE'
                       ? `${template.mechanics.discountValue}%`
-                      : formatCurrency(template.mechanics.discountValue)}
+                      : formatCurrencyCompact(template.mechanics.discountValue, 'VND')}
                   </p>
                 </div>
               )}
@@ -118,7 +119,7 @@ export function TemplatePreview({ template, versions, recentPromotions }: Templa
                 <div>
                   <p className="text-sm font-medium">Min Purchase</p>
                   <p className="text-sm text-muted-foreground">
-                    {formatCurrency(template.mechanics.minPurchase)}
+                    {formatCurrencyCompact(template.mechanics.minPurchase, 'VND')}
                   </p>
                 </div>
               )}
@@ -126,7 +127,7 @@ export function TemplatePreview({ template, versions, recentPromotions }: Templa
                 <div>
                   <p className="text-sm font-medium">Max Discount</p>
                   <p className="text-sm text-muted-foreground">
-                    {formatCurrency(template.mechanics.maxDiscount)}
+                    {formatCurrencyCompact(template.mechanics.maxDiscount, 'VND')}
                   </p>
                 </div>
               )}
@@ -180,7 +181,7 @@ export function TemplatePreview({ template, versions, recentPromotions }: Templa
                 <div>
                   <p className="text-sm font-medium">Min Order Value</p>
                   <p className="text-sm text-muted-foreground">
-                    {formatCurrency(template.eligibility.minOrderValue)}
+                    {formatCurrencyCompact(template.eligibility.minOrderValue, 'VND')}
                   </p>
                 </div>
               )}

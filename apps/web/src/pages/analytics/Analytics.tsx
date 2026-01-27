@@ -17,7 +17,7 @@ import { BarChart } from '@/components/charts/BarChart';
 import { PieChart } from '@/components/charts/PieChart';
 import { AreaChart } from '@/components/charts/AreaChart';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { formatCurrency } from '@/lib/utils';
+import { CurrencyDisplay, formatCurrencyCompact } from '@/components/ui/currency-display';
 import {
   DollarSign,
   TrendingUp,
@@ -106,13 +106,13 @@ export default function Analytics() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <KPICard
           title="Total Revenue"
-          value={formatCurrency(9680000000)}
+          amount={9680000000}
           icon={DollarSign}
           trend={{ value: 18.5, label: 'YoY' }}
         />
         <KPICard
           title="Total Spend"
-          value={formatCurrency(2900000000)}
+          amount={2900000000}
           icon={TrendingUp}
           trend={{ value: 12.3, label: 'YoY' }}
         />
@@ -246,9 +246,9 @@ export default function Analytics() {
                 {monthlyData.map((row) => (
                   <tr key={row.month} className="border-b hover:bg-muted/50">
                     <td className="py-3 px-4 font-medium">{row.month}</td>
-                    <td className="py-3 px-4 text-right">{formatCurrency(row.revenue)}</td>
-                    <td className="py-3 px-4 text-right">{formatCurrency(row.spend)}</td>
-                    <td className="py-3 px-4 text-right text-green-600">{row.roi}%</td>
+                    <td className="py-3 px-4 text-right">{formatCurrencyCompact(row.revenue, 'VND')}</td>
+                    <td className="py-3 px-4 text-right">{formatCurrencyCompact(row.spend, 'VND')}</td>
+                    <td className="py-3 px-4 text-right text-emerald-600 dark:text-emerald-400">{row.roi}%</td>
                     <td className="py-3 px-4 text-right">
                       {((row.revenue / row.spend) * 100).toFixed(1)}%
                     </td>

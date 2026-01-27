@@ -30,7 +30,8 @@ import { EmptyState } from '@/components/shared/EmptyState';
 import { LoadingSpinner } from '@/components/shared/LoadingSpinner';
 import { SearchInput } from '@/components/shared/SearchInput';
 import { useFunds, useDeleteFund } from '@/hooks/useFunds';
-import { formatCurrency, formatDate } from '@/lib/utils';
+import { formatDate } from '@/lib/utils';
+import { CurrencyDisplay } from '@/components/ui/currency-display';
 import type { Fund, FundType } from '@/types';
 
 type ViewMode = 'table' | 'grid';
@@ -250,7 +251,7 @@ export default function FundList() {
             : 0;
           return (
             <div className="space-y-1">
-              <p className="font-medium">{formatCurrency(row.original.totalBudget)}</p>
+              <CurrencyDisplay amount={row.original.totalBudget} size="sm" />
               <div className="flex items-center gap-2">
                 <Progress
                   value={utilizationPercent}
@@ -266,9 +267,9 @@ export default function FundList() {
         accessorKey: 'availableBudget',
         header: 'Available',
         cell: ({ row }) => (
-          <span className={row.original.availableBudget > 0 ? 'text-green-600 font-medium' : 'text-red-600 font-medium'}>
-            {formatCurrency(row.original.availableBudget)}
-          </span>
+          <div className={row.original.availableBudget > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}>
+            <CurrencyDisplay amount={row.original.availableBudget} size="sm" />
+          </div>
         ),
       },
       {
@@ -467,13 +468,13 @@ export default function FundList() {
                         <div className="flex justify-between pt-2">
                           <div>
                             <p className="text-xs text-muted-foreground">Available</p>
-                            <p className={`font-semibold ${fund.availableBudget > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                              {formatCurrency(fund.availableBudget)}
-                            </p>
+                            <div className={fund.availableBudget > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}>
+                              <CurrencyDisplay amount={fund.availableBudget} size="sm" />
+                            </div>
                           </div>
                           <div className="text-right">
                             <p className="text-xs text-muted-foreground">Total</p>
-                            <p className="font-semibold">{formatCurrency(fund.totalBudget)}</p>
+                            <CurrencyDisplay amount={fund.totalBudget} size="sm" />
                           </div>
                         </div>
                       </div>

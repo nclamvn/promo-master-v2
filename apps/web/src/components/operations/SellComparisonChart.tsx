@@ -15,7 +15,8 @@ import {
   Legend,
 } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { formatCurrency, formatNumber } from '@/lib/utils';
+import { formatNumber } from '@/lib/utils';
+import { formatCurrencyCompact } from '@/components/ui/currency-display';
 
 interface ComparisonDataPoint {
   period: string;
@@ -48,7 +49,7 @@ export function SellComparisonChart({
 
   const formatValue = (value: number) => {
     if (viewMode === 'value') {
-      return formatCurrency(value);
+      return formatCurrencyCompact(value, 'VND');
     }
     return formatNumber(value);
   };

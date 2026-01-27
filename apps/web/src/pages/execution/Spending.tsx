@@ -54,6 +54,7 @@ import {
   Cell,
   Treemap,
 } from 'recharts';
+import { CurrencyDisplay, formatCurrencyCompact } from '@/components/ui/currency-display';
 
 // Mock data
 const categorySpending = [
@@ -96,15 +97,6 @@ const topPromotions = [
   { id: '5', name: 'POSM Campaign', channel: 'GT', spent: 600000000, roi: 28 },
 ];
 
-// Utility functions
-const formatCurrency = (value: number): string => {
-  if (value >= 1000000000) {
-    return `₫${(value / 1000000000).toFixed(1)}B`;
-  } else if (value >= 1000000) {
-    return `₫${(value / 1000000).toFixed(0)}M`;
-  }
-  return `₫${value.toLocaleString('vi-VN')}`;
-};
 
 export default function SpendingAnalysisPage() {
   const [selectedPeriod, setSelectedPeriod] = useState('Q1-2026');
@@ -150,10 +142,10 @@ export default function SpendingAnalysisPage() {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(totalSpent)}</div>
+            <div className="text-2xl font-bold"><CurrencyDisplay amount={totalSpent} size="lg" /></div>
             <div className="flex items-center mt-1">
-              <TrendingUp className="h-4 w-4 text-green-600 mr-1" />
-              <span className="text-xs text-green-600">+12% vs last period</span>
+              <TrendingUp className="h-4 w-4 text-emerald-600 dark:text-emerald-400 mr-1" />
+              <span className="text-xs text-emerald-600 dark:text-emerald-400">+12% vs last period</span>
             </div>
           </CardContent>
         </Card>
@@ -175,7 +167,7 @@ export default function SpendingAnalysisPage() {
             <Calendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(totalSpent / 90)}</div>
+            <div className="text-2xl font-bold"><CurrencyDisplay amount={totalSpent / 90} size="lg" /></div>
             <p className="text-xs text-muted-foreground">Based on 90 days</p>
           </CardContent>
         </Card>
@@ -183,11 +175,11 @@ export default function SpendingAnalysisPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Variance</CardTitle>
-            <TrendingDown className="h-4 w-4 text-green-600" />
+            <TrendingDown className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">
-              -{formatCurrency(totalBudget - totalSpent)}
+            <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
+              -<CurrencyDisplay amount={totalBudget - totalSpent} size="lg" showToggle={false} />
             </div>
             <p className="text-xs text-muted-foreground">Under budget</p>
           </CardContent>
@@ -217,7 +209,7 @@ export default function SpendingAnalysisPage() {
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="category" />
                     <YAxis tickFormatter={(v) => `${v / 1000}B`} />
-                    <Tooltip formatter={(value) => formatCurrency(Number(value) * 1000000)} />
+                    <Tooltip formatter={(value) => formatCurrencyCompact(Number(value) * 1000000, 'VND')} />
                     <Legend />
                     <Bar dataKey="budget" fill="#94a3b8" name="Budget" />
                     <Bar dataKey="spent" fill="#3b82f6" name="Spent" />
@@ -238,10 +230,10 @@ export default function SpendingAnalysisPage() {
                       <div className="flex items-center justify-between">
                         <span className="font-medium">{cat.category}</span>
                         <div className="flex items-center gap-2">
-                          <span className="font-mono">{formatCurrency(cat.spent * 1000000)}</span>
+                          <span className="font-mono"><CurrencyDisplay amount={cat.spent * 1000000} size="sm" showToggle={false} /></span>
                           <span
                             className={`flex items-center text-sm ${
-                              cat.variance > 0 ? 'text-red-600' : 'text-green-600'
+                              cat.variance > 0 ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'
                             }`}
                           >
                             {cat.variance > 0 ? (
@@ -249,7 +241,7 @@ export default function SpendingAnalysisPage() {
                             ) : (
                               <ArrowDownRight className="h-4 w-4" />
                             )}
-                            {formatCurrency(Math.abs(cat.variance) * 1000000)}
+                            <CurrencyDisplay amount={Math.abs(cat.variance) * 1000000} size="sm" showToggle={false} />
                           </span>
                         </div>
                       </div>
@@ -287,7 +279,7 @@ export default function SpendingAnalysisPage() {
                         <Cell key={`cell-${index}`} fill={entry.color} />
                       ))}
                     </Pie>
-                    <Tooltip formatter={(value) => formatCurrency(Number(value) * 1000000)} />
+                    <Tooltip formatter={(value) => formatCurrencyCompact(Number(value) * 1000000, 'VND')} />
                   </PieChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -363,7 +355,7 @@ export default function SpendingAnalysisPage() {
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="month" />
                   <YAxis tickFormatter={(v) => `${v / 1000}B`} />
-                  <Tooltip formatter={(value) => formatCurrency(Number(value) * 1000000)} />
+                  <Tooltip formatter={(value) => formatCurrencyCompact(Number(value) * 1000000, 'VND')} />
                   <Legend />
                   <Bar dataKey="trade" stackId="a" fill="#3b82f6" name="Trade" />
                   <Bar dataKey="marketing" stackId="a" fill="#10b981" name="Marketing" />
@@ -404,12 +396,12 @@ export default function SpendingAnalysisPage() {
                           <Badge variant="secondary">{promo.channel}</Badge>
                         </TableCell>
                         <TableCell className="text-right font-mono">
-                          {formatCurrency(promo.spent)}
+                          <CurrencyDisplay amount={promo.spent} size="sm" />
                         </TableCell>
                         <TableCell className="text-right">
                           <span
                             className={`font-medium ${
-                              promo.roi >= 50 ? 'text-green-600' : promo.roi >= 30 ? 'text-blue-600' : 'text-yellow-600'
+                              promo.roi >= 50 ? 'text-emerald-600 dark:text-emerald-400' : promo.roi >= 30 ? 'text-blue-600 dark:text-blue-400' : 'text-amber-600 dark:text-amber-400'
                             }`}
                           >
                             {promo.roi}%

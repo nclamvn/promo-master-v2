@@ -44,7 +44,8 @@ import {
 import { DeliveryStatusBadge, DeliveryTimeline } from '@/components/operations';
 import { LoadingSpinner } from '@/components/shared/LoadingSpinner';
 import { useToast } from '@/hooks/useToast';
-import { formatCurrency, formatDate } from '@/lib/utils';
+import { formatDate } from '@/lib/utils';
+import { CurrencyDisplay } from '@/components/ui/currency-display';
 import {
   useDeliveryOrder,
   useDeliveryTracking,
@@ -223,7 +224,7 @@ export default function DeliveryDetail() {
               <DollarSign className="h-5 w-5 text-muted-foreground" />
               <div>
                 <p className="text-sm text-muted-foreground">Total Value</p>
-                <p className="font-semibold">{formatCurrency(order.totalValue || 0)}</p>
+                <p className="font-semibold"><CurrencyDisplay amount={order.totalValue || 0} size="sm" /></p>
               </div>
             </div>
           </CardContent>
@@ -349,10 +350,10 @@ export default function DeliveryDetail() {
                         </p>
                       </td>
                       <td className="text-right py-3 px-4">{line.quantity}</td>
-                      <td className="text-right py-3 px-4 text-green-600">
+                      <td className="text-right py-3 px-4 text-emerald-600 dark:text-emerald-400">
                         {line.deliveredQty}
                       </td>
-                      <td className="text-right py-3 px-4 text-red-600">
+                      <td className="text-right py-3 px-4 text-red-600 dark:text-red-400">
                         {line.damagedQty || 0}
                       </td>
                       <td className="py-3 px-4">

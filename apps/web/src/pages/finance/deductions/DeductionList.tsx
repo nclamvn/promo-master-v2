@@ -44,7 +44,8 @@ import {
   useDisputeDeduction,
 } from '@/hooks/useDeductions';
 import { useCustomers } from '@/hooks/useCustomers';
-import { formatCurrency, formatDate } from '@/lib/utils';
+import { formatDate } from '@/lib/utils';
+import { CurrencyDisplay } from '@/components/ui/currency-display';
 import { useToast } from '@/hooks/useToast';
 import type { Deduction, DeductionStatus } from '@/types/finance';
 
@@ -174,7 +175,7 @@ export default function DeductionListPage() {
     {
       accessorKey: 'amount',
       header: 'Amount',
-      cell: ({ row }) => formatCurrency(row.original.amount),
+      cell: ({ row }) => <CurrencyDisplay amount={row.original.amount} size="sm" />,
     },
     {
       accessorKey: 'status',

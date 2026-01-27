@@ -23,7 +23,7 @@ import {
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { formatCurrency } from '@/lib/utils';
+import { formatCurrencyCompact } from '@/components/ui/currency-display';
 import { useCustomers } from '@/hooks/useCustomers';
 import { useFunds } from '@/hooks/useFunds';
 import type { PromotionTemplate, ApplyTemplateRequest } from '@/types/planning';
@@ -104,7 +104,7 @@ export function ApplyTemplateDialog({
               </div>
               <div>
                 <span className="text-muted-foreground">Budget:</span>{' '}
-                {template.defaultBudget ? formatCurrency(template.defaultBudget) : 'Custom'}
+                {template.defaultBudget ? formatCurrencyCompact(template.defaultBudget, 'VND') : 'Custom'}
               </div>
             </div>
           </div>
@@ -164,7 +164,7 @@ export function ApplyTemplateDialog({
               />
               {template.defaultBudget && (
                 <p className="text-xs text-muted-foreground">
-                  Default: {formatCurrency(template.defaultBudget)}
+                  Default: {formatCurrencyCompact(template.defaultBudget, 'VND')}
                 </p>
               )}
             </div>
@@ -202,7 +202,7 @@ export function ApplyTemplateDialog({
                   <SelectItem value="__none__">No fund allocation</SelectItem>
                   {fundsData?.funds?.map((f: any) => (
                     <SelectItem key={f.id} value={f.id}>
-                      {f.name} ({formatCurrency(f.availableBudget || 0)} available)
+                      {f.name} ({formatCurrencyCompact(f.availableBudget || 0, 'VND')} available)
                     </SelectItem>
                   ))}
                 </SelectContent>

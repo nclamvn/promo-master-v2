@@ -43,7 +43,8 @@ import {
   useApprovePromotion,
   useRejectPromotion,
 } from '@/hooks/usePromotions';
-import { formatCurrency, formatDate } from '@/lib/utils';
+import { formatDate } from '@/lib/utils';
+import { CurrencyDisplay } from '@/components/ui/currency-display';
 import type { Promotion, Claim } from '@/types';
 
 // Demo data
@@ -233,7 +234,7 @@ export default function PromotionDetail() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{formatCurrency(promo.budget)}</div>
+                <CurrencyDisplay amount={promo.budget} size="lg" />
               </CardContent>
             </Card>
 
@@ -244,7 +245,7 @@ export default function PromotionDetail() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{formatCurrency(promo.actualSpend)}</div>
+                <CurrencyDisplay amount={promo.actualSpend} size="lg" />
               </CardContent>
             </Card>
 
@@ -255,8 +256,8 @@ export default function PromotionDetail() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-green-600">
-                  {formatCurrency(promo.budget - promo.actualSpend)}
+                <div className="text-emerald-600 dark:text-emerald-400">
+                  <CurrencyDisplay amount={promo.budget - promo.actualSpend} size="lg" />
                 </div>
               </CardContent>
             </Card>
@@ -417,7 +418,7 @@ export default function PromotionDetail() {
                           </p>
                         </div>
                         <div className="text-right">
-                          <p className="font-medium">{formatCurrency(claim.claimAmount)}</p>
+                          <CurrencyDisplay amount={claim.claimAmount} size="sm" />
                           <ClaimStatusBadge status={claim.status} />
                         </div>
                       </div>

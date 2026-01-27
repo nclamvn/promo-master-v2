@@ -82,7 +82,8 @@ import {
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react';
-import { cn, formatCurrency, formatDate } from '@/lib/utils';
+import { cn, formatDate } from '@/lib/utils';
+import { CurrencyDisplay } from '@/components/ui/currency-display';
 
 // ============================================================================
 // TYPES
@@ -367,67 +368,67 @@ const SummaryCards = ({ summary }: { summary: PaymentSummary }) => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs text-muted-foreground">Tổng giá trị</p>
-              <p className="text-lg font-bold">{formatCurrency(summary.totalAmount)}</p>
+              <div className="text-lg font-bold"><CurrencyDisplay amount={summary.totalAmount} size="md" /></div>
             </div>
             <Wallet className="h-8 w-8 text-purple-500 opacity-50" />
           </div>
         </CardContent>
       </Card>
-      
+
       <Card>
         <CardContent className="pt-4">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs text-muted-foreground">Chờ xử lý</p>
-              <p className="text-lg font-bold text-yellow-600">{formatCurrency(summary.pendingAmount)}</p>
+              <div className="text-lg font-bold text-amber-600 dark:text-amber-400"><CurrencyDisplay amount={summary.pendingAmount} size="md" showToggle={false} /></div>
             </div>
             <Clock className="h-8 w-8 text-yellow-500 opacity-50" />
           </div>
         </CardContent>
       </Card>
-      
+
       <Card>
         <CardContent className="pt-4">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs text-muted-foreground">Đang xử lý</p>
-              <p className="text-lg font-bold text-blue-600">{formatCurrency(summary.processingAmount)}</p>
+              <div className="text-lg font-bold text-blue-600 dark:text-blue-400"><CurrencyDisplay amount={summary.processingAmount} size="md" showToggle={false} /></div>
             </div>
             <RefreshCw className="h-8 w-8 text-blue-500 opacity-50" />
           </div>
         </CardContent>
       </Card>
-      
+
       <Card>
         <CardContent className="pt-4">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs text-muted-foreground">Đã thanh toán</p>
-              <p className="text-lg font-bold text-green-600">{formatCurrency(summary.paidAmount)}</p>
+              <div className="text-lg font-bold text-emerald-600 dark:text-emerald-400"><CurrencyDisplay amount={summary.paidAmount} size="md" showToggle={false} /></div>
             </div>
             <CheckCircle2 className="h-8 w-8 text-green-500 opacity-50" />
           </div>
         </CardContent>
       </Card>
       
-      <Card className="border-red-200 bg-red-50/50">
+      <Card className="border-red-200 bg-red-500/10 dark:bg-red-500/20">
         <CardContent className="pt-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs text-red-600">Quá hạn</p>
-              <p className="text-lg font-bold text-red-600">{summary.overdueCount}</p>
+              <p className="text-xs text-red-600 dark:text-red-400">Quá hạn</p>
+              <p className="text-lg font-bold text-red-600 dark:text-red-400">{summary.overdueCount}</p>
             </div>
             <AlertTriangle className="h-8 w-8 text-red-500 opacity-50" />
           </div>
         </CardContent>
       </Card>
-      
-      <Card className="border-red-200 bg-red-50/50">
+
+      <Card className="border-red-200 bg-red-500/10 dark:bg-red-500/20">
         <CardContent className="pt-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs text-red-600">Giá trị quá hạn</p>
-              <p className="text-lg font-bold text-red-600">{formatCurrency(summary.overdueAmount)}</p>
+              <p className="text-xs text-red-600 dark:text-red-400">Giá trị quá hạn</p>
+              <div className="text-lg font-bold text-red-600 dark:text-red-400"><CurrencyDisplay amount={summary.overdueAmount} size="md" showToggle={false} /></div>
             </div>
             <XCircle className="h-8 w-8 text-red-500 opacity-50" />
           </div>
@@ -476,14 +477,14 @@ const PaymentRow = ({
         </div>
       </TableCell>
       <TableCell className="text-right">
-        <div className="font-medium">{formatCurrency(item.approvedAmount)}</div>
+        <div className="font-medium"><CurrencyDisplay amount={item.approvedAmount} size="sm" /></div>
         {item.paidAmount > 0 && (
-          <div className="text-xs text-green-600">Đã TT: {formatCurrency(item.paidAmount)}</div>
+          <div className="text-xs text-emerald-600 dark:text-emerald-400">Đã TT: <CurrencyDisplay amount={item.paidAmount} size="sm" showToggle={false} /></div>
         )}
       </TableCell>
       <TableCell className="text-right">
-        <div className={cn('font-medium', item.pendingAmount > 0 ? 'text-yellow-600' : 'text-green-600')}>
-          {formatCurrency(item.pendingAmount)}
+        <div className={cn('font-medium', item.pendingAmount > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-emerald-600 dark:text-emerald-400')}>
+          <CurrencyDisplay amount={item.pendingAmount} size="sm" showToggle={false} />
         </div>
       </TableCell>
       <TableCell>
@@ -578,11 +579,11 @@ const ProcessPaymentDialog = ({
           <div className="grid grid-cols-2 gap-4 p-4 bg-muted rounded-lg">
             <div>
               <p className="text-sm text-muted-foreground">Số tiền đã duyệt</p>
-              <p className="text-lg font-bold">{formatCurrency(item.approvedAmount)}</p>
+              <div className="text-lg font-bold"><CurrencyDisplay amount={item.approvedAmount} size="md" /></div>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Còn phải thanh toán</p>
-              <p className="text-lg font-bold text-yellow-600">{formatCurrency(item.pendingAmount)}</p>
+              <div className="text-lg font-bold text-amber-600 dark:text-amber-400"><CurrencyDisplay amount={item.pendingAmount} size="md" showToggle={false} /></div>
             </div>
           </div>
           
@@ -859,7 +860,7 @@ export default function ClaimsPaymentPage() {
                 </span>
                 <Separator orientation="vertical" className="h-6" />
                 <span className="text-muted-foreground">
-                  Tổng: <span className="font-bold text-primary">{formatCurrency(selectedTotal)}</span>
+                  Tổng: <span className="font-bold text-primary"><CurrencyDisplay amount={selectedTotal} size="sm" showToggle={false} /></span>
                 </span>
               </div>
               <div className="flex items-center gap-2">

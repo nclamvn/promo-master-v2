@@ -33,7 +33,8 @@ import {
 } from '@/components/ui/table';
 import { LoadingSpinner } from '@/components/shared/LoadingSpinner';
 import { useInventoryList, useInventorySummary } from '@/hooks/operations';
-import { formatCurrency, formatNumber, formatDate } from '@/lib/utils';
+import { formatNumber, formatDate } from '@/lib/utils';
+import { CurrencyDisplay } from '@/components/ui/currency-display';
 import type { InventoryParams } from '@/types/operations';
 
 export default function InventoryList() {
@@ -98,7 +99,7 @@ export default function InventoryList() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {formatCurrency(summaryData?.summary?.totalValue || 0)}
+              <CurrencyDisplay amount={summaryData?.summary?.totalValue || 0} size="md" />
             </div>
             <p className="text-xs text-muted-foreground">
               {formatNumber(summaryData?.summary?.totalItems || 0)} total items
@@ -123,7 +124,7 @@ export default function InventoryList() {
             <AlertTriangle className="h-4 w-4 text-red-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-600">
+            <div className="text-2xl font-bold text-red-600 dark:text-red-400">
               {formatNumber(summaryData?.summary?.outOfStockItems || 0)}
             </div>
             <p className="text-xs text-muted-foreground">Require immediate attention</p>
@@ -256,14 +257,14 @@ export default function InventoryList() {
                         {formatNumber(record.quantity)}
                       </TableCell>
                       <TableCell className="text-right">
-                        {formatCurrency(record.value)}
+                        <CurrencyDisplay amount={record.value} size="sm" />
                       </TableCell>
                       <TableCell>
                         {record.expiryDate ? (
                           <span
                             className={
                               new Date(record.expiryDate) < new Date()
-                                ? 'text-red-600'
+                                ? 'text-red-600 dark:text-red-400'
                                 : new Date(record.expiryDate) <
                                   new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
                                 ? 'text-orange-600'
