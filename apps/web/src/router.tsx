@@ -28,6 +28,7 @@ const PromotionNew = lazy(() => import('@/pages/promotions/PromotionNew'));
 const PromotionEdit = lazy(() => import('@/pages/promotions/PromotionEdit'));
 const PromotionEfficiency = lazy(() => import('@/pages/promotions/Efficiency'));
 const PromotionDeployment = lazy(() => import('@/pages/promotions/Deployment'));
+const PromotionMechanics = lazy(() => import('@/pages/promotions/Mechanics'));
 
 const ClaimList = lazy(() => import('@/pages/claims/ClaimList'));
 const ClaimDetail = lazy(() => import('@/pages/claims/ClaimDetail'));
@@ -216,6 +217,9 @@ export default function AppRouter() {
         } />
         <Route path="/promotions/deployment" element={
           <SuspenseWrapper><PromotionDeployment /></SuspenseWrapper>
+        } />
+        <Route path="/promotions/mechanics" element={
+          <SuspenseWrapper><PromotionMechanics /></SuspenseWrapper>
         } />
 
         {/* Claims */}
