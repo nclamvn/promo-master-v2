@@ -50,6 +50,11 @@ function formatCompact(
   currency: CurrencyCode,
   exchangeRate: number
 ): { display: string; fullValue: string } {
+  // Guard against undefined/null/NaN
+  if (amount == null || isNaN(amount)) {
+    return { display: '-', fullValue: '-' };
+  }
+
   const convertedAmount = currency === 'VND' ? amount : amount / exchangeRate;
 
   // Full value for tooltip
@@ -174,10 +179,13 @@ export function CurrencyDisplay({
  * Simple currency formatter function (for inline use)
  */
 export function formatCurrencyCompact(
-  amount: number,
+  amount: number | undefined | null,
   currency: CurrencyCode = 'VND',
   exchangeRate: number = DEFAULT_EXCHANGE_RATE
 ): string {
+  if (amount == null || isNaN(amount)) {
+    return '-';
+  }
   const { display } = formatCompact(amount, currency, exchangeRate);
   return display;
 }
