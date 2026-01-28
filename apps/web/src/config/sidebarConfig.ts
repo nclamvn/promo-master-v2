@@ -29,7 +29,6 @@ import {
   MessageSquare,
   Webhook,
   Shield,
-  Database,
   Building2,
   Cog,
   Users,
@@ -37,8 +36,29 @@ import {
 } from 'lucide-react';
 
 // ============================================================================
-// TYPE DEFINITIONS
+// ENHANCED TYPE DEFINITIONS
 // ============================================================================
+
+export type BadgeType = 'count' | 'dot' | 'pulse' | 'text';
+export type BadgeVariant = 'default' | 'primary' | 'success' | 'warning' | 'danger' | 'info' | 'premium';
+export type VisualPriority = 'primary' | 'default' | 'muted';
+
+export interface SmartBadge {
+  type: BadgeType;
+  value?: string | number;
+  variant: BadgeVariant;
+  animate?: boolean;
+}
+
+export interface TooltipFeature {
+  text: string;
+}
+
+export interface EnhancedTooltip {
+  title: string;
+  description?: string;
+  features?: TooltipFeature[];
+}
 
 export interface SidebarItem {
   id: string;
@@ -46,8 +66,21 @@ export interface SidebarItem {
   titleVi?: string;
   href: string;
   icon: LucideIcon;
+  // Legacy badge support
   badge?: string | number;
   badgeVariant?: 'default' | 'success' | 'warning' | 'danger';
+  // Enhanced badge
+  smartBadge?: SmartBadge;
+  // User Story reference
+  sublabel?: string;
+  // Keyboard shortcut
+  shortcut?: string;
+  // Visual priority
+  priority?: VisualPriority;
+  isPrimary?: boolean;
+  // Enhanced tooltip
+  tooltip?: EnhancedTooltip;
+  // Other
   children?: Omit<SidebarItem, 'children'>[];
   permissions?: string[];
   brdRef?: string;
@@ -64,6 +97,10 @@ export interface SidebarSection {
   defaultCollapsed?: boolean;
   permissions?: string[];
   brdSection?: string;
+  // Enhanced: section-level badge
+  sectionBadge?: SmartBadge;
+  // Visual variant
+  variant?: 'primary' | 'default' | 'muted';
 }
 
 export interface SidebarConfig {
@@ -84,8 +121,8 @@ export interface SidebarConfig {
 }
 
 // ============================================================================
-// SIDEBAR CONFIGURATION - 100% BRD ALIGNED
-// 11 Sections | 52 Items | Full BRD Compliance
+// SIDEBAR CONFIGURATION - ENHANCED VERSION
+// 11 Sections | 45 Items | Smart Badges | Keyboard Shortcuts | Tooltips
 // ============================================================================
 
 export const sidebarConfig: SidebarConfig = {
@@ -96,12 +133,13 @@ export const sidebarConfig: SidebarConfig = {
   },
   sections: [
     // ============================================
-    // 1. TỔNG QUAN
+    // 1. TỔNG QUAN - Entry Point
     // ============================================
     {
       id: 'overview',
       title: 'TỔNG QUAN',
       defaultExpanded: true,
+      variant: 'primary',
       items: [
         {
           id: 'dashboard',
@@ -109,19 +147,31 @@ export const sidebarConfig: SidebarConfig = {
           titleVi: 'Tổng quan',
           href: '/dashboard',
           icon: LayoutDashboard,
-          description: 'Tổng quan KPI và báo cáo',
+          shortcut: '⌘1',
+          isPrimary: true,
+          tooltip: {
+            title: 'Dashboard',
+            description: 'Tổng quan KPI và báo cáo real-time',
+            features: [
+              { text: 'KPI overview' },
+              { text: 'Real-time metrics' },
+              { text: 'Quick actions' },
+            ],
+          },
         },
       ],
     },
 
     // ============================================
-    // 2. QUẢN LÝ NGÂN SÁCH (BRD 3.1)
+    // 2. QUẢN LÝ NGÂN SÁCH (BRD 3.1) - Primary
     // ============================================
     {
       id: 'budget-management',
       title: 'QUẢN LÝ NGÂN SÁCH',
       defaultExpanded: true,
       brdSection: '3.1',
+      variant: 'primary',
+      sectionBadge: { type: 'count', value: 2, variant: 'warning' },
       items: [
         {
           id: 'budget-definition',
@@ -131,6 +181,18 @@ export const sidebarConfig: SidebarConfig = {
           icon: FileText,
           brdRef: '3.1.1',
           isNew: true,
+          shortcut: '⌘2',
+          sublabel: 'US-01, US-02',
+          smartBadge: { type: 'count', value: 2, variant: 'warning' },
+          tooltip: {
+            title: 'Budget Definition & Control',
+            description: 'Định nghĩa ngân sách theo năm/quý/tháng',
+            features: [
+              { text: 'Create budget definitions' },
+              { text: 'Set budget limits' },
+              { text: 'Version control' },
+            ],
+          },
         },
         {
           id: 'budget-allocation',
@@ -140,6 +202,16 @@ export const sidebarConfig: SidebarConfig = {
           icon: GitBranch,
           brdRef: '3.1.2',
           isNew: true,
+          sublabel: 'US-03',
+          tooltip: {
+            title: 'Budget Allocation',
+            description: 'Phân bổ ngân sách theo kênh/vùng/sản phẩm',
+            features: [
+              { text: 'Tree-view allocation' },
+              { text: 'Drag & drop' },
+              { text: 'Auto-calculate' },
+            ],
+          },
         },
         {
           id: 'budget-monitoring',
@@ -149,6 +221,17 @@ export const sidebarConfig: SidebarConfig = {
           icon: Activity,
           brdRef: '3.1.3',
           isNew: true,
+          sublabel: 'US-04',
+          smartBadge: { type: 'dot', variant: 'success', animate: true },
+          tooltip: {
+            title: 'Budget Monitoring',
+            description: 'Dashboard theo dõi ngân sách real-time',
+            features: [
+              { text: 'Real-time dashboard' },
+              { text: 'Channel analysis' },
+              { text: 'Variance alerts' },
+            ],
+          },
         },
         {
           id: 'fund-management',
@@ -157,18 +240,28 @@ export const sidebarConfig: SidebarConfig = {
           href: '/funds',
           icon: Wallet,
           description: 'Quản lý các quỹ FIXED/VARIABLE',
+          tooltip: {
+            title: 'Fund Management',
+            description: 'Quản lý các quỹ khuyến mãi',
+            features: [
+              { text: 'Fixed funds' },
+              { text: 'Variable funds' },
+              { text: 'Fund transfers' },
+            ],
+          },
         },
       ],
     },
 
     // ============================================
-    // 3. LẬP KẾ HOẠCH KINH DOANH (BRD 3.2)
+    // 3. LẬP KẾ HOẠCH KINH DOANH (BRD 3.2) - Primary
     // ============================================
     {
       id: 'business-planning',
       title: 'LẬP KẾ HOẠCH KINH DOANH',
       defaultExpanded: true,
       brdSection: '3.2',
+      variant: 'primary',
       items: [
         {
           id: 'baselines',
@@ -177,6 +270,11 @@ export const sidebarConfig: SidebarConfig = {
           href: '/baselines',
           icon: TrendingUp,
           brdRef: '3.2.1',
+          sublabel: 'US-05',
+          tooltip: {
+            title: 'Baseline Management',
+            description: 'Quản lý dữ liệu baseline cho dự báo',
+          },
         },
         {
           id: 'targets',
@@ -185,6 +283,11 @@ export const sidebarConfig: SidebarConfig = {
           href: '/targets',
           icon: Target,
           brdRef: '3.2.2',
+          sublabel: 'US-06',
+          tooltip: {
+            title: 'Target Management',
+            description: 'Thiết lập và theo dõi mục tiêu',
+          },
         },
         {
           id: 'scenarios',
@@ -193,6 +296,11 @@ export const sidebarConfig: SidebarConfig = {
           href: '/planning/scenarios',
           icon: GitBranch,
           brdRef: '3.2.3',
+          sublabel: 'US-07',
+          tooltip: {
+            title: 'Scenario Planning',
+            description: 'So sánh các kịch bản khuyến mãi',
+          },
         },
         {
           id: 'tpo-suggestion',
@@ -203,18 +311,33 @@ export const sidebarConfig: SidebarConfig = {
           brdRef: '3.2.4',
           isNew: true,
           isBeta: true,
+          shortcut: '⌘T',
+          sublabel: 'US-08',
+          smartBadge: { type: 'text', value: 'AI', variant: 'premium' },
+          isPrimary: true,
+          tooltip: {
+            title: 'TPO - AI Suggestion',
+            description: 'AI đề xuất promotion tối ưu',
+            features: [
+              { text: 'ML predictions' },
+              { text: 'ROI optimization' },
+              { text: 'Auto-recommendations' },
+            ],
+          },
         },
       ],
     },
 
     // ============================================
-    // 4. LẬP KẾ HOẠCH KHUYẾN MÃI (BRD 3.3)
+    // 4. LẬP KẾ HOẠCH KHUYẾN MÃI (BRD 3.3) - Primary
     // ============================================
     {
       id: 'promotion-planning',
       title: 'LẬP KẾ HOẠCH KHUYẾN MÃI',
       defaultExpanded: true,
       brdSection: '3.3',
+      variant: 'primary',
+      sectionBadge: { type: 'count', value: 67, variant: 'primary' },
       items: [
         {
           id: 'promotion-calendar',
@@ -223,7 +346,12 @@ export const sidebarConfig: SidebarConfig = {
           href: '/calendar',
           icon: Calendar,
           brdRef: '3.3.1',
-          description: 'Calendar view theo tuần/tháng',
+          shortcut: '⌘3',
+          sublabel: 'US-09',
+          tooltip: {
+            title: 'Promotion Calendar',
+            description: 'Lịch khuyến mãi theo tuần/tháng/quý',
+          },
         },
         {
           id: 'promotion-scheme',
@@ -231,9 +359,19 @@ export const sidebarConfig: SidebarConfig = {
           titleVi: 'Chương trình Khuyến mãi',
           href: '/promotions',
           icon: Tag,
-          badge: 67,
-          badgeVariant: 'default',
           brdRef: '3.3.2',
+          sublabel: 'US-10, US-11',
+          smartBadge: { type: 'count', value: 67, variant: 'primary' },
+          isPrimary: true,
+          tooltip: {
+            title: 'Promotion Scheme',
+            description: 'Quản lý các chương trình khuyến mãi',
+            features: [
+              { text: '67 active promotions' },
+              { text: 'Multi-channel support' },
+              { text: 'Approval workflow' },
+            ],
+          },
         },
         {
           id: 'mechanics-slab',
@@ -242,7 +380,11 @@ export const sidebarConfig: SidebarConfig = {
           href: '/promotions/mechanics',
           icon: Cog,
           brdRef: '3.3.3',
-          description: 'Cấu hình discount %, rebate, free goods',
+          sublabel: 'US-12',
+          tooltip: {
+            title: 'Mechanics / Slab',
+            description: 'Cấu hình discount, rebate, free goods',
+          },
         },
         {
           id: 'templates',
@@ -250,6 +392,7 @@ export const sidebarConfig: SidebarConfig = {
           titleVi: 'Mẫu Khuyến mãi',
           href: '/planning/templates',
           icon: FileStack,
+          sublabel: 'US-13',
         },
         {
           id: 'projected-efficiency',
@@ -259,6 +402,12 @@ export const sidebarConfig: SidebarConfig = {
           icon: BarChart3,
           brdRef: '3.3.4',
           isNew: true,
+          sublabel: 'US-14',
+          smartBadge: { type: 'text', value: 'NEW', variant: 'success' },
+          tooltip: {
+            title: 'Projected Efficiency',
+            description: 'Tính toán hiệu quả dự kiến của promotion',
+          },
         },
         {
           id: 'deployment-plan',
@@ -268,6 +417,11 @@ export const sidebarConfig: SidebarConfig = {
           icon: Rocket,
           brdRef: '3.3.5',
           isNew: true,
+          sublabel: 'US-15',
+          tooltip: {
+            title: 'Deployment Plan',
+            description: 'Checklist triển khai promotion',
+          },
         },
         {
           id: 'dms-integration',
@@ -276,7 +430,12 @@ export const sidebarConfig: SidebarConfig = {
           href: '/integration/dms',
           icon: Link2,
           brdRef: '3.3.6',
-          description: 'Export promotion sang DMS',
+          sublabel: 'US-16',
+          smartBadge: { type: 'dot', variant: 'success' },
+          tooltip: {
+            title: 'DMS Integration',
+            description: 'Export promotion sang DMS',
+          },
         },
         {
           id: 'clash-detection',
@@ -284,18 +443,25 @@ export const sidebarConfig: SidebarConfig = {
           titleVi: 'Phát hiện Xung đột',
           href: '/planning/clashes',
           icon: AlertTriangle,
+          sublabel: 'US-17',
+          smartBadge: { type: 'count', value: 3, variant: 'warning' },
+          tooltip: {
+            title: 'Clash Detection',
+            description: 'Phát hiện và xử lý xung đột promotion',
+          },
         },
       ],
     },
 
     // ============================================
-    // 5. THỰC THI & GIÁM SÁT (BRD 3.4.1-3.4.5)
+    // 5. THỰC THI & GIÁM SÁT (BRD 3.4.1-3.4.5) - Primary
     // ============================================
     {
       id: 'execution-monitoring',
       title: 'THỰC THI & GIÁM SÁT',
       defaultExpanded: false,
       brdSection: '3.4 (1-5)',
+      variant: 'primary',
       items: [
         {
           id: 'psp-budget-monitoring',
@@ -305,6 +471,12 @@ export const sidebarConfig: SidebarConfig = {
           icon: Activity,
           brdRef: '3.4.1',
           isNew: true,
+          sublabel: 'US-18',
+          smartBadge: { type: 'pulse', variant: 'success' },
+          tooltip: {
+            title: 'PSP Budget Monitoring',
+            description: 'Real-time monitoring PSP budget',
+          },
         },
         {
           id: 'sell-in-monitoring',
@@ -313,6 +485,8 @@ export const sidebarConfig: SidebarConfig = {
           href: '/operations/sell-tracking/sell-in',
           icon: ShoppingCart,
           brdRef: '3.4.2',
+          sublabel: 'US-19',
+          smartBadge: { type: 'dot', variant: 'success', animate: true },
         },
         {
           id: 'sell-out-monitoring',
@@ -321,6 +495,8 @@ export const sidebarConfig: SidebarConfig = {
           href: '/operations/sell-tracking/sell-out',
           icon: TrendingUp,
           brdRef: '3.4.3',
+          sublabel: 'US-20',
+          smartBadge: { type: 'dot', variant: 'success', animate: true },
         },
         {
           id: 'spending-monitoring',
@@ -330,6 +506,7 @@ export const sidebarConfig: SidebarConfig = {
           icon: DollarSign,
           brdRef: '3.4.4',
           isNew: true,
+          sublabel: 'US-21',
         },
         {
           id: 'delivery-tracking',
@@ -337,6 +514,7 @@ export const sidebarConfig: SidebarConfig = {
           titleVi: 'Theo dõi Giao hàng',
           href: '/operations/delivery',
           icon: Truck,
+          sublabel: 'US-22',
         },
         {
           id: 'inventory-tracking',
@@ -344,6 +522,7 @@ export const sidebarConfig: SidebarConfig = {
           titleVi: 'Theo dõi Tồn kho',
           href: '/operations/inventory',
           icon: Package,
+          sublabel: 'US-23',
         },
         {
           id: 'budget-reallocation',
@@ -353,6 +532,7 @@ export const sidebarConfig: SidebarConfig = {
           icon: GitBranch,
           brdRef: '3.4.5',
           isNew: true,
+          sublabel: 'US-24',
         },
       ],
     },
@@ -365,6 +545,8 @@ export const sidebarConfig: SidebarConfig = {
       title: 'YÊU CẦU & THANH TOÁN',
       defaultExpanded: false,
       brdSection: '3.4 (6-8)',
+      variant: 'default',
+      sectionBadge: { type: 'count', value: 12, variant: 'warning' },
       items: [
         {
           id: 'claims-reporting',
@@ -372,9 +554,9 @@ export const sidebarConfig: SidebarConfig = {
           titleVi: 'Báo cáo Claims',
           href: '/claims',
           icon: FileText,
-          badge: 12,
-          badgeVariant: 'warning',
           brdRef: '3.4.6',
+          sublabel: 'US-25',
+          smartBadge: { type: 'count', value: 12, variant: 'warning' },
         },
         {
           id: 'claims-processing',
@@ -382,6 +564,7 @@ export const sidebarConfig: SidebarConfig = {
           titleVi: 'Xử lý Claims',
           href: '/claims/processing',
           icon: ClipboardList,
+          sublabel: 'US-26',
         },
         {
           id: 'settlement',
@@ -391,6 +574,7 @@ export const sidebarConfig: SidebarConfig = {
           icon: Receipt,
           brdRef: '3.4.7',
           isNew: true,
+          sublabel: 'US-27',
         },
         {
           id: 'payment',
@@ -400,6 +584,7 @@ export const sidebarConfig: SidebarConfig = {
           icon: CreditCard,
           brdRef: '3.4.8',
           isNew: true,
+          sublabel: 'US-28',
         },
       ],
     },
@@ -411,6 +596,7 @@ export const sidebarConfig: SidebarConfig = {
       id: 'finance-accounting',
       title: 'TÀI CHÍNH & KẾ TOÁN',
       defaultExpanded: false,
+      variant: 'default',
       items: [
         {
           id: 'accruals',
@@ -418,6 +604,7 @@ export const sidebarConfig: SidebarConfig = {
           titleVi: 'Dồn tích Chi phí',
           href: '/finance/accruals',
           icon: BookOpen,
+          sublabel: 'US-29',
         },
         {
           id: 'deductions',
@@ -425,6 +612,7 @@ export const sidebarConfig: SidebarConfig = {
           titleVi: 'Khấu trừ',
           href: '/finance/deductions',
           icon: FileText,
+          sublabel: 'US-30',
         },
         {
           id: 'gl-journals',
@@ -432,6 +620,7 @@ export const sidebarConfig: SidebarConfig = {
           titleVi: 'Sổ cái Tổng hợp',
           href: '/finance/journals',
           icon: BookOpen,
+          sublabel: 'US-31',
         },
         {
           id: 'cheques',
@@ -439,6 +628,7 @@ export const sidebarConfig: SidebarConfig = {
           titleVi: 'Séc Thanh toán',
           href: '/finance/cheques',
           icon: CreditCard,
+          sublabel: 'US-32',
         },
       ],
     },
@@ -451,6 +641,7 @@ export const sidebarConfig: SidebarConfig = {
       title: 'PHÂN TÍCH HIỆU QUẢ',
       defaultExpanded: false,
       brdSection: 'Section 2',
+      variant: 'default',
       items: [
         {
           id: 'roi-analysis',
@@ -459,6 +650,8 @@ export const sidebarConfig: SidebarConfig = {
           href: '/analysis/roi',
           icon: TrendingUp,
           isNew: true,
+          sublabel: 'US-33',
+          smartBadge: { type: 'text', value: 'NEW', variant: 'success' },
         },
         {
           id: 'efficiency-report',
@@ -467,6 +660,7 @@ export const sidebarConfig: SidebarConfig = {
           href: '/analysis/efficiency',
           icon: BarChart3,
           isNew: true,
+          sublabel: 'US-34',
         },
         {
           id: 'whatif-analysis',
@@ -475,6 +669,7 @@ export const sidebarConfig: SidebarConfig = {
           href: '/analysis/what-if',
           icon: Lightbulb,
           isNew: true,
+          sublabel: 'US-35',
         },
         {
           id: 'bi-dashboard',
@@ -482,18 +677,20 @@ export const sidebarConfig: SidebarConfig = {
           titleVi: 'Dashboard BI',
           href: '/bi',
           icon: PieChart,
+          sublabel: 'US-36',
         },
       ],
     },
 
     // ============================================
-    // 9. AI & PHÂN TÍCH (GIỮ LẠI - KHÔNG XÓA)
+    // 9. AI & PHÂN TÍCH - Muted
     // ============================================
     {
       id: 'ai-analytics',
       title: 'AI & PHÂN TÍCH',
       defaultExpanded: false,
       defaultCollapsed: true,
+      variant: 'muted',
       items: [
         {
           id: 'ai-insights',
@@ -502,6 +699,8 @@ export const sidebarConfig: SidebarConfig = {
           href: '/ai/insights',
           icon: Brain,
           isBeta: true,
+          sublabel: 'US-37',
+          smartBadge: { type: 'text', value: 'BETA', variant: 'warning' },
         },
         {
           id: 'ai-recommendations',
@@ -510,6 +709,7 @@ export const sidebarConfig: SidebarConfig = {
           href: '/ai/recommendations',
           icon: Sparkles,
           isBeta: true,
+          sublabel: 'US-38',
         },
         {
           id: 'voice-commands',
@@ -518,18 +718,21 @@ export const sidebarConfig: SidebarConfig = {
           href: '/voice',
           icon: MessageSquare,
           isBeta: true,
+          sublabel: 'US-39',
+          smartBadge: { type: 'text', value: 'BETA', variant: 'warning' },
         },
       ],
     },
 
     // ============================================
-    // 10. TÍCH HỢP HỆ THỐNG (GIỮ LẠI - KHÔNG XÓA)
+    // 10. TÍCH HỢP HỆ THỐNG - Muted
     // ============================================
     {
       id: 'integration',
       title: 'TÍCH HỢP HỆ THỐNG',
       defaultExpanded: false,
       defaultCollapsed: true,
+      variant: 'muted',
       items: [
         {
           id: 'erp-integration',
@@ -537,6 +740,8 @@ export const sidebarConfig: SidebarConfig = {
           titleVi: 'Tích hợp ERP',
           href: '/integration/erp',
           icon: Building2,
+          sublabel: 'US-40',
+          smartBadge: { type: 'dot', variant: 'success' },
         },
         {
           id: 'webhooks',
@@ -544,6 +749,7 @@ export const sidebarConfig: SidebarConfig = {
           titleVi: 'Webhooks',
           href: '/integration/webhooks',
           icon: Webhook,
+          sublabel: 'US-41',
         },
         {
           id: 'security',
@@ -551,18 +757,20 @@ export const sidebarConfig: SidebarConfig = {
           titleVi: 'Bảo mật',
           href: '/integration/security',
           icon: Shield,
+          sublabel: 'US-42',
         },
       ],
     },
 
     // ============================================
-    // 11. CÀI ĐẶT
+    // 11. CÀI ĐẶT - Muted
     // ============================================
     {
       id: 'settings',
       title: 'CÀI ĐẶT',
       defaultExpanded: false,
       defaultCollapsed: true,
+      variant: 'muted',
       items: [
         {
           id: 'customers',
@@ -570,6 +778,7 @@ export const sidebarConfig: SidebarConfig = {
           titleVi: 'Khách hàng',
           href: '/customers',
           icon: Users,
+          sublabel: 'US-43',
         },
         {
           id: 'products',
@@ -577,6 +786,7 @@ export const sidebarConfig: SidebarConfig = {
           titleVi: 'Sản phẩm',
           href: '/products',
           icon: Package,
+          sublabel: 'US-44',
         },
         {
           id: 'system-config',
@@ -585,6 +795,7 @@ export const sidebarConfig: SidebarConfig = {
           href: '/settings',
           icon: Settings,
           permissions: ['ADMIN'],
+          sublabel: 'US-45',
         },
       ],
     },
@@ -597,6 +808,19 @@ export const sidebarConfig: SidebarConfig = {
       { label: 'Sync', status: 'syncing', value: '2 phút trước' },
     ],
   },
+};
+
+// ============================================================================
+// KEYBOARD SHORTCUTS MAP
+// ============================================================================
+
+export const keyboardShortcuts: Record<string, string> = {
+  '⌘1': '/dashboard',
+  '⌘2': '/budget/definition',
+  '⌘3': '/calendar',
+  '⌘T': '/planning/tpo',
+  '⌘K': 'search', // Opens quick search
+  '⌘B': 'toggle', // Toggles sidebar
 };
 
 // ============================================================================
@@ -643,3 +867,41 @@ export const getSidebarColors = (isDark: boolean): SidebarColors => ({
 
 export const getSidebarBgColor = (isDark: boolean): string =>
   isDark ? '#0A2744' : '#8DD8E8';
+
+// ============================================================================
+// BADGE COLORS
+// ============================================================================
+
+export const getBadgeColors = (variant: BadgeVariant, isDark: boolean) => {
+  const colors = {
+    default: {
+      bg: isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.1)',
+      text: isDark ? '#FFFFFF' : '#374151',
+    },
+    primary: {
+      bg: isDark ? 'rgba(59,130,246,0.3)' : 'rgba(59,130,246,0.15)',
+      text: isDark ? '#93c5fd' : '#2563eb',
+    },
+    success: {
+      bg: isDark ? 'rgba(34,197,94,0.3)' : 'rgba(34,197,94,0.15)',
+      text: isDark ? '#86efac' : '#16a34a',
+    },
+    warning: {
+      bg: isDark ? 'rgba(245,158,11,0.3)' : 'rgba(245,158,11,0.15)',
+      text: isDark ? '#fcd34d' : '#d97706',
+    },
+    danger: {
+      bg: isDark ? 'rgba(239,68,68,0.3)' : 'rgba(239,68,68,0.15)',
+      text: isDark ? '#fca5a5' : '#dc2626',
+    },
+    info: {
+      bg: isDark ? 'rgba(6,182,212,0.3)' : 'rgba(6,182,212,0.15)',
+      text: isDark ? '#67e8f9' : '#0891b2',
+    },
+    premium: {
+      bg: isDark ? 'rgba(168,85,247,0.3)' : 'rgba(168,85,247,0.15)',
+      text: isDark ? '#c4b5fd' : '#7c3aed',
+    },
+  };
+  return colors[variant];
+};
