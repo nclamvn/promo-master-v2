@@ -244,6 +244,7 @@ export function Sidebar({ isMobileOpen = false, onMobileClose }: SidebarProps) {
               isExpanded={isSectionExpanded(section.id)}
               isCollapsed={sidebarCollapsed}
               colors={colors}
+              isDark={isDark}
               onToggle={() => toggleSection(section.id)}
               isItemActive={isActive}
               onNavigate={onMobileClose}

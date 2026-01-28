@@ -1,6 +1,7 @@
 import { ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { SidebarItem } from './SidebarItem';
+import { SmartSidebarBadge } from './SidebarBadge';
 import type { SidebarSection as SidebarSectionType, SidebarColors } from '@/config/sidebarConfig';
 
 interface SidebarSectionProps {
@@ -8,6 +9,7 @@ interface SidebarSectionProps {
   isExpanded: boolean;
   isCollapsed: boolean;
   colors: SidebarColors;
+  isDark?: boolean;
   onToggle: () => void;
   isItemActive: (href: string) => boolean;
   onNavigate?: () => void;
@@ -18,6 +20,7 @@ export function SidebarSection({
   isExpanded,
   isCollapsed,
   colors,
+  isDark = false,
   onToggle,
   isItemActive,
   onNavigate,
@@ -47,7 +50,16 @@ export function SidebarSection({
             e.currentTarget.style.borderLeftColor = colors.borderAccent;
           }}
         >
-          <span>{section.title}</span>
+          <span className="flex items-center gap-2">
+            {section.title}
+            {section.sectionBadge && (
+              <SmartSidebarBadge
+                badge={section.sectionBadge}
+                colors={colors}
+                isDark={isDark}
+              />
+            )}
+          </span>
           <ChevronDown
             className={cn(
               'h-3 w-3 transition-transform duration-150',
@@ -68,6 +80,7 @@ export function SidebarSection({
               isCollapsed={isCollapsed}
               isActive={isItemActive(item.href)}
               colors={colors}
+              isDark={isDark}
               onNavigate={onNavigate}
             />
           ))}
