@@ -1,6 +1,6 @@
 /**
  * KeyboardShortcutsProvider
- * Provides global keyboard shortcuts and help dialog
+ * Provides global keyboard shortcuts, help dialog, and quick search
  */
 
 import { createContext, useContext, ReactNode } from 'react';
@@ -17,6 +17,7 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 import { Keyboard } from 'lucide-react';
+import { QuickSearch } from '@/components/search/QuickSearch';
 
 interface KeyboardShortcutsContextValue {
   isSearchOpen: boolean;
@@ -115,6 +116,9 @@ export function KeyboardShortcutsProvider({
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Quick Search Modal (⌘K) */}
+      <QuickSearch open={isSearchOpen} onOpenChange={setIsSearchOpen} />
     </KeyboardShortcutsContext.Provider>
   );
 }

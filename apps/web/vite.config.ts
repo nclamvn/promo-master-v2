@@ -37,16 +37,45 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     sourcemap: true,
+    // Optimize chunk size
+    chunkSizeWarningLimit: 500,
     rollupOptions: {
       output: {
         manualChunks: {
+          // Core React libraries
           vendor: ['react', 'react-dom', 'react-router-dom'],
-          ui: ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-select'],
+          // UI component libraries
+          ui: [
+            '@radix-ui/react-dialog',
+            '@radix-ui/react-dropdown-menu',
+            '@radix-ui/react-select',
+            '@radix-ui/react-tabs',
+            '@radix-ui/react-tooltip',
+            '@radix-ui/react-popover',
+            '@radix-ui/react-scroll-area',
+          ],
+          // Charts (large library)
           charts: ['recharts'],
+          // Form handling + validation
           forms: ['react-hook-form', '@hookform/resolvers', 'zod'],
+          // Data fetching
+          query: ['@tanstack/react-query'],
+          // State management
+          state: ['zustand'],
+          // Date utilities
+          dates: ['date-fns'],
+          // Data table
+          datatable: ['@tanstack/react-table'],
         },
+        // Optimize chunk names for better caching
+        chunkFileNames: 'assets/[name]-[hash].js',
+        entryFileNames: 'assets/[name]-[hash].js',
+        assetFileNames: 'assets/[name]-[hash].[ext]',
       },
     },
+    // Enable minification optimizations
+    minify: 'esbuild',
+    target: 'es2020',
   },
 
   optimizeDeps: {
