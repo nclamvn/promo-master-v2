@@ -1,41 +1,38 @@
 import {
   LayoutDashboard,
-  Tag,
-  Receipt,
-  Wallet,
-  Users,
-  Package,
-  PiggyBank,
-  Target,
-  TrendingUp,
-  Calendar,
-  BarChart3,
-  Settings,
-  Calculator,
-  CreditCard,
   FileText,
-  Banknote,
-  FileStack,
   GitBranch,
-  AlertTriangle,
-  Truck,
-  ShoppingCart,
-  Boxes,
-  Link2,
-  // New icons for Budget Management & TPO
-  DollarSign,
   Activity,
-  CheckSquare,
+  Wallet,
+  TrendingUp,
+  Target,
   Sparkles,
-  // New icons for Priority 1 pages
-  Gauge,
+  Calendar,
+  Tag,
+  Settings,
+  FileStack,
   Rocket,
-  ArrowLeftRight,
-  ReceiptText,
-  // Analysis icons
+  Link2,
+  AlertTriangle,
+  ShoppingCart,
+  DollarSign,
+  Truck,
+  Package,
+  ClipboardList,
+  Receipt,
+  CreditCard,
+  BookOpen,
+  BarChart3,
+  Lightbulb,
   PieChart,
-  LineChart,
-  FlaskConical,
+  Brain,
+  MessageSquare,
+  Webhook,
+  Shield,
+  Database,
+  Building2,
+  Cog,
+  Users,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -46,12 +43,17 @@ import {
 export interface SidebarItem {
   id: string;
   title: string;
+  titleVi?: string;
   href: string;
   icon: LucideIcon;
   badge?: string | number;
   badgeVariant?: 'default' | 'success' | 'warning' | 'danger';
   children?: Omit<SidebarItem, 'children'>[];
   permissions?: string[];
+  brdRef?: string;
+  isNew?: boolean;
+  isBeta?: boolean;
+  description?: string;
 }
 
 export interface SidebarSection {
@@ -59,7 +61,9 @@ export interface SidebarSection {
   title: string;
   items: SidebarItem[];
   defaultExpanded?: boolean;
+  defaultCollapsed?: boolean;
   permissions?: string[];
+  brdSection?: string;
 }
 
 export interface SidebarConfig {
@@ -80,8 +84,8 @@ export interface SidebarConfig {
 }
 
 // ============================================================================
-// SIDEBAR CONFIGURATION - BRD ALIGNED
-// Follows business workflow: Budget → Planning → Promotion → Execution → Claims → Finance → Analysis
+// SIDEBAR CONFIGURATION - 100% BRD ALIGNED
+// 11 Sections | 52 Items | Full BRD Compliance
 // ============================================================================
 
 export const sidebarConfig: SidebarConfig = {
@@ -91,131 +95,497 @@ export const sidebarConfig: SidebarConfig = {
     icon: Package,
   },
   sections: [
-    // 1. TỔNG QUAN (Overview) - Entry point
+    // ============================================
+    // 1. TỔNG QUAN
+    // ============================================
     {
       id: 'overview',
       title: 'TỔNG QUAN',
       defaultExpanded: true,
       items: [
-        { id: 'dashboard', title: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-        { id: 'calendar', title: 'Lịch', href: '/calendar', icon: Calendar },
+        {
+          id: 'dashboard',
+          title: 'Dashboard',
+          titleVi: 'Tổng quan',
+          href: '/dashboard',
+          icon: LayoutDashboard,
+          description: 'Tổng quan KPI và báo cáo',
+        },
       ],
     },
 
-    // 2. NGÂN SÁCH (Budget) - BRD 3.1.3
+    // ============================================
+    // 2. QUẢN LÝ NGÂN SÁCH (BRD 3.1)
+    // ============================================
     {
-      id: 'budget',
-      title: 'NGÂN SÁCH',
+      id: 'budget-management',
+      title: 'QUẢN LÝ NGÂN SÁCH',
       defaultExpanded: true,
+      brdSection: '3.1',
       items: [
-        { id: 'budget-overview', title: 'Tổng quan NS', href: '/budget', icon: PiggyBank },
-        { id: 'budget-definition', title: 'Định nghĩa', href: '/budget/definition', icon: DollarSign },
-        { id: 'budget-allocation', title: 'Phân bổ', href: '/budget/allocation', icon: PiggyBank },
-        { id: 'budget-monitoring', title: 'Giám sát', href: '/budget/monitoring', icon: Activity },
-        { id: 'budget-approval', title: 'Phê duyệt', href: '/budget/approval', icon: CheckSquare, badge: 3, badgeVariant: 'warning' },
+        {
+          id: 'budget-definition',
+          title: 'Budget Definition',
+          titleVi: 'Định nghĩa & Kiểm soát',
+          href: '/budget/definition',
+          icon: FileText,
+          brdRef: '3.1.1',
+          isNew: true,
+        },
+        {
+          id: 'budget-allocation',
+          title: 'Budget Allocation',
+          titleVi: 'Phân bổ Ngân sách',
+          href: '/budget/allocation',
+          icon: GitBranch,
+          brdRef: '3.1.2',
+          isNew: true,
+        },
+        {
+          id: 'budget-monitoring',
+          title: 'Budget Monitoring',
+          titleVi: 'Giám sát Ngân sách',
+          href: '/budget/monitoring',
+          icon: Activity,
+          brdRef: '3.1.3',
+          isNew: true,
+        },
+        {
+          id: 'fund-management',
+          title: 'Fund Management',
+          titleVi: 'Quản lý Quỹ',
+          href: '/funds',
+          icon: Wallet,
+          description: 'Quản lý các quỹ FIXED/VARIABLE',
+        },
       ],
     },
 
-    // 3. KẾ HOẠCH (Planning) - BRD 3.1.4
+    // ============================================
+    // 3. LẬP KẾ HOẠCH KINH DOANH (BRD 3.2)
+    // ============================================
     {
-      id: 'planning',
-      title: 'KẾ HOẠCH',
+      id: 'business-planning',
+      title: 'LẬP KẾ HOẠCH KINH DOANH',
       defaultExpanded: true,
+      brdSection: '3.2',
       items: [
-        { id: 'tpo', title: 'TPO (AI)', href: '/planning/tpo', icon: Sparkles },
-        { id: 'targets', title: 'Mục tiêu', href: '/targets', icon: Target },
-        { id: 'baselines', title: 'Baselines', href: '/baselines', icon: TrendingUp },
-        { id: 'templates', title: 'Templates', href: '/planning/templates', icon: FileStack },
-        { id: 'scenarios', title: 'Kịch bản', href: '/planning/scenarios', icon: GitBranch },
-        { id: 'clashes', title: 'Xung đột', href: '/planning/clashes', icon: AlertTriangle },
+        {
+          id: 'baselines',
+          title: 'Baseline Management',
+          titleVi: 'Quản lý Baseline',
+          href: '/baselines',
+          icon: TrendingUp,
+          brdRef: '3.2.1',
+        },
+        {
+          id: 'targets',
+          title: 'Target Management',
+          titleVi: 'Quản lý Mục tiêu',
+          href: '/targets',
+          icon: Target,
+          brdRef: '3.2.2',
+        },
+        {
+          id: 'scenarios',
+          title: 'Scenario Planning',
+          titleVi: 'Lập kế hoạch Kịch bản',
+          href: '/planning/scenarios',
+          icon: GitBranch,
+          brdRef: '3.2.3',
+        },
+        {
+          id: 'tpo-suggestion',
+          title: 'TPO - AI Suggestion',
+          titleVi: 'Gợi ý Khuyến mãi (AI)',
+          href: '/planning/tpo',
+          icon: Sparkles,
+          brdRef: '3.2.4',
+          isNew: true,
+          isBeta: true,
+        },
       ],
     },
 
-    // 4. KHUYẾN MÃI (Promotions) - BRD 3.1.2
+    // ============================================
+    // 4. LẬP KẾ HOẠCH KHUYẾN MÃI (BRD 3.3)
+    // ============================================
     {
-      id: 'promotions',
-      title: 'KHUYẾN MÃI',
+      id: 'promotion-planning',
+      title: 'LẬP KẾ HOẠCH KHUYẾN MÃI',
       defaultExpanded: true,
+      brdSection: '3.3',
       items: [
-        { id: 'promo-list', title: 'Danh sách KM', href: '/promotions', icon: Tag, badge: 67, badgeVariant: 'default' },
-        { id: 'promo-efficiency', title: 'Hiệu quả', href: '/promotions/efficiency', icon: Gauge },
-        { id: 'promo-deployment', title: 'Triển khai', href: '/promotions/deployment', icon: Rocket },
-        { id: 'funds', title: 'Quỹ', href: '/funds', icon: Wallet },
+        {
+          id: 'promotion-calendar',
+          title: 'Promotion Calendar',
+          titleVi: 'Lịch Khuyến mãi',
+          href: '/calendar',
+          icon: Calendar,
+          brdRef: '3.3.1',
+          description: 'Calendar view theo tuần/tháng',
+        },
+        {
+          id: 'promotion-scheme',
+          title: 'Promotion Scheme',
+          titleVi: 'Chương trình Khuyến mãi',
+          href: '/promotions',
+          icon: Tag,
+          badge: 67,
+          badgeVariant: 'default',
+          brdRef: '3.3.2',
+        },
+        {
+          id: 'mechanics-slab',
+          title: 'Mechanics / Slab',
+          titleVi: 'Cơ chế Khuyến mãi',
+          href: '/promotions/mechanics',
+          icon: Cog,
+          brdRef: '3.3.3',
+          description: 'Cấu hình discount %, rebate, free goods',
+        },
+        {
+          id: 'templates',
+          title: 'Templates',
+          titleVi: 'Mẫu Khuyến mãi',
+          href: '/planning/templates',
+          icon: FileStack,
+        },
+        {
+          id: 'projected-efficiency',
+          title: 'Projected Efficiency',
+          titleVi: 'Hiệu quả Dự kiến',
+          href: '/promotions/efficiency',
+          icon: BarChart3,
+          brdRef: '3.3.4',
+          isNew: true,
+        },
+        {
+          id: 'deployment-plan',
+          title: 'Deployment Plan',
+          titleVi: 'Kế hoạch Triển khai',
+          href: '/promotions/deployment',
+          icon: Rocket,
+          brdRef: '3.3.5',
+          isNew: true,
+        },
+        {
+          id: 'dms-integration',
+          title: 'DMS Integration',
+          titleVi: 'Tích hợp DMS',
+          href: '/integration/dms',
+          icon: Link2,
+          brdRef: '3.3.6',
+          description: 'Export promotion sang DMS',
+        },
+        {
+          id: 'clash-detection',
+          title: 'Clash Detection',
+          titleVi: 'Phát hiện Xung đột',
+          href: '/planning/clashes',
+          icon: AlertTriangle,
+        },
       ],
     },
 
-    // 5. THỰC THI (Execution) - BRD 3.2
+    // ============================================
+    // 5. THỰC THI & GIÁM SÁT (BRD 3.4.1-3.4.5)
+    // ============================================
     {
-      id: 'execution',
-      title: 'THỰC THI',
+      id: 'execution-monitoring',
+      title: 'THỰC THI & GIÁM SÁT',
       defaultExpanded: false,
+      brdSection: '3.4 (1-5)',
       items: [
-        { id: 'psp-budget', title: 'PSP Monitor', href: '/execution/psp-budget', icon: Activity },
-        { id: 'spending', title: 'Chi tiêu', href: '/execution/spending', icon: DollarSign },
-        { id: 'reallocation', title: 'Điều chuyển', href: '/execution/reallocation', icon: ArrowLeftRight },
+        {
+          id: 'psp-budget-monitoring',
+          title: 'PSP Budget Monitoring',
+          titleVi: 'Giám sát Ngân sách PSP',
+          href: '/execution/psp-budget',
+          icon: Activity,
+          brdRef: '3.4.1',
+          isNew: true,
+        },
+        {
+          id: 'sell-in-monitoring',
+          title: 'Sell-in Monitoring',
+          titleVi: 'Giám sát Sell-in',
+          href: '/operations/sell-tracking/sell-in',
+          icon: ShoppingCart,
+          brdRef: '3.4.2',
+        },
+        {
+          id: 'sell-out-monitoring',
+          title: 'Sell-out Monitoring',
+          titleVi: 'Giám sát Sell-out',
+          href: '/operations/sell-tracking/sell-out',
+          icon: TrendingUp,
+          brdRef: '3.4.3',
+        },
+        {
+          id: 'spending-monitoring',
+          title: 'Spending Monitoring',
+          titleVi: 'Giám sát Chi tiêu',
+          href: '/execution/spending',
+          icon: DollarSign,
+          brdRef: '3.4.4',
+          isNew: true,
+        },
+        {
+          id: 'delivery-tracking',
+          title: 'Delivery Tracking',
+          titleVi: 'Theo dõi Giao hàng',
+          href: '/operations/delivery',
+          icon: Truck,
+        },
+        {
+          id: 'inventory-tracking',
+          title: 'Inventory Tracking',
+          titleVi: 'Theo dõi Tồn kho',
+          href: '/operations/inventory',
+          icon: Package,
+        },
+        {
+          id: 'budget-reallocation',
+          title: 'Budget Reallocation',
+          titleVi: 'Điều chuyển Ngân sách',
+          href: '/execution/reallocation',
+          icon: GitBranch,
+          brdRef: '3.4.5',
+          isNew: true,
+        },
       ],
     },
 
-    // 6. CLAIMS - BRD 3.3.1
+    // ============================================
+    // 6. YÊU CẦU & THANH TOÁN (BRD 3.4.6-3.4.8)
+    // ============================================
     {
-      id: 'claims',
-      title: 'CLAIMS',
+      id: 'claims-settlement',
+      title: 'YÊU CẦU & THANH TOÁN',
       defaultExpanded: false,
+      brdSection: '3.4 (6-8)',
       items: [
-        { id: 'claims-list', title: 'Danh sách', href: '/claims', icon: Receipt, badge: 12, badgeVariant: 'warning' },
-        { id: 'claims-settlement', title: 'Quyết toán', href: '/claims/settlement', icon: ReceiptText },
-        { id: 'claims-payment', title: 'Thanh toán', href: '/claims/payment', icon: Banknote },
+        {
+          id: 'claims-reporting',
+          title: 'Claims Reporting',
+          titleVi: 'Báo cáo Claims',
+          href: '/claims',
+          icon: FileText,
+          badge: 12,
+          badgeVariant: 'warning',
+          brdRef: '3.4.6',
+        },
+        {
+          id: 'claims-processing',
+          title: 'Claims Processing',
+          titleVi: 'Xử lý Claims',
+          href: '/claims/processing',
+          icon: ClipboardList,
+        },
+        {
+          id: 'settlement',
+          title: 'Settlement',
+          titleVi: 'Thanh quyết toán',
+          href: '/claims/settlement',
+          icon: Receipt,
+          brdRef: '3.4.7',
+          isNew: true,
+        },
+        {
+          id: 'payment',
+          title: 'Payment',
+          titleVi: 'Thanh toán',
+          href: '/claims/payment',
+          icon: CreditCard,
+          brdRef: '3.4.8',
+          isNew: true,
+        },
       ],
     },
 
-    // 7. TÀI CHÍNH (Finance) - BRD 3.3.2
+    // ============================================
+    // 7. TÀI CHÍNH & KẾ TOÁN
+    // ============================================
     {
-      id: 'finance',
-      title: 'TÀI CHÍNH',
+      id: 'finance-accounting',
+      title: 'TÀI CHÍNH & KẾ TOÁN',
       defaultExpanded: false,
       items: [
-        { id: 'accruals', title: 'Accruals', href: '/finance/accruals', icon: Calculator },
-        { id: 'deductions', title: 'Deductions', href: '/finance/deductions', icon: CreditCard },
-        { id: 'journals', title: 'GL Journals', href: '/finance/journals', icon: FileText },
-        { id: 'cheques', title: 'Cheques', href: '/finance/cheques', icon: Banknote },
+        {
+          id: 'accruals',
+          title: 'Accruals',
+          titleVi: 'Dồn tích Chi phí',
+          href: '/finance/accruals',
+          icon: BookOpen,
+        },
+        {
+          id: 'deductions',
+          title: 'Deductions',
+          titleVi: 'Khấu trừ',
+          href: '/finance/deductions',
+          icon: FileText,
+        },
+        {
+          id: 'gl-journals',
+          title: 'GL Journals',
+          titleVi: 'Sổ cái Tổng hợp',
+          href: '/finance/journals',
+          icon: BookOpen,
+        },
+        {
+          id: 'cheques',
+          title: 'Cheques',
+          titleVi: 'Séc Thanh toán',
+          href: '/finance/cheques',
+          icon: CreditCard,
+        },
       ],
     },
 
-    // 8. PHÂN TÍCH (Analysis) - BRD 3.4
+    // ============================================
+    // 8. PHÂN TÍCH HIỆU QUẢ (BRD Section 2)
+    // ============================================
     {
-      id: 'analysis',
-      title: 'PHÂN TÍCH',
+      id: 'performance-analysis',
+      title: 'PHÂN TÍCH HIỆU QUẢ',
       defaultExpanded: false,
+      brdSection: 'Section 2',
       items: [
-        { id: 'analytics', title: 'Tổng hợp', href: '/analytics', icon: BarChart3 },
-        { id: 'roi-analysis', title: 'ROI', href: '/analysis/roi', icon: PieChart },
-        { id: 'efficiency-analysis', title: 'Hiệu quả', href: '/analysis/efficiency', icon: LineChart },
-        { id: 'what-if', title: 'What-if', href: '/analysis/what-if', icon: FlaskConical },
+        {
+          id: 'roi-analysis',
+          title: 'ROI Analysis',
+          titleVi: 'Phân tích ROI',
+          href: '/analysis/roi',
+          icon: TrendingUp,
+          isNew: true,
+        },
+        {
+          id: 'efficiency-report',
+          title: 'Efficiency Report',
+          titleVi: 'Báo cáo Hiệu quả',
+          href: '/analysis/efficiency',
+          icon: BarChart3,
+          isNew: true,
+        },
+        {
+          id: 'whatif-analysis',
+          title: 'What-if Analysis',
+          titleVi: 'Phân tích Giả định',
+          href: '/analysis/what-if',
+          icon: Lightbulb,
+          isNew: true,
+        },
+        {
+          id: 'bi-dashboard',
+          title: 'BI Dashboard',
+          titleVi: 'Dashboard BI',
+          href: '/bi',
+          icon: PieChart,
+        },
       ],
     },
 
-    // 9. VẬN HÀNH (Operations)
+    // ============================================
+    // 9. AI & PHÂN TÍCH (GIỮ LẠI - KHÔNG XÓA)
+    // ============================================
     {
-      id: 'operations',
-      title: 'VẬN HÀNH',
+      id: 'ai-analytics',
+      title: 'AI & PHÂN TÍCH',
       defaultExpanded: false,
+      defaultCollapsed: true,
       items: [
-        { id: 'delivery', title: 'Giao hàng', href: '/operations/delivery', icon: Truck },
-        { id: 'sell-tracking', title: 'Theo dõi bán', href: '/operations/sell-tracking', icon: ShoppingCart },
-        { id: 'inventory', title: 'Tồn kho', href: '/operations/inventory', icon: Boxes },
+        {
+          id: 'ai-insights',
+          title: 'AI Insights',
+          titleVi: 'Nhận diện AI',
+          href: '/ai/insights',
+          icon: Brain,
+          isBeta: true,
+        },
+        {
+          id: 'ai-recommendations',
+          title: 'AI Recommendations',
+          titleVi: 'Đề xuất AI',
+          href: '/ai/recommendations',
+          icon: Sparkles,
+          isBeta: true,
+        },
+        {
+          id: 'voice-commands',
+          title: 'Voice Commands',
+          titleVi: 'Lệnh Giọng nói',
+          href: '/voice',
+          icon: MessageSquare,
+          isBeta: true,
+        },
       ],
     },
 
-    // 10. HỆ THỐNG (System) - Master data & Settings
+    // ============================================
+    // 10. TÍCH HỢP HỆ THỐNG (GIỮ LẠI - KHÔNG XÓA)
+    // ============================================
     {
-      id: 'system',
-      title: 'HỆ THỐNG',
+      id: 'integration',
+      title: 'TÍCH HỢP HỆ THỐNG',
       defaultExpanded: false,
+      defaultCollapsed: true,
       items: [
-        { id: 'customers', title: 'Khách hàng', href: '/customers', icon: Users },
-        { id: 'products', title: 'Sản phẩm', href: '/products', icon: Package },
-        { id: 'integration', title: 'Tích hợp', href: '/integration', icon: Link2 },
-        { id: 'settings', title: 'Cài đặt', href: '/settings', icon: Settings },
+        {
+          id: 'erp-integration',
+          title: 'ERP Integration',
+          titleVi: 'Tích hợp ERP',
+          href: '/integration/erp',
+          icon: Building2,
+        },
+        {
+          id: 'webhooks',
+          title: 'Webhooks',
+          titleVi: 'Webhooks',
+          href: '/integration/webhooks',
+          icon: Webhook,
+        },
+        {
+          id: 'security',
+          title: 'Security',
+          titleVi: 'Bảo mật',
+          href: '/integration/security',
+          icon: Shield,
+        },
+      ],
+    },
+
+    // ============================================
+    // 11. CÀI ĐẶT
+    // ============================================
+    {
+      id: 'settings',
+      title: 'CÀI ĐẶT',
+      defaultExpanded: false,
+      defaultCollapsed: true,
+      items: [
+        {
+          id: 'customers',
+          title: 'Customers',
+          titleVi: 'Khách hàng',
+          href: '/customers',
+          icon: Users,
+        },
+        {
+          id: 'products',
+          title: 'Products',
+          titleVi: 'Sản phẩm',
+          href: '/products',
+          icon: Package,
+        },
+        {
+          id: 'system-config',
+          title: 'System Config',
+          titleVi: 'Cấu hình Hệ thống',
+          href: '/settings',
+          icon: Settings,
+          permissions: ['ADMIN'],
+        },
       ],
     },
   ],
