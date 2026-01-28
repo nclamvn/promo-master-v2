@@ -56,6 +56,7 @@ const BudgetNew = lazy(() => import('@/pages/budgets/BudgetNew'));
 const BudgetAllocation = lazy(() => import('@/pages/budgets/BudgetAllocation'));
 
 // New Budget Management pages (Phase 2)
+const BudgetOverview = lazy(() => import('@/pages/budget/Overview'));
 const BudgetDefinition = lazy(() => import('@/pages/budget/Definition'));
 const BudgetMonitoring = lazy(() => import('@/pages/budget/Monitoring'));
 const BudgetApproval = lazy(() => import('@/pages/budget/Approval'));
@@ -294,6 +295,9 @@ export default function AppRouter() {
         } />
 
         {/* Budget Management (New) */}
+        <Route path="/budget" element={
+          <SuspenseWrapper><BudgetOverview /></SuspenseWrapper>
+        } />
         <Route path="/budget/definition" element={
           <SuspenseWrapper><BudgetDefinition /></SuspenseWrapper>
         } />
