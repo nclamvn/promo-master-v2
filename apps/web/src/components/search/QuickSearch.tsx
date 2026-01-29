@@ -261,8 +261,8 @@ export function QuickSearch({ open, onOpenChange }: QuickSearchProps) {
                       className={cn(
                         'flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-colors',
                         isSelected
-                          ? 'bg-accent text-accent-foreground'
-                          : 'hover:bg-accent/50'
+                          ? 'bg-primary/10 text-foreground'
+                          : 'hover:bg-muted'
                       )}
                     >
                       <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary/10">
@@ -303,8 +303,8 @@ export function QuickSearch({ open, onOpenChange }: QuickSearchProps) {
                       className={cn(
                         'flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors',
                         isSelected
-                          ? 'bg-accent text-accent-foreground'
-                          : 'hover:bg-accent/50'
+                          ? 'bg-primary/10 text-foreground'
+                          : 'hover:bg-muted'
                       )}
                     >
                       <Icon className="h-4 w-4 text-muted-foreground" />
@@ -334,8 +334,8 @@ export function QuickSearch({ open, onOpenChange }: QuickSearchProps) {
                       className={cn(
                         'flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors',
                         isSelected
-                          ? 'bg-accent text-accent-foreground'
-                          : 'hover:bg-accent/50'
+                          ? 'bg-primary/10 text-foreground'
+                          : 'hover:bg-muted'
                       )}
                     >
                       <Icon className="h-4 w-4 text-muted-foreground" />

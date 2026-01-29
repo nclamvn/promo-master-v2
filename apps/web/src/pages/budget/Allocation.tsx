@@ -566,8 +566,8 @@ const TreeNode = ({
       <div
         className={cn(
           'flex items-center gap-2 py-2 px-3 rounded-lg cursor-pointer transition-colors',
-          'hover:bg-accent',
-          selectedId === node.id && 'bg-accent ring-2 ring-primary/20'
+          'hover:bg-muted',
+          selectedId === node.id && 'bg-primary/10 ring-2 ring-primary/20'
         )}
         style={{ paddingLeft: `${node.level * 24 + 12}px` }}
         onClick={() => onSelect(node.id)}
