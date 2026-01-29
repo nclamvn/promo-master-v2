@@ -10,6 +10,7 @@ interface SidebarSectionProps {
   isCollapsed: boolean;
   colors: SidebarColors;
   isDark?: boolean;
+  language?: 'vi' | 'en';
   onToggle: () => void;
   isItemActive: (href: string) => boolean;
   onNavigate?: () => void;
@@ -21,10 +22,14 @@ export function SidebarSection({
   isCollapsed,
   colors,
   isDark = false,
+  language = 'vi',
   onToggle,
   isItemActive,
   onNavigate,
 }: SidebarSectionProps) {
+  // Get the title based on language
+  const sectionTitle = language === 'en' && section.titleEn ? section.titleEn : section.title;
+
   return (
     <div>
       {/* Section Header - Hidden when collapsed */}
@@ -51,7 +56,7 @@ export function SidebarSection({
           }}
         >
           <span className="flex items-center gap-2">
-            {section.title}
+            {sectionTitle}
             {section.sectionBadge && (
               <SmartSidebarBadge
                 badge={section.sectionBadge}
@@ -81,6 +86,7 @@ export function SidebarSection({
               isActive={isItemActive(item.href)}
               colors={colors}
               isDark={isDark}
+              language={language}
               onNavigate={onNavigate}
             />
           ))}

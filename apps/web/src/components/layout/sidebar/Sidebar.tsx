@@ -57,9 +57,10 @@ const WavePattern = ({ isDark }: { isDark: boolean }) => {
 // ============================================================================
 interface StatusSectionProps {
   colors: ReturnType<typeof getSidebarColors>;
+  language: 'vi' | 'en';
 }
 
-const StatusSection = ({ colors }: StatusSectionProps) => {
+const StatusSection = ({ colors, language }: StatusSectionProps) => {
   const statusItems = sidebarConfig.footer.statusItems || [];
 
   const getStatusColor = (status: 'online' | 'offline' | 'syncing') => {
@@ -76,11 +77,11 @@ const StatusSection = ({ colors }: StatusSectionProps) => {
   const getStatusText = (status: 'online' | 'offline' | 'syncing') => {
     switch (status) {
       case 'online':
-        return 'Online';
+        return language === 'vi' ? 'Trực tuyến' : 'Online';
       case 'offline':
-        return 'Offline';
+        return language === 'vi' ? 'Ngoại tuyến' : 'Offline';
       case 'syncing':
-        return 'Syncing';
+        return language === 'vi' ? 'Đang đồng bộ' : 'Syncing';
     }
   };
 
@@ -99,7 +100,7 @@ const StatusSection = ({ colors }: StatusSectionProps) => {
           className="text-[10px] font-semibold uppercase tracking-wider"
           style={{ color: colors.textSubtle }}
         >
-          Trạng thái
+          {language === 'vi' ? 'Trạng thái' : 'Status'}
         </span>
       </div>
       <div className="space-y-1">
@@ -141,7 +142,7 @@ interface SidebarProps {
 }
 
 export function Sidebar({ isMobileOpen = false, onMobileClose }: SidebarProps) {
-  const { sidebarOpen, toggleSidebar, theme } = useUIStore();
+  const { sidebarOpen, toggleSidebar, theme, language } = useUIStore();
   const { toggleSection, isSectionExpanded } = useSidebarCollapse();
   const { isActive } = useNavigation();
 
@@ -249,6 +250,7 @@ export function Sidebar({ isMobileOpen = false, onMobileClose }: SidebarProps) {
               isCollapsed={sidebarCollapsed}
               colors={colors}
               isDark={isDark}
+              language={language}
               onToggle={() => toggleSection(section.id)}
               isItemActive={isActive}
               onNavigate={onMobileClose}
@@ -258,7 +260,7 @@ export function Sidebar({ isMobileOpen = false, onMobileClose }: SidebarProps) {
       </nav>
 
       {/* System Status */}
-      {!sidebarCollapsed && footer.showStatus && <StatusSection colors={colors} />}
+      {!sidebarCollapsed && footer.showStatus && <StatusSection colors={colors} language={language} />}
 
       {/* User Section */}
       <SidebarUser

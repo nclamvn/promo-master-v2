@@ -8,6 +8,7 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 interface UIState {
   sidebarOpen: boolean;
   theme: 'light' | 'dark';
+  language: 'vi' | 'en';
   isMobile: boolean;
 }
 
@@ -15,6 +16,8 @@ interface UIActions {
   toggleSidebar: () => void;
   setSidebarOpen: (open: boolean) => void;
   setTheme: (theme: 'light' | 'dark') => void;
+  setLanguage: (language: 'vi' | 'en') => void;
+  toggleLanguage: () => void;
   setIsMobile: (isMobile: boolean) => void;
 }
 
@@ -25,11 +28,14 @@ export const useUIStore = create<UIStore>()(
     (set) => ({
       sidebarOpen: true,
       theme: 'light',
+      language: 'vi',
       isMobile: false,
 
       toggleSidebar: () => set((state) => ({ sidebarOpen: !state.sidebarOpen })),
       setSidebarOpen: (open) => set({ sidebarOpen: open }),
       setTheme: (theme) => set({ theme }),
+      setLanguage: (language) => set({ language }),
+      toggleLanguage: () => set((state) => ({ language: state.language === 'vi' ? 'en' : 'vi' })),
       setIsMobile: (isMobile) => set({ isMobile }),
     }),
     {
@@ -38,6 +44,7 @@ export const useUIStore = create<UIStore>()(
       partialize: (state) => ({
         sidebarOpen: state.sidebarOpen,
         theme: state.theme,
+        language: state.language,
       }),
     }
   )

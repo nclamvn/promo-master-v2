@@ -92,6 +92,7 @@ export interface SidebarItem {
 export interface SidebarSection {
   id: string;
   title: string;
+  titleEn?: string;
   items: SidebarItem[];
   defaultExpanded?: boolean;
   defaultCollapsed?: boolean;
@@ -138,6 +139,7 @@ export const sidebarConfig: SidebarConfig = {
     {
       id: 'overview',
       title: 'TỔNG QUAN',
+      titleEn: 'OVERVIEW',
       defaultExpanded: true,
       variant: 'primary',
       items: [
@@ -168,6 +170,7 @@ export const sidebarConfig: SidebarConfig = {
     {
       id: 'budget-management',
       title: 'QUẢN LÝ NGÂN SÁCH',
+      titleEn: 'BUDGET MANAGEMENT',
       defaultExpanded: true,
       brdSection: '3.1',
       variant: 'primary',
@@ -259,6 +262,7 @@ export const sidebarConfig: SidebarConfig = {
     {
       id: 'business-planning',
       title: 'LẬP KẾ HOẠCH KINH DOANH',
+      titleEn: 'BUSINESS PLANNING',
       defaultExpanded: true,
       brdSection: '3.2',
       variant: 'primary',
@@ -334,6 +338,7 @@ export const sidebarConfig: SidebarConfig = {
     {
       id: 'promotion-planning',
       title: 'LẬP KẾ HOẠCH KHUYẾN MÃI',
+      titleEn: 'PROMOTION PLANNING',
       defaultExpanded: true,
       brdSection: '3.3',
       variant: 'primary',
@@ -459,6 +464,7 @@ export const sidebarConfig: SidebarConfig = {
     {
       id: 'execution-monitoring',
       title: 'THỰC THI & GIÁM SÁT',
+      titleEn: 'EXECUTION & MONITORING',
       defaultExpanded: false,
       brdSection: '3.4 (1-5)',
       variant: 'primary',
@@ -543,6 +549,7 @@ export const sidebarConfig: SidebarConfig = {
     {
       id: 'claims-settlement',
       title: 'YÊU CẦU & THANH TOÁN',
+      titleEn: 'CLAIMS & SETTLEMENT',
       defaultExpanded: false,
       brdSection: '3.4 (6-8)',
       variant: 'default',
@@ -595,6 +602,7 @@ export const sidebarConfig: SidebarConfig = {
     {
       id: 'finance-accounting',
       title: 'TÀI CHÍNH & KẾ TOÁN',
+      titleEn: 'FINANCE & ACCOUNTING',
       defaultExpanded: false,
       variant: 'default',
       items: [
@@ -639,6 +647,7 @@ export const sidebarConfig: SidebarConfig = {
     {
       id: 'performance-analysis',
       title: 'PHÂN TÍCH HIỆU QUẢ',
+      titleEn: 'PERFORMANCE ANALYSIS',
       defaultExpanded: false,
       brdSection: 'Section 2',
       variant: 'default',
@@ -688,6 +697,7 @@ export const sidebarConfig: SidebarConfig = {
     {
       id: 'ai-analytics',
       title: 'AI & PHÂN TÍCH',
+      titleEn: 'AI & ANALYTICS',
       defaultExpanded: false,
       defaultCollapsed: true,
       variant: 'muted',
@@ -730,6 +740,7 @@ export const sidebarConfig: SidebarConfig = {
     {
       id: 'integration',
       title: 'TÍCH HỢP HỆ THỐNG',
+      titleEn: 'SYSTEM INTEGRATION',
       defaultExpanded: false,
       defaultCollapsed: true,
       variant: 'muted',
@@ -768,6 +779,7 @@ export const sidebarConfig: SidebarConfig = {
     {
       id: 'settings',
       title: 'CÀI ĐẶT',
+      titleEn: 'SETTINGS',
       defaultExpanded: false,
       defaultCollapsed: true,
       variant: 'muted',

@@ -32,8 +32,10 @@ import {
 import { Input } from '@/components/ui/input';
 import { NotificationDropdown } from '@/components/notifications/NotificationDropdown';
 import { ThemeToggleCompact } from '@/components/ui/ThemeToggle';
+import { LanguageToggle } from '@/components/ui/LanguageToggle';
 import { useAuthStore } from '@/stores/authStore';
 import { useUIStore } from '@/stores/uiStore';
+import { useTranslation } from '@/lib/i18n/useTranslation';
 import { cn } from '@/lib/utils';
 
 interface HeaderProps {
@@ -66,6 +68,7 @@ const keyboardShortcuts = [
 export function Header({ onMobileMenuClick }: HeaderProps) {
   const { user, logout } = useAuthStore();
   const { sidebarOpen, toggleSidebar } = useUIStore();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
@@ -153,7 +156,7 @@ export function Header({ onMobileMenuClick }: HeaderProps) {
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-foreground-subtle" />
             <Input
               type="search"
-              placeholder="Search promotions, customers..."
+              placeholder={t('header.searchPlaceholder')}
               data-testid="global-search"
               className={cn(
                 'pl-9 pr-12 h-8 w-64 md:w-80',
@@ -206,6 +209,9 @@ export function Header({ onMobileMenuClick }: HeaderProps) {
             <HelpCircle className="h-4 w-4" />
           </Button>
 
+          {/* Language Toggle */}
+          <LanguageToggle />
+
           {/* Theme Toggle */}
           <ThemeToggleCompact />
 
@@ -254,7 +260,7 @@ export function Header({ onMobileMenuClick }: HeaderProps) {
               <DropdownMenuItem asChild>
                 <Link to="/settings" className="flex items-center gap-2">
                   <Settings className="h-4 w-4" />
-                  <span>Settings</span>
+                  <span>{t('header.settings')}</span>
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
@@ -263,7 +269,7 @@ export function Header({ onMobileMenuClick }: HeaderProps) {
                 className="text-danger focus:text-danger"
               >
                 <LogOut className="h-4 w-4 mr-2" />
-                <span>Logout</span>
+                <span>{t('header.logout')}</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -276,10 +282,10 @@ export function Header({ onMobileMenuClick }: HeaderProps) {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <HelpCircle className="h-5 w-5 text-primary" />
-              Help & Support
+              {t('header.help')}
             </DialogTitle>
             <DialogDescription>
-              Get help with PROMO MASTER
+              {t('header.help')} - PROMO MASTER
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
@@ -337,7 +343,7 @@ export function Header({ onMobileMenuClick }: HeaderProps) {
                   className="flex items-center gap-1 hover:text-foreground"
                 >
                   <Keyboard className="h-3 w-3" />
-                  Keyboard Shortcuts
+                  {t('header.keyboardShortcuts')}
                 </button>
               </div>
             </div>
@@ -351,7 +357,7 @@ export function Header({ onMobileMenuClick }: HeaderProps) {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Keyboard className="h-5 w-5 text-primary" />
-              Keyboard Shortcuts
+              {t('header.keyboardShortcuts')}
             </DialogTitle>
             <DialogDescription>
               Press <kbd className="kbd mx-1">⌘/</kbd> anytime to show this dialog

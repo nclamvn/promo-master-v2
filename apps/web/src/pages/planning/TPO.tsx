@@ -67,6 +67,7 @@ import {
   Radar,
 } from 'recharts';
 import { CurrencyDisplay } from '@/components/ui/currency-display';
+import { useTranslation } from '@/lib/i18n/useTranslation';
 
 // Types
 interface AIRecommendation {
@@ -197,6 +198,7 @@ const getStatusBadge = (status: AIRecommendation['status']) => {
 };
 
 export default function TPOPage() {
+  const { t } = useTranslation();
   const [isOptimizing, setIsOptimizing] = useState(false);
   const [selectedScenario, setSelectedScenario] = useState('balanced');
   const [budgetConstraint, setBudgetConstraint] = useState([70]);
@@ -287,10 +289,10 @@ export default function TPOPage() {
           </div>
           <div>
             <h1 className="text-3xl font-bold tracking-tight">
-              Trade Promotion Optimization
+              {t('tpo.title')}
             </h1>
             <p className="text-muted-foreground mt-1">
-              AI-powered recommendations to maximize promotion ROI
+              {t('tpo.subtitle')}
             </p>
           </div>
         </div>
@@ -389,7 +391,7 @@ export default function TPOPage() {
                 <div className="flex items-center gap-3 text-yellow-600">
                   <WifiOff className="w-6 h-6" />
                   <div>
-                    <p className="font-medium">TPO Engine Not Connected</p>
+                    <p className="font-medium">{t('tpo.notConnected')}</p>
                     <p className="text-sm">Start TPO Engine: <code className="bg-muted px-1 rounded">uvicorn app.main:app --port 8001</code></p>
                   </div>
                 </div>
@@ -401,10 +403,10 @@ export default function TPOPage() {
               <div className="flex items-center justify-between">
                 <Badge variant="outline" className="text-green-600 border-green-600">
                   <Wifi className="w-3 h-3 mr-1" />
-                  TPO Engine Connected
+                  {t('tpo.connected')}
                 </Badge>
                 <div className="text-sm text-muted-foreground">
-                  {mechanics.length} mechanics | {channels.length} channels available
+                  {mechanics.length} {t('tpo.mechanicsAvailable')} | {channels.length} {t('tpo.channelsAvailable')}
                 </div>
               </div>
 
@@ -414,14 +416,14 @@ export default function TPOPage() {
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Lightbulb className="h-5 w-5 text-yellow-500" />
-                      AI Promotion Suggestions
+                      {t('tpo.aiSuggestions')}
                     </CardTitle>
-                    <CardDescription>Get AI-powered promotion recommendations</CardDescription>
+                    <CardDescription>{t('tpo.subtitle')}</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="grid gap-4 sm:grid-cols-2">
                       <div>
-                        <Label className="text-xs">Channel</Label>
+                        <Label className="text-xs">{t('tpo.channel')}</Label>
                         <Select
                           value={tpoForm.channel}
                           onValueChange={(v) => setTpoForm((p) => ({ ...p, channel: v as ChannelType }))}
@@ -435,14 +437,14 @@ export default function TPOPage() {
                         </Select>
                       </div>
                       <div>
-                        <Label className="text-xs">Category</Label>
+                        <Label className="text-xs">{t('tpo.category')}</Label>
                         <Input
                           value={tpoForm.productCategory}
                           onChange={(e) => setTpoForm((p) => ({ ...p, productCategory: e.target.value }))}
                         />
                       </div>
                       <div>
-                        <Label className="text-xs">Budget Min (VND)</Label>
+                        <Label className="text-xs">{t('tpo.budgetMin')}</Label>
                         <Input
                           type="number"
                           value={tpoForm.budgetMin}
@@ -450,7 +452,7 @@ export default function TPOPage() {
                         />
                       </div>
                       <div>
-                        <Label className="text-xs">Budget Max (VND)</Label>
+                        <Label className="text-xs">{t('tpo.budgetMax')}</Label>
                         <Input
                           type="number"
                           value={tpoForm.budgetMax}
@@ -458,7 +460,7 @@ export default function TPOPage() {
                         />
                       </div>
                       <div>
-                        <Label className="text-xs">Target ROI (%)</Label>
+                        <Label className="text-xs">{t('tpo.targetRoi')}</Label>
                         <Input
                           type="number"
                           value={tpoForm.targetROI}
@@ -466,7 +468,7 @@ export default function TPOPage() {
                         />
                       </div>
                       <div>
-                        <Label className="text-xs"># Suggestions</Label>
+                        <Label className="text-xs">{t('tpo.numSuggestions')}</Label>
                         <Input
                           type="number"
                           value={tpoForm.maxSuggestions}
@@ -478,7 +480,7 @@ export default function TPOPage() {
                       {suggestionsLoading ? (
                         <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Analyzing...</>
                       ) : (
-                        <><Sparkles className="w-4 h-4 mr-2" /> Get AI Suggestions</>
+                        <><Sparkles className="w-4 h-4 mr-2" /> {t('tpo.getAiSuggestions')}</>
                       )}
                     </Button>
                   </CardContent>
@@ -489,14 +491,14 @@ export default function TPOPage() {
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <TrendingUp className="h-5 w-5 text-blue-500" />
-                      ROI Prediction
+                      {t('tpo.roiPrediction')}
                     </CardTitle>
-                    <CardDescription>Predict ROI for a promotion configuration</CardDescription>
+                    <CardDescription>{t('tpo.subtitle')}</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="grid gap-4 sm:grid-cols-2">
                       <div>
-                        <Label className="text-xs">Mechanic</Label>
+                        <Label className="text-xs">{t('tpo.mechanic')}</Label>
                         <Select
                           value={roiForm.mechanicType}
                           onValueChange={(v) => setRoiForm((p) => ({ ...p, mechanicType: v as MechanicType }))}
@@ -510,7 +512,7 @@ export default function TPOPage() {
                         </Select>
                       </div>
                       <div>
-                        <Label className="text-xs">Channel</Label>
+                        <Label className="text-xs">{t('tpo.channel')}</Label>
                         <Select
                           value={roiForm.channel}
                           onValueChange={(v) => setRoiForm((p) => ({ ...p, channel: v as ChannelType }))}
@@ -524,7 +526,7 @@ export default function TPOPage() {
                         </Select>
                       </div>
                       <div>
-                        <Label className="text-xs">Discount %</Label>
+                        <Label className="text-xs">{t('tpo.discount')}</Label>
                         <Input
                           type="number"
                           value={roiForm.discountPercent}
@@ -532,7 +534,7 @@ export default function TPOPage() {
                         />
                       </div>
                       <div>
-                        <Label className="text-xs">Budget (VND)</Label>
+                        <Label className="text-xs">{t('tpo.budget')}</Label>
                         <Input
                           type="number"
                           value={roiForm.budgetAmount}
@@ -540,7 +542,7 @@ export default function TPOPage() {
                         />
                       </div>
                       <div>
-                        <Label className="text-xs">Start Date</Label>
+                        <Label className="text-xs">{t('tpo.startDate')}</Label>
                         <Input
                           type="date"
                           value={roiForm.startDate}
@@ -548,7 +550,7 @@ export default function TPOPage() {
                         />
                       </div>
                       <div>
-                        <Label className="text-xs">End Date</Label>
+                        <Label className="text-xs">{t('tpo.endDate')}</Label>
                         <Input
                           type="date"
                           value={roiForm.endDate}
@@ -560,7 +562,7 @@ export default function TPOPage() {
                       {roiLoading ? (
                         <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Predicting...</>
                       ) : (
-                        <><TrendingUp className="w-4 h-4 mr-2" /> Predict ROI</>
+                        <><TrendingUp className="w-4 h-4 mr-2" /> {t('tpo.predictRoi')}</>
                       )}
                     </Button>
                   </CardContent>

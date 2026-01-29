@@ -15,6 +15,7 @@ interface SidebarItemProps {
   isActive: boolean;
   colors: SidebarColors;
   isDark?: boolean;
+  language?: 'vi' | 'en';
   onNavigate?: () => void;
 }
 
@@ -24,9 +25,12 @@ export function SidebarItem({
   isActive,
   colors,
   isDark = false,
+  language = 'vi',
   onNavigate,
 }: SidebarItemProps) {
   const Icon = item.icon;
+  // Get the title based on language
+  const itemTitle = language === 'vi' && item.titleVi ? item.titleVi : item.title;
 
   const linkContent = (
     <Link
@@ -63,7 +67,7 @@ export function SidebarItem({
       {!isCollapsed && (
         <>
           <div className="flex-1 min-w-0">
-            <span className="block truncate">{item.title}</span>
+            <span className="block truncate">{itemTitle}</span>
             {item.sublabel && (
               <span
                 className="block text-[10px] truncate opacity-60"
@@ -119,7 +123,7 @@ export function SidebarItem({
             >
               <div className="space-y-1">
                 <p className="font-semibold text-sm">
-                  {item.tooltip?.title || item.title}
+                  {item.tooltip?.title || itemTitle}
                 </p>
                 {item.tooltip?.description && (
                   <p className="text-xs text-muted-foreground">
