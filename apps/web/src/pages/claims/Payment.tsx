@@ -675,6 +675,7 @@ export default function ClaimsPaymentPage() {
   const [methodFilter, setMethodFilter] = useState<string>('all');
   const [activeTab, setActiveTab] = useState('pending');
   const [processDialogOpen, setProcessDialogOpen] = useState(false);
+  const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [selectedPayment, setSelectedPayment] = useState<PaymentItem | null>(null);
   
   // Filter payments
@@ -730,7 +731,8 @@ export default function ClaimsPaymentPage() {
   
   // Process handlers
   const handleView = (item: PaymentItem) => {
-    console.log('View:', item);
+    setSelectedPayment(item);
+    setViewDialogOpen(true);
   };
   
   const handleProcess = (item: PaymentItem) => {
@@ -944,6 +946,177 @@ export default function ClaimsPaymentPage() {
         onOpenChange={setProcessDialogOpen}
         onProcess={handleProcessConfirm}
       />
+
+      {/* View Detail Dialog */}
+      <Dialog open={viewDialogOpen} onOpenChange={setViewDialogOpen}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>Chi tiết thanh toán</DialogTitle>
+            <DialogDescription>
+              {selectedPayment?.claimCode}
+            </DialogDescription>
+          </DialogHeader>
+          {selectedPayment && (
+            <div className="space-y-6 py-4">
+              {/* Status */}
+              <div className="flex items-center justify-between">
+                <PaymentStatusBadge status={selectedPayment.paymentStatus} />
+                {isOverdue(selectedPayment.dueDate, selectedPayment.paymentStatus) && (
+                  <Badge variant="destructive" className="gap-1">
+                    <AlertTriangle className="h-3 w-3" />
+                    Quá hạn
+                  </Badge>
+                )}
+              </div>
+
+              {/* Customer Information */}
+              <div className="p-4 bg-muted rounded-lg">
+                <h4 className="text-sm font-medium mb-3 flex items-center gap-2">
+                  <Building2 className="h-4 w-4" />
+                  Thông tin khách hàng
+                </h4>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <p className="text-muted-foreground">Tên khách hàng</p>
+                    <p className="font-medium">{selectedPayment.customerName}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Mã khách hàng</p>
+                    <p className="font-medium">{selectedPayment.customerCode}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Promotion Details */}
+              <div className="p-4 bg-muted rounded-lg">
+                <h4 className="text-sm font-medium mb-3 flex items-center gap-2">
+                  <Receipt className="h-4 w-4" />
+                  Chi tiết chương trình
+                </h4>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <p className="text-muted-foreground">Mã CTKM</p>
+                    <p className="font-medium">{selectedPayment.promotionCode}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Tên CTKM</p>
+                    <p className="font-medium">{selectedPayment.promotionName}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Ngày claim</p>
+                    <p className="font-medium">{formatDate(selectedPayment.claimDate)}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Ngày duyệt</p>
+                    <p className="font-medium">{formatDate(selectedPayment.approvedDate)}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Amount Information */}
+              <div className="p-4 bg-muted rounded-lg">
+                <h4 className="text-sm font-medium mb-3 flex items-center gap-2">
+                  <DollarSign className="h-4 w-4" />
+                  Thông tin số tiền
+                </h4>
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground">Số tiền claim</span>
+                    <CurrencyDisplay amount={selectedPayment.claimAmount} size="sm" />
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground">Số tiền duyệt</span>
+                    <CurrencyDisplay
+                      amount={selectedPayment.approvedAmount}
+                      size="sm"
+                      valueClassName={selectedPayment.approvedAmount !== selectedPayment.claimAmount ? 'text-yellow-600' : ''}
+                    />
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground">Đã thanh toán</span>
+                    <CurrencyDisplay
+                      amount={selectedPayment.paidAmount}
+                      size="sm"
+                      valueClassName="text-green-600"
+                    />
+                  </div>
+                  <div className="flex justify-between items-center pt-2 border-t">
+                    <span className="text-sm font-medium">Còn lại</span>
+                    <CurrencyDisplay
+                      amount={selectedPayment.pendingAmount}
+                      size="md"
+                      valueClassName="text-primary font-bold"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Payment Method */}
+              <div className="p-4 bg-muted rounded-lg">
+                <h4 className="text-sm font-medium mb-3 flex items-center gap-2">
+                  <CreditCard className="h-4 w-4" />
+                  Phương thức thanh toán
+                </h4>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <p className="text-muted-foreground">Phương thức</p>
+                    <p className="font-medium">
+                      {selectedPayment.paymentMethod === 'BANK_TRANSFER' && 'Chuyển khoản'}
+                      {selectedPayment.paymentMethod === 'CHEQUE' && 'Séc'}
+                      {selectedPayment.paymentMethod === 'CREDIT_NOTE' && 'Credit Note'}
+                      {selectedPayment.paymentMethod === 'OFFSET' && 'Bù trừ'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Hạn thanh toán</p>
+                    <p className="font-medium">{formatDate(selectedPayment.dueDate)}</p>
+                  </div>
+                  {selectedPayment.bankName && (
+                    <div>
+                      <p className="text-muted-foreground">Ngân hàng</p>
+                      <p className="font-medium">{selectedPayment.bankName}</p>
+                    </div>
+                  )}
+                  {selectedPayment.bankAccount && (
+                    <div>
+                      <p className="text-muted-foreground">Số tài khoản</p>
+                      <p className="font-medium">{selectedPayment.bankAccount}</p>
+                    </div>
+                  )}
+                  {selectedPayment.chequeNumber && (
+                    <div>
+                      <p className="text-muted-foreground">Số séc</p>
+                      <p className="font-medium">{selectedPayment.chequeNumber}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Notes */}
+              {selectedPayment.notes && (
+                <div className="p-4 bg-muted rounded-lg">
+                  <h4 className="text-sm font-medium mb-2">Ghi chú</h4>
+                  <p className="text-sm text-muted-foreground">{selectedPayment.notes}</p>
+                </div>
+              )}
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setViewDialogOpen(false)}>
+              Đóng
+            </Button>
+            {selectedPayment && selectedPayment.paymentStatus !== 'PAID' && selectedPayment.paymentStatus !== 'CANCELLED' && (
+              <Button onClick={() => {
+                setViewDialogOpen(false);
+                handleProcess(selectedPayment);
+              }}>
+                <Send className="h-4 w-4 mr-2" />
+                Thanh toán
+              </Button>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

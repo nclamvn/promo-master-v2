@@ -190,12 +190,19 @@ export default function ClaimsSettlementPage() {
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [selectedClaims, setSelectedClaims] = useState<string[]>([]);
   const [isSettleDialogOpen, setIsSettleDialogOpen] = useState(false);
+  const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
+  const [selectedClaimForDetail, setSelectedClaimForDetail] = useState<ClaimSettlement | null>(null);
   const [settlementDetails, setSettlementDetails] = useState({
     paymentMethod: 'BANK_TRANSFER',
     bankAccount: '',
     reference: '',
     notes: '',
   });
+
+  const handleViewClaimDetail = (claim: ClaimSettlement) => {
+    setSelectedClaimForDetail(claim);
+    setIsDetailDialogOpen(true);
+  };
 
   // Filter claims
   const filteredClaims = mockClaims.filter((claim) => {
@@ -423,10 +430,7 @@ export default function ClaimsSettlementPage() {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => {
-                          // TODO: Open claim detail dialog
-                          console.log('View claim:', claim.id);
-                        }}
+                        onClick={() => handleViewClaimDetail(claim)}
                       >
                         <Eye className="h-4 w-4" />
                       </Button>
@@ -546,6 +550,142 @@ export default function ClaimsSettlementPage() {
             <Button onClick={() => setIsSettleDialogOpen(false)}>
               <CheckCircle className="mr-2 h-4 w-4" />
               Process Settlement
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Claim Detail Dialog */}
+      <Dialog open={isDetailDialogOpen} onOpenChange={setIsDetailDialogOpen}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>Claim Details</DialogTitle>
+            <DialogDescription>
+              {selectedClaimForDetail?.claimCode}
+            </DialogDescription>
+          </DialogHeader>
+          {selectedClaimForDetail && (
+            <div className="space-y-6 py-4">
+              {/* Status Badge */}
+              <div className="flex items-center justify-between">
+                <StatusBadge status={selectedClaimForDetail.status} />
+                {selectedClaimForDetail.settledAt && (
+                  <span className="text-xs text-muted-foreground">
+                    Settled: {new Date(selectedClaimForDetail.settledAt).toLocaleDateString('vi-VN')}
+                  </span>
+                )}
+              </div>
+
+              {/* Customer Information */}
+              <div className="p-4 bg-muted rounded-lg">
+                <h4 className="text-sm font-medium mb-3 flex items-center gap-2">
+                  <Building2 className="h-4 w-4" />
+                  Customer Information
+                </h4>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <p className="text-muted-foreground">Customer Name</p>
+                    <p className="font-medium">{selectedClaimForDetail.customerName}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Customer Code</p>
+                    <p className="font-medium">{selectedClaimForDetail.customerCode}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Promotion Details */}
+              <div className="p-4 bg-muted rounded-lg">
+                <h4 className="text-sm font-medium mb-3 flex items-center gap-2">
+                  <Receipt className="h-4 w-4" />
+                  Promotion Details
+                </h4>
+                <div className="space-y-2 text-sm">
+                  <div>
+                    <p className="text-muted-foreground">Promotion Name</p>
+                    <p className="font-medium">{selectedClaimForDetail.promotionName}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Submitted Date</p>
+                    <p className="font-medium">
+                      {new Date(selectedClaimForDetail.submittedAt).toLocaleDateString('vi-VN')}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Amount Information */}
+              <div className="p-4 bg-muted rounded-lg">
+                <h4 className="text-sm font-medium mb-3 flex items-center gap-2">
+                  <DollarSign className="h-4 w-4" />
+                  Amount Details
+                </h4>
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground">Claimed Amount</span>
+                    <CurrencyDisplay amount={selectedClaimForDetail.claimAmount} size="sm" />
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground">Verified Amount</span>
+                    <CurrencyDisplay
+                      amount={selectedClaimForDetail.verifiedAmount}
+                      size="sm"
+                      valueClassName={selectedClaimForDetail.verifiedAmount !== selectedClaimForDetail.claimAmount ? 'text-yellow-600' : ''}
+                    />
+                  </div>
+                  {selectedClaimForDetail.adjustments !== 0 && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-muted-foreground">Adjustments</span>
+                      <CurrencyDisplay
+                        amount={selectedClaimForDetail.adjustments}
+                        size="sm"
+                        valueClassName={selectedClaimForDetail.adjustments < 0 ? 'text-red-600' : 'text-green-600'}
+                      />
+                    </div>
+                  )}
+                  <div className="flex justify-between items-center pt-2 border-t">
+                    <span className="text-sm font-medium">Settlement Amount</span>
+                    <CurrencyDisplay
+                      amount={selectedClaimForDetail.settlementAmount}
+                      size="md"
+                      valueClassName="text-primary font-bold"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Payment Information (if settled) */}
+              {selectedClaimForDetail.status === 'SETTLED' && selectedClaimForDetail.paymentMethod && (
+                <div className="p-4 bg-green-50 dark:bg-green-950 rounded-lg">
+                  <h4 className="text-sm font-medium mb-3 flex items-center gap-2 text-green-800 dark:text-green-200">
+                    <CreditCard className="h-4 w-4" />
+                    Payment Information
+                  </h4>
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <p className="text-green-700 dark:text-green-300">Payment Method</p>
+                      <p className="font-medium text-green-800 dark:text-green-200">
+                        {selectedClaimForDetail.paymentMethod === 'BANK_TRANSFER' && 'Bank Transfer'}
+                        {selectedClaimForDetail.paymentMethod === 'CHEQUE' && 'Cheque'}
+                        {selectedClaimForDetail.paymentMethod === 'CREDIT_NOTE' && 'Credit Note'}
+                      </p>
+                    </div>
+                    {selectedClaimForDetail.paymentRef && (
+                      <div>
+                        <p className="text-green-700 dark:text-green-300">Payment Reference</p>
+                        <p className="font-medium text-green-800 dark:text-green-200">
+                          {selectedClaimForDetail.paymentRef}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsDetailDialogOpen(false)}>
+              Close
             </Button>
           </DialogFooter>
         </DialogContent>
