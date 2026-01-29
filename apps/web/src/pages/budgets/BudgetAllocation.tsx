@@ -602,7 +602,7 @@ export default function BudgetAllocation() {
                 </button>
               </div>
 
-              <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors">
+              <button className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground text-sm font-medium rounded-lg hover:bg-primary/90 transition-colors">
                 <Plus className="w-4 h-4" strokeWidth={2} />
                 Tạo phân bổ
               </button>
@@ -714,7 +714,7 @@ export default function BudgetAllocation() {
                       <p className="text-sm text-muted-foreground mb-4">
                         Ngân sách này chưa có dữ liệu phân bổ theo vùng miền
                       </p>
-                      <button className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700">
+                      <button className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground text-sm font-medium rounded-lg hover:bg-primary/90">
                         <Plus className="w-4 h-4" />
                         Tạo phân bổ đầu tiên
                       </button>
