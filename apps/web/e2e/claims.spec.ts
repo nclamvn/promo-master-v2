@@ -61,22 +61,27 @@ test.describe('Claims - List', () => {
   });
 
   test('should navigate to create claim', async ({ page }) => {
+    // First ensure we're on claims page
+    await page.goto('/claims');
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(500);
+
     const createBtn = page.locator(
-      'button:has-text("New"), ' +
-      'button:has-text("Create"), ' +
-      'button:has-text("Add"), ' +
-      'button:has-text("Tạo"), ' +
-      'a:has-text("New"), ' +
+      'button:has-text("New Claim"), ' +
+      'button:has-text("Create Claim"), ' +
+      'button:has-text("Add Claim"), ' +
+      'a:has-text("New Claim"), ' +
+      'a[href*="/claims/new"], ' +
       '[data-testid="create-btn"]'
     );
-    
+
     if (await createBtn.count() > 0) {
       await createBtn.first().click();
-      await page.waitForTimeout(500);
+      await page.waitForTimeout(1000);
     } else {
       await page.goto('/claims/new');
     }
-    
+
     await expect(page).toHaveURL(/(claims|claim)/);
   });
 });
