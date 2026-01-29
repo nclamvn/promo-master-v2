@@ -713,6 +713,330 @@ const TreeNode = ({
   );
 };
 
+// Flatten tree for table view
+const flattenTree = (nodes: AllocationNode[], result: AllocationNode[] = []): AllocationNode[] => {
+  for (const node of nodes) {
+    result.push(node);
+    if (node.children && node.children.length > 0) {
+      flattenTree(node.children, result);
+    }
+  }
+  return result;
+};
+
+// Table View Component
+const TableView = ({
+  data,
+  onEdit,
+  onDelete,
+  onLockToggle,
+}: {
+  data: AllocationNode[];
+  onEdit: (node: AllocationNode) => void;
+  onDelete: (id: string) => void;
+  onLockToggle: (id: string) => void;
+}) => {
+  const flatData = useMemo(() => flattenTree(data), [data]);
+
+  return (
+    <div className="border rounded-lg overflow-hidden">
+      <Table>
+        <TableHeader>
+          <TableRow className="bg-muted/50">
+            <TableHead className="w-12">Cấp</TableHead>
+            <TableHead>Tên / Mã</TableHead>
+            <TableHead className="text-right">Ngân sách</TableHead>
+            <TableHead className="text-right">Đã phân bổ</TableHead>
+            <TableHead className="text-right">Đã chi</TableHead>
+            <TableHead className="text-right">Còn lại</TableHead>
+            <TableHead className="text-center w-28">Sử dụng</TableHead>
+            <TableHead className="text-center">Phương thức</TableHead>
+            <TableHead className="text-center">Trạng thái</TableHead>
+            <TableHead className="w-16"></TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {flatData.map((node) => {
+            const Icon = getTypeIcon(node.type);
+            const utilizationPercent = (node.spentBudget / node.totalBudget) * 100;
+
+            return (
+              <TableRow
+                key={node.id}
+                className={cn(
+                  'hover:bg-muted/50',
+                  node.level === 0 && 'bg-muted/30 font-medium',
+                  node.level === 1 && 'bg-muted/10'
+                )}
+              >
+                <TableCell>
+                  <div className={cn('p-1.5 rounded w-fit', getTypeColor(node.type))}>
+                    <Icon className="h-4 w-4" />
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <div style={{ paddingLeft: `${node.level * 16}px` }}>
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium">{node.name}</span>
+                      <span className="text-xs text-muted-foreground">({node.code})</span>
+                      {node.isLocked && <Lock className="h-3 w-3 text-muted-foreground" />}
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      {node.customerCount.toLocaleString()} khách hàng
+                    </div>
+                  </div>
+                </TableCell>
+                <TableCell className="text-right">
+                  <CurrencyDisplay amount={node.totalBudget} size="sm" />
+                </TableCell>
+                <TableCell className="text-right">
+                  <CurrencyDisplay amount={node.allocatedBudget} size="sm" valueClassName="text-emerald-600 dark:text-emerald-400" />
+                </TableCell>
+                <TableCell className="text-right">
+                  <CurrencyDisplay amount={node.spentBudget} size="sm" valueClassName="text-violet-600 dark:text-violet-400" />
+                </TableCell>
+                <TableCell className="text-right">
+                  <CurrencyDisplay amount={node.remainingBudget} size="sm" valueClassName="text-blue-600 dark:text-blue-400" />
+                </TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-2">
+                    <Progress
+                      value={utilizationPercent}
+                      className={cn(
+                        'h-2 flex-1',
+                        utilizationPercent > 90 && '[&>div]:bg-red-500',
+                        utilizationPercent > 75 && utilizationPercent <= 90 && '[&>div]:bg-amber-500'
+                      )}
+                    />
+                    <span className="text-xs font-medium w-10 text-right">
+                      {utilizationPercent.toFixed(0)}%
+                    </span>
+                  </div>
+                </TableCell>
+                <TableCell className="text-center">
+                  <Badge variant="outline" className="text-xs">
+                    {getMethodLabel(node.allocationMethod)}
+                  </Badge>
+                </TableCell>
+                <TableCell className="text-center">
+                  {getStatusBadge(node.status)}
+                </TableCell>
+                <TableCell>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-8 w-8">
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => onEdit(node)}>
+                        <Edit2 className="h-4 w-4 mr-2" />
+                        Chỉnh sửa
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => onLockToggle(node.id)}>
+                        {node.isLocked ? (
+                          <>
+                            <Unlock className="h-4 w-4 mr-2" />
+                            Mở khóa
+                          </>
+                        ) : (
+                          <>
+                            <Lock className="h-4 w-4 mr-2" />
+                            Khóa
+                          </>
+                        )}
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        className="text-destructive"
+                        onClick={() => onDelete(node.id)}
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Xóa
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TableCell>
+              </TableRow>
+            );
+          })}
+        </TableBody>
+      </Table>
+    </div>
+  );
+};
+
+// Flow View Component - Budget allocation visualization
+const FlowView = ({
+  data,
+  summary,
+}: {
+  data: AllocationNode[];
+  summary: BudgetSummary;
+}) => {
+  // Get regions (level 1)
+  const regions = data[0]?.children || [];
+
+  // Colors for regions
+  const regionColors = [
+    { bg: 'bg-blue-500', light: 'bg-blue-100 dark:bg-blue-900/30', text: 'text-blue-700 dark:text-blue-300' },
+    { bg: 'bg-emerald-500', light: 'bg-emerald-100 dark:bg-emerald-900/30', text: 'text-emerald-700 dark:text-emerald-300' },
+    { bg: 'bg-violet-500', light: 'bg-violet-100 dark:bg-violet-900/30', text: 'text-violet-700 dark:text-violet-300' },
+    { bg: 'bg-orange-500', light: 'bg-orange-100 dark:bg-orange-900/30', text: 'text-orange-700 dark:text-orange-300' },
+  ];
+
+  return (
+    <div className="space-y-6">
+      {/* Budget Flow Visualization */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Total Budget */}
+        <Card className="lg:col-span-1">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Tổng ngân sách</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <CurrencyDisplay amount={summary.totalBudget} size="lg" />
+            <div className="mt-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Đã phân bổ</span>
+                <span className="text-sm font-medium text-emerald-600">{formatPercent(summary.allocated / summary.totalBudget * 100)}</span>
+              </div>
+              <Progress value={summary.allocated / summary.totalBudget * 100} className="h-2" />
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Chưa phân bổ</span>
+                <CurrencyDisplay amount={summary.unallocated} size="sm" valueClassName="text-amber-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Regional Distribution */}
+        <Card className="lg:col-span-2">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Phân bổ theo vùng</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {regions.map((region, index) => {
+                const colors = regionColors[index % regionColors.length];
+                const percent = (region.totalBudget / summary.totalBudget) * 100;
+                const utilizationPercent = (region.spentBudget / region.totalBudget) * 100;
+
+                return (
+                  <div key={region.id} className={cn('p-4 rounded-lg', colors.light)}>
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-3">
+                        <div className={cn('w-3 h-3 rounded-full', colors.bg)} />
+                        <span className={cn('font-medium', colors.text)}>{region.name}</span>
+                        <Badge variant="outline" className="text-xs">{formatPercent(percent)}</Badge>
+                      </div>
+                      <CurrencyDisplay amount={region.totalBudget} size="sm" />
+                    </div>
+                    <div className="grid grid-cols-3 gap-4 text-sm">
+                      <div>
+                        <span className="text-muted-foreground">Đã chi: </span>
+                        <span className="font-medium">{formatCurrencyCompact(region.spentBudget)}</span>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">Còn lại: </span>
+                        <span className="font-medium">{formatCurrencyCompact(region.remainingBudget)}</span>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">Sử dụng: </span>
+                        <span className="font-medium">{formatPercent(utilizationPercent)}</span>
+                      </div>
+                    </div>
+                    {/* Progress bar */}
+                    <div className="mt-2">
+                      <Progress value={utilizationPercent} className="h-1.5" />
+                    </div>
+                    {/* Sub-regions preview */}
+                    {region.children && region.children.length > 0 && (
+                      <div className="mt-3 pt-3 border-t border-border/50">
+                        <div className="flex flex-wrap gap-2">
+                          {region.children.slice(0, 4).map((child) => (
+                            <Badge key={child.id} variant="secondary" className="text-xs">
+                              {child.name}: {formatCurrencyCompact(child.totalBudget)}
+                            </Badge>
+                          ))}
+                          {region.children.length > 4 && (
+                            <Badge variant="secondary" className="text-xs">
+                              +{region.children.length - 4} khác
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Utilization Summary */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <Card>
+          <CardContent className="pt-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-emerald-100 dark:bg-emerald-900/30">
+                <CheckCircle2 className="h-5 w-5 text-emerald-600" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Đã chi tiêu</p>
+                <CurrencyDisplay amount={summary.spent} size="sm" valueClassName="text-emerald-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="pt-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-orange-100 dark:bg-orange-900/30">
+                <Clock className="h-5 w-5 text-orange-600" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Cam kết</p>
+                <CurrencyDisplay amount={summary.committed} size="sm" valueClassName="text-orange-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="pt-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30">
+                <Wallet className="h-5 w-5 text-blue-600" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Khả dụng</p>
+                <CurrencyDisplay amount={summary.available} size="sm" valueClassName="text-blue-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="pt-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-violet-100 dark:bg-violet-900/30">
+                <TrendingUp className="h-5 w-5 text-violet-600" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Tỷ lệ sử dụng</p>
+                <p className="text-lg font-bold text-violet-600">{formatPercent(summary.utilizationRate)}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+};
+
 // Allocation Form Dialog
 const AllocationFormDialog = ({
   node,
@@ -1064,20 +1388,19 @@ export default function BudgetAllocationPage() {
             </div>
           )}
           
-          {/* Table View (placeholder) */}
+          {/* Table View */}
           {viewMode === 'table' && (
-            <div className="text-center py-12 text-muted-foreground">
-              <BarChart3 className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p>Table view đang được phát triển</p>
-            </div>
+            <TableView
+              data={allocationTree}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+              onLockToggle={handleLockToggle}
+            />
           )}
-          
-          {/* Flow View (placeholder) */}
+
+          {/* Flow View */}
           {viewMode === 'flow' && (
-            <div className="text-center py-12 text-muted-foreground">
-              <PieChart className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p>Flow view đang được phát triển</p>
-            </div>
+            <FlowView data={allocationTree} summary={mockBudgetSummary} />
           )}
         </CardContent>
       </Card>
