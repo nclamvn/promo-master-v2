@@ -44,10 +44,10 @@
   --color-popover: #FFFFFF;
   --color-popover-foreground: #111827;
 
-  /* Primary - SPVB Deep Navy Blue */
-  --color-primary: #0047AB;
-  --color-primary-hover: #003D91;
-  --color-primary-muted: #F0F5FF;
+  /* Primary - SPVB Dark Green (matches sidebar) */
+  --color-primary: #1B5E20;
+  --color-primary-hover: #145A18;
+  --color-primary-muted: #E8F5E9;
   --color-primary-foreground: #FFFFFF;
 
   /* Secondary */
@@ -89,10 +89,10 @@
   /* Border/Input/Ring */
   --color-border: #E5E7EB;
   --color-input: #E5E7EB;
-  --color-ring: #0047AB;
+  --color-ring: #1B5E20;
 
   /* Chart colors - Professional palette */
-  --color-chart-1: #0047AB;
+  --color-chart-1: #1B5E20;
   --color-chart-2: #15803D;
   --color-chart-3: #A16207;
   --color-chart-4: #7C3AED;
@@ -100,16 +100,16 @@
   --color-chart-6: #B91C1C;
 
   /* Chart cursor */
-  --chart-cursor-fill: rgba(0, 71, 171, 0.05);
+  --chart-cursor-fill: rgba(27, 94, 32, 0.08);
 
-  /* Sidebar - SPVB Deep Navy */
-  --color-sidebar-background: #001D3D;
-  --color-sidebar-foreground: rgba(255, 255, 255, 0.55);
+  /* Sidebar - SPVB Dark Green */
+  --color-sidebar-background: #1B5E20;
+  --color-sidebar-foreground: rgba(255, 255, 255, 0.85);
   --color-sidebar-primary: #FFFFFF;
-  --color-sidebar-primary-foreground: #001D3D;
+  --color-sidebar-primary-foreground: #1B5E20;
   --color-sidebar-accent: rgba(255, 255, 255, 0.12);
   --color-sidebar-accent-foreground: #FFFFFF;
-  --color-sidebar-border: rgba(255, 255, 255, 0.08);
+  --color-sidebar-border: rgba(255, 255, 255, 0.12);
   --color-sidebar-ring: #FFFFFF;
 
   /* Typography - System fonts for performance */
@@ -171,7 +171,7 @@
   --color-popover: #1E293B;
   --color-popover-foreground: #F8FAFC;
 
-  /* Primary */
+  /* Primary - Blue (original) */
   --color-primary: #3B82F6;
   --color-primary-hover: #2563EB;
   --color-primary-muted: rgba(59, 130, 246, 0.15);
@@ -229,14 +229,14 @@
   /* Chart cursor */
   --chart-cursor-fill: rgba(59, 130, 246, 0.1);
 
-  /* Sidebar - Darker */
-  --color-sidebar-background: #0F172A;
-  --color-sidebar-foreground: #94A3B8;
-  --color-sidebar-primary: #3B82F6;
-  --color-sidebar-primary-foreground: #FFFFFF;
-  --color-sidebar-accent: #1E293B;
-  --color-sidebar-accent-foreground: #F8FAFC;
-  --color-sidebar-border: #334155;
+  /* Sidebar - Dark Green (consistent with light theme) */
+  --color-sidebar-background: #1B4332;
+  --color-sidebar-foreground: rgba(255, 255, 255, 0.8);
+  --color-sidebar-primary: #FFFFFF;
+  --color-sidebar-primary-foreground: #1B4332;
+  --color-sidebar-accent: rgba(255, 255, 255, 0.1);
+  --color-sidebar-accent-foreground: #FFFFFF;
+  --color-sidebar-border: rgba(255, 255, 255, 0.1);
   --color-sidebar-ring: #3B82F6;
 
   /* Shadows - Darker */
@@ -317,7 +317,7 @@
 
   /* Selection */
   ::selection {
-    background: rgba(0, 71, 171, 0.2);
+    background: rgba(27, 94, 32, 0.2);
     color: var(--color-foreground);
   }
 

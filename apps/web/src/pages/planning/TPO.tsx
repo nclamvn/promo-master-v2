@@ -44,7 +44,13 @@ import {
   Percent,
   Zap,
   Award,
+  AlertTriangle,
+  Loader2,
+  Wifi,
+  WifiOff,
 } from 'lucide-react';
+import { useTPO, usePromotionSuggestions, useROIPrediction } from '@/hooks/useTPO';
+import type { MechanicType, ChannelType } from '@/types/tpo';
 import {
   LineChart,
   Line,
@@ -197,6 +203,54 @@ export default function TPOPage() {
   const [includeCannibalisation, setIncludeCannibalisation] = useState(true);
   const [recommendations, setRecommendations] = useState(mockRecommendations);
 
+  // TPO AI Integration
+  const { isConnected, isLoading: tpoLoading, mechanics, channels } = useTPO();
+  const { getSuggestions, suggestions, isLoading: suggestionsLoading, reset: resetSuggestions } = usePromotionSuggestions();
+  const { predict, result: roiResult, isLoading: roiLoading, reset: resetROI } = useROIPrediction();
+
+  // TPO AI Form State
+  const [tpoForm, setTpoForm] = useState({
+    channel: 'MT' as ChannelType,
+    productCategory: 'Beverages',
+    budgetMin: 20000000,
+    budgetMax: 100000000,
+    targetROI: 80,
+    maxSuggestions: 5,
+  });
+
+  const [roiForm, setRoiForm] = useState({
+    mechanicType: 'DISCOUNT' as MechanicType,
+    discountPercent: 15,
+    channel: 'MT' as ChannelType,
+    productCategory: 'Beverages',
+    budgetAmount: 50000000,
+    startDate: new Date().toISOString().split('T')[0],
+    endDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+  });
+
+  const handleGetSuggestions = () => {
+    getSuggestions({
+      channel: tpoForm.channel,
+      product_category: tpoForm.productCategory,
+      budget_range_min: tpoForm.budgetMin,
+      budget_range_max: tpoForm.budgetMax,
+      target_roi: tpoForm.targetROI,
+      max_suggestions: tpoForm.maxSuggestions,
+    });
+  };
+
+  const handlePredictROI = () => {
+    predict({
+      mechanic_type: roiForm.mechanicType,
+      discount_percent: roiForm.discountPercent,
+      channel: roiForm.channel,
+      product_category: roiForm.productCategory,
+      budget_amount: roiForm.budgetAmount,
+      start_date: roiForm.startDate,
+      end_date: roiForm.endDate,
+    });
+  };
+
   const handleAccept = (id: string) => {
     setRecommendations((prev) =>
       prev.map((r) => (r.id === id ? { ...r, status: 'ACCEPTED' as const } : r))
@@ -307,12 +361,333 @@ export default function TPOPage() {
       </div>
 
       {/* Main Content */}
-      <Tabs defaultValue="recommendations" className="space-y-4">
+      <Tabs defaultValue="tpoai" className="space-y-4">
         <TabsList>
+          <TabsTrigger value="tpoai" className="gap-2">
+            <Sparkles className="h-4 w-4" />
+            TPO AI
+            {isConnected && <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />}
+          </TabsTrigger>
           <TabsTrigger value="recommendations">AI Recommendations</TabsTrigger>
           <TabsTrigger value="optimization">Optimization Engine</TabsTrigger>
           <TabsTrigger value="scenarios">Scenario Planning</TabsTrigger>
         </TabsList>
+
+        {/* TPO AI Tab - Real API Integration */}
+        <TabsContent value="tpoai" className="space-y-6">
+          {/* Connection Status */}
+          {tpoLoading ? (
+            <Card>
+              <CardContent className="p-6 flex items-center justify-center">
+                <Loader2 className="w-6 h-6 animate-spin mr-2" />
+                <span>Connecting to TPO Engine...</span>
+              </CardContent>
+            </Card>
+          ) : !isConnected ? (
+            <Card className="border-yellow-500">
+              <CardContent className="p-6">
+                <div className="flex items-center gap-3 text-yellow-600">
+                  <WifiOff className="w-6 h-6" />
+                  <div>
+                    <p className="font-medium">TPO Engine Not Connected</p>
+                    <p className="text-sm">Start TPO Engine: <code className="bg-muted px-1 rounded">uvicorn app.main:app --port 8001</code></p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ) : (
+            <>
+              {/* Connection Badge */}
+              <div className="flex items-center justify-between">
+                <Badge variant="outline" className="text-green-600 border-green-600">
+                  <Wifi className="w-3 h-3 mr-1" />
+                  TPO Engine Connected
+                </Badge>
+                <div className="text-sm text-muted-foreground">
+                  {mechanics.length} mechanics | {channels.length} channels available
+                </div>
+              </div>
+
+              <div className="grid gap-6 lg:grid-cols-2">
+                {/* Promotion Suggestions */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Lightbulb className="h-5 w-5 text-yellow-500" />
+                      AI Promotion Suggestions
+                    </CardTitle>
+                    <CardDescription>Get AI-powered promotion recommendations</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <div>
+                        <Label className="text-xs">Channel</Label>
+                        <Select
+                          value={tpoForm.channel}
+                          onValueChange={(v) => setTpoForm((p) => ({ ...p, channel: v as ChannelType }))}
+                        >
+                          <SelectTrigger><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            {channels.map((ch) => (
+                              <SelectItem key={ch.type} value={ch.type}>{ch.name}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label className="text-xs">Category</Label>
+                        <Input
+                          value={tpoForm.productCategory}
+                          onChange={(e) => setTpoForm((p) => ({ ...p, productCategory: e.target.value }))}
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-xs">Budget Min (VND)</Label>
+                        <Input
+                          type="number"
+                          value={tpoForm.budgetMin}
+                          onChange={(e) => setTpoForm((p) => ({ ...p, budgetMin: Number(e.target.value) }))}
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-xs">Budget Max (VND)</Label>
+                        <Input
+                          type="number"
+                          value={tpoForm.budgetMax}
+                          onChange={(e) => setTpoForm((p) => ({ ...p, budgetMax: Number(e.target.value) }))}
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-xs">Target ROI (%)</Label>
+                        <Input
+                          type="number"
+                          value={tpoForm.targetROI}
+                          onChange={(e) => setTpoForm((p) => ({ ...p, targetROI: Number(e.target.value) }))}
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-xs"># Suggestions</Label>
+                        <Input
+                          type="number"
+                          value={tpoForm.maxSuggestions}
+                          onChange={(e) => setTpoForm((p) => ({ ...p, maxSuggestions: Number(e.target.value) }))}
+                        />
+                      </div>
+                    </div>
+                    <Button onClick={handleGetSuggestions} disabled={suggestionsLoading} className="w-full">
+                      {suggestionsLoading ? (
+                        <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Analyzing...</>
+                      ) : (
+                        <><Sparkles className="w-4 h-4 mr-2" /> Get AI Suggestions</>
+                      )}
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                {/* ROI Prediction */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <TrendingUp className="h-5 w-5 text-blue-500" />
+                      ROI Prediction
+                    </CardTitle>
+                    <CardDescription>Predict ROI for a promotion configuration</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <div>
+                        <Label className="text-xs">Mechanic</Label>
+                        <Select
+                          value={roiForm.mechanicType}
+                          onValueChange={(v) => setRoiForm((p) => ({ ...p, mechanicType: v as MechanicType }))}
+                        >
+                          <SelectTrigger><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            {mechanics.map((m) => (
+                              <SelectItem key={m.type} value={m.type}>{m.name}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label className="text-xs">Channel</Label>
+                        <Select
+                          value={roiForm.channel}
+                          onValueChange={(v) => setRoiForm((p) => ({ ...p, channel: v as ChannelType }))}
+                        >
+                          <SelectTrigger><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            {channels.map((ch) => (
+                              <SelectItem key={ch.type} value={ch.type}>{ch.name}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label className="text-xs">Discount %</Label>
+                        <Input
+                          type="number"
+                          value={roiForm.discountPercent}
+                          onChange={(e) => setRoiForm((p) => ({ ...p, discountPercent: Number(e.target.value) }))}
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-xs">Budget (VND)</Label>
+                        <Input
+                          type="number"
+                          value={roiForm.budgetAmount}
+                          onChange={(e) => setRoiForm((p) => ({ ...p, budgetAmount: Number(e.target.value) }))}
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-xs">Start Date</Label>
+                        <Input
+                          type="date"
+                          value={roiForm.startDate}
+                          onChange={(e) => setRoiForm((p) => ({ ...p, startDate: e.target.value }))}
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-xs">End Date</Label>
+                        <Input
+                          type="date"
+                          value={roiForm.endDate}
+                          onChange={(e) => setRoiForm((p) => ({ ...p, endDate: e.target.value }))}
+                        />
+                      </div>
+                    </div>
+                    <Button onClick={handlePredictROI} disabled={roiLoading} className="w-full">
+                      {roiLoading ? (
+                        <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Predicting...</>
+                      ) : (
+                        <><TrendingUp className="w-4 h-4 mr-2" /> Predict ROI</>
+                      )}
+                    </Button>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Results Section */}
+              {(suggestions || roiResult) && (
+                <div className="space-y-6">
+                  {/* Suggestions Results */}
+                  {suggestions && (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>AI Suggestions ({suggestions.suggestions.length})</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {suggestions.suggestions.map((s, i) => (
+                          <div
+                            key={i}
+                            className={`p-4 rounded-lg border ${i === 0 ? 'border-purple-500 bg-purple-50 dark:bg-purple-950/20' : ''}`}
+                          >
+                            <div className="flex items-start justify-between">
+                              <div>
+                                <div className="flex items-center gap-2">
+                                  <Badge variant={i === 0 ? 'default' : 'secondary'}>#{s.rank}</Badge>
+                                  <span className="font-semibold">{s.mechanic_type}</span>
+                                  <Badge variant="outline">{s.suggested_duration_days} days</Badge>
+                                </div>
+                                <p className="text-sm text-muted-foreground mt-1">{s.rationale}</p>
+                                <div className="flex gap-4 mt-2 text-sm">
+                                  <span>Discount: <strong>{s.discount_percent}%</strong></span>
+                                  <span>Cost: <CurrencyDisplay amount={s.predicted_cost} size="sm" /></span>
+                                  <span>Start: <strong>{s.best_start_day}</strong></span>
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <div className="text-2xl font-bold text-green-600">{s.predicted_roi}%</div>
+                                <div className="text-xs text-muted-foreground">Expected ROI</div>
+                                <div className="text-sm mt-1">Confidence: {(s.confidence * 100).toFixed(0)}%</div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+
+                        {suggestions.market_insights.length > 0 && (
+                          <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
+                            <h4 className="font-medium mb-2 flex items-center gap-2">
+                              <Target className="h-4 w-4 text-blue-500" />
+                              Market Insights
+                            </h4>
+                            <ul className="space-y-1">
+                              {suggestions.market_insights.map((insight, i) => (
+                                <li key={i} className="text-sm text-muted-foreground">• {insight}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {/* ROI Prediction Results */}
+                  {roiResult && (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>ROI Prediction Results</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                          <div className="p-4 bg-green-50 dark:bg-green-950/20 rounded-lg text-center">
+                            <div className="text-3xl font-bold text-green-600">{roiResult.predicted_roi}%</div>
+                            <div className="text-sm text-muted-foreground">Predicted ROI</div>
+                          </div>
+                          <div className="p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg text-center">
+                            <div className="text-2xl font-bold text-blue-600">
+                              <CurrencyDisplay amount={roiResult.predicted_incremental_sales} size="lg" />
+                            </div>
+                            <div className="text-sm text-muted-foreground">Incremental Sales</div>
+                          </div>
+                          <div className="p-4 bg-purple-50 dark:bg-purple-950/20 rounded-lg text-center">
+                            <div className="text-2xl font-bold text-purple-600">
+                              <CurrencyDisplay amount={roiResult.predicted_incremental_profit} size="lg" />
+                            </div>
+                            <div className="text-sm text-muted-foreground">Incremental Profit</div>
+                          </div>
+                          <div className="p-4 bg-orange-50 dark:bg-orange-950/20 rounded-lg text-center">
+                            <div className="text-3xl font-bold text-orange-600">{(roiResult.confidence_score * 100).toFixed(0)}%</div>
+                            <div className="text-sm text-muted-foreground">Confidence</div>
+                          </div>
+                        </div>
+
+                        <div className="grid gap-4 sm:grid-cols-2 mt-4">
+                          {roiResult.key_drivers.length > 0 && (
+                            <div className="p-4 bg-muted rounded-lg">
+                              <h4 className="font-medium mb-2 flex items-center gap-2">
+                                <CheckCircle className="h-4 w-4 text-green-500" />
+                                Key Drivers
+                              </h4>
+                              <ul className="space-y-1">
+                                {roiResult.key_drivers.map((d, i) => (
+                                  <li key={i} className="text-sm">• {d}</li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                          {roiResult.optimization_suggestions.length > 0 && (
+                            <div className="p-4 bg-muted rounded-lg">
+                              <h4 className="font-medium mb-2 flex items-center gap-2">
+                                <Lightbulb className="h-4 w-4 text-yellow-500" />
+                                Optimization Tips
+                              </h4>
+                              <ul className="space-y-1">
+                                {roiResult.optimization_suggestions.map((s, i) => (
+                                  <li key={i} className="text-sm">• {s}</li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+                </div>
+              )}
+            </>
+          )}
+        </TabsContent>
 
         {/* Recommendations Tab */}
         <TabsContent value="recommendations" className="space-y-4">

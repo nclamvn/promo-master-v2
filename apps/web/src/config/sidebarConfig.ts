@@ -844,63 +844,116 @@ export interface SidebarColors {
   statusSyncing: string;
 }
 
-export const getSidebarColors = (isDark: boolean): SidebarColors => ({
-  text: isDark ? '#FFFFFF' : '#0A2744',
-  textMuted: isDark ? 'rgba(255,255,255,0.8)' : '#1E3A5F',
-  textSubtle: isDark ? 'rgba(255,255,255,0.55)' : 'rgba(10,39,68,0.7)',
-  textHover: isDark ? '#FFFFFF' : '#0A2744',
-  border: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(10,39,68,0.12)',
-  borderAccent: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(10,39,68,0.25)',
-  bgHover: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(10,39,68,0.08)',
-  bgActive: isDark ? 'rgba(255,255,255,0.15)' : 'rgba(10,39,68,0.15)',
-  bgSubtle: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(10,39,68,0.1)',
-  bgGradient: isDark
-    ? 'linear-gradient(90deg, rgba(255,255,255,0.06) 0%, transparent 100%)'
-    : 'linear-gradient(90deg, rgba(10,39,68,0.08) 0%, transparent 100%)',
-  overlayGradient: isDark
-    ? 'linear-gradient(180deg, rgba(10,39,68,0.3) 0%, transparent 30%, rgba(10,39,68,0.4) 100%)'
-    : 'linear-gradient(180deg, rgba(10,39,68,0.1) 0%, transparent 30%, rgba(10,39,68,0.15) 100%)',
-  statusOnline: isDark ? '#4ade80' : '#15803D',
-  statusOffline: isDark ? '#f87171' : '#dc2626',
-  statusSyncing: isDark ? '#fbbf24' : '#d97706',
-});
+export const getSidebarColors = (isDark: boolean): SidebarColors => {
+  if (isDark) {
+    // Dark theme: Navy blue sidebar with white text/icons
+    return {
+      text: '#FFFFFF',
+      textMuted: 'rgba(255,255,255,0.85)',
+      textSubtle: 'rgba(255,255,255,0.6)',
+      textHover: '#FFFFFF',
+      border: 'rgba(255,255,255,0.12)',
+      borderAccent: 'rgba(255,255,255,0.25)',
+      bgHover: 'rgba(255,255,255,0.1)',
+      bgActive: 'rgba(255,255,255,0.18)',
+      bgSubtle: 'rgba(255,255,255,0.12)',
+      bgGradient: 'linear-gradient(90deg, rgba(255,255,255,0.08) 0%, transparent 100%)',
+      overlayGradient: 'linear-gradient(180deg, rgba(0,0,0,0.2) 0%, transparent 30%, rgba(0,0,0,0.25) 100%)',
+      statusOnline: '#4ade80',
+      statusOffline: '#f87171',
+      statusSyncing: '#fbbf24',
+    };
+  }
+  // Light theme: Dark green sidebar with white text
+  return {
+    text: '#FFFFFF',
+    textMuted: 'rgba(255,255,255,0.85)',
+    textSubtle: 'rgba(255,255,255,0.6)',
+    textHover: '#FFFFFF',
+    border: 'rgba(255,255,255,0.12)',
+    borderAccent: 'rgba(255,255,255,0.25)',
+    bgHover: 'rgba(255,255,255,0.1)',
+    bgActive: 'rgba(255,255,255,0.18)',
+    bgSubtle: 'rgba(255,255,255,0.12)',
+    bgGradient: 'linear-gradient(90deg, rgba(255,255,255,0.08) 0%, transparent 100%)',
+    overlayGradient: 'linear-gradient(180deg, rgba(0,0,0,0.15) 0%, transparent 30%, rgba(0,0,0,0.2) 100%)',
+    statusOnline: '#4ade80',
+    statusOffline: '#f87171',
+    statusSyncing: '#fbbf24',
+  };
+};
 
 export const getSidebarBgColor = (isDark: boolean): string =>
-  isDark ? '#0A2744' : '#8DD8E8';
+  isDark ? '#0A2744' : '#1B5E20'; // Dark theme: navy blue, Light theme: dark green
 
 // ============================================================================
 // BADGE COLORS
 // ============================================================================
 
 export const getBadgeColors = (variant: BadgeVariant, isDark: boolean) => {
+  if (isDark) {
+    // Dark theme: Navy blue sidebar with white accents
+    const colors = {
+      default: {
+        bg: 'rgba(255,255,255,0.2)',
+        text: '#FFFFFF',
+      },
+      primary: {
+        bg: 'rgba(96,165,250,0.35)',
+        text: '#93c5fd',
+      },
+      success: {
+        bg: 'rgba(74,222,128,0.35)',
+        text: '#86efac',
+      },
+      warning: {
+        bg: 'rgba(251,191,36,0.35)',
+        text: '#fcd34d',
+      },
+      danger: {
+        bg: 'rgba(248,113,113,0.35)',
+        text: '#fca5a5',
+      },
+      info: {
+        bg: 'rgba(103,232,249,0.35)',
+        text: '#67e8f9',
+      },
+      premium: {
+        bg: 'rgba(196,181,253,0.35)',
+        text: '#c4b5fd',
+      },
+    };
+    return colors[variant];
+  }
+  // Light theme: Dark green sidebar with white text
   const colors = {
     default: {
-      bg: isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.1)',
-      text: isDark ? '#FFFFFF' : '#374151',
+      bg: 'rgba(255,255,255,0.2)',
+      text: '#FFFFFF',
     },
     primary: {
-      bg: isDark ? 'rgba(59,130,246,0.3)' : 'rgba(59,130,246,0.15)',
-      text: isDark ? '#93c5fd' : '#2563eb',
+      bg: 'rgba(96,165,250,0.35)',
+      text: '#93c5fd',
     },
     success: {
-      bg: isDark ? 'rgba(34,197,94,0.3)' : 'rgba(34,197,94,0.15)',
-      text: isDark ? '#86efac' : '#16a34a',
+      bg: 'rgba(74,222,128,0.35)',
+      text: '#86efac',
     },
     warning: {
-      bg: isDark ? 'rgba(245,158,11,0.3)' : 'rgba(245,158,11,0.15)',
-      text: isDark ? '#fcd34d' : '#d97706',
+      bg: 'rgba(251,191,36,0.35)',
+      text: '#fcd34d',
     },
     danger: {
-      bg: isDark ? 'rgba(239,68,68,0.3)' : 'rgba(239,68,68,0.15)',
-      text: isDark ? '#fca5a5' : '#dc2626',
+      bg: 'rgba(248,113,113,0.35)',
+      text: '#fca5a5',
     },
     info: {
-      bg: isDark ? 'rgba(6,182,212,0.3)' : 'rgba(6,182,212,0.15)',
-      text: isDark ? '#67e8f9' : '#0891b2',
+      bg: 'rgba(103,232,249,0.35)',
+      text: '#67e8f9',
     },
     premium: {
-      bg: isDark ? 'rgba(168,85,247,0.3)' : 'rgba(168,85,247,0.15)',
-      text: isDark ? '#c4b5fd' : '#7c3aed',
+      bg: 'rgba(196,181,253,0.35)',
+      text: '#c4b5fd',
     },
   };
   return colors[variant];

@@ -14,39 +14,43 @@ import { SidebarUser } from './SidebarUser';
 // ============================================================================
 // WAVE PATTERN SVG - Theme-aware background
 // ============================================================================
-const WavePattern = ({ isDark }: { isDark: boolean }) => (
-  <svg
-    className="absolute inset-0 w-full h-full pointer-events-none"
-    preserveAspectRatio="xMidYMid slice"
-    style={{ opacity: isDark ? 0.04 : 0.05 }}
-  >
-    <defs>
-      <pattern
-        id="wave-pattern"
-        x="0"
-        y="0"
-        width="120"
-        height="24"
-        patternUnits="userSpaceOnUse"
-      >
-        <path
-          d="M0 12 Q 30 4, 60 12 T 120 12"
-          fill="none"
-          stroke={isDark ? 'white' : '#1E4A6E'}
-          strokeWidth={1}
-        />
-        <path
-          d="M0 20 Q 30 12, 60 20 T 120 20"
-          fill="none"
-          stroke={isDark ? 'white' : '#1E4A6E'}
-          strokeWidth={0.5}
-          opacity={isDark ? 0.5 : 0.3}
-        />
-      </pattern>
-    </defs>
-    <rect width="100%" height="100%" fill="url(#wave-pattern)" />
-  </svg>
-);
+const WavePattern = ({ isDark }: { isDark: boolean }) => {
+  // Both themes now use white strokes
+  const strokeColor = 'white';
+  return (
+    <svg
+      className="absolute inset-0 w-full h-full pointer-events-none"
+      preserveAspectRatio="xMidYMid slice"
+      style={{ opacity: 0.06 }}
+    >
+      <defs>
+        <pattern
+          id="wave-pattern"
+          x="0"
+          y="0"
+          width="120"
+          height="24"
+          patternUnits="userSpaceOnUse"
+        >
+          <path
+            d="M0 12 Q 30 4, 60 12 T 120 12"
+            fill="none"
+            stroke={strokeColor}
+            strokeWidth={1}
+          />
+          <path
+            d="M0 20 Q 30 12, 60 20 T 120 20"
+            fill="none"
+            stroke={strokeColor}
+            strokeWidth={0.5}
+            opacity={0.5}
+          />
+        </pattern>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#wave-pattern)" />
+    </svg>
+  );
+};
 
 // ============================================================================
 // STATUS SECTION

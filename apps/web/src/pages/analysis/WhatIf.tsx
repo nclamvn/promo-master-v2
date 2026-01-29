@@ -79,7 +79,14 @@ import {
   RefreshCw,
   Sliders,
   Zap,
+  Loader2,
+  FlaskConical,
+  Trophy,
+  Wifi,
+  WifiOff,
 } from 'lucide-react';
+import { useWhatIfSimulation, useTPOHealth, useTPOMechanics, useTPOChannels } from '@/hooks/useTPO';
+import type { MechanicType, ChannelType, WhatIfScenario as TPOScenario } from '@/types/tpo';
 import { cn, formatPercent, formatNumber } from '@/lib/utils';
 import { CurrencyDisplay, formatCurrencyCompact } from '@/components/ui/currency-display';
 
@@ -618,6 +625,73 @@ export default function AnalysisWhatIfPage() {
     { ...defaultParams, name: 'Aggressive', budget: 3000000000, discountPercent: 20, expectedUplift: 30 },
   ]);
   const [activeIndex, setActiveIndex] = useState(0);
+
+  // TPO Integration
+  const { isSuccess: isConnected, isLoading: healthLoading } = useTPOHealth();
+  const { data: mechanics = [] } = useTPOMechanics();
+  const { data: channels = [] } = useTPOChannels();
+  const { simulate: runTPOSimulation, result: tpoResult, isLoading: tpoLoading, reset: resetTPO } = useWhatIfSimulation();
+
+  const [showTPOPanel, setShowTPOPanel] = useState(false);
+  const [tpoScenarios, setTPOScenarios] = useState<TPOScenario[]>([
+    {
+      scenario_id: 'A',
+      scenario_name: 'Discount 15%',
+      mechanic_type: 'DISCOUNT',
+      discount_percent: 15,
+      channel: 'MT',
+      product_category: 'Beverages',
+      budget_amount: 50000000,
+      duration_days: 14,
+    },
+    {
+      scenario_id: 'B',
+      scenario_name: 'BOGO Offer',
+      mechanic_type: 'BOGO',
+      discount_percent: 0,
+      channel: 'MT',
+      product_category: 'Beverages',
+      budget_amount: 50000000,
+      duration_days: 14,
+    },
+  ]);
+
+  const handleTPOSimulation = () => {
+    runTPOSimulation({
+      scenarios: tpoScenarios,
+      comparison_date: new Date().toISOString().split('T')[0],
+      include_sensitivity_analysis: true,
+    });
+  };
+
+  const addTPOScenario = () => {
+    if (tpoScenarios.length >= 5) return;
+    const nextId = String.fromCharCode(65 + tpoScenarios.length);
+    setTPOScenarios([
+      ...tpoScenarios,
+      {
+        scenario_id: nextId,
+        scenario_name: `Scenario ${nextId}`,
+        mechanic_type: 'DISCOUNT',
+        discount_percent: 10,
+        channel: 'MT',
+        product_category: 'Beverages',
+        budget_amount: 50000000,
+        duration_days: 14,
+      },
+    ]);
+  };
+
+  const updateTPOScenario = (index: number, updates: Partial<TPOScenario>) => {
+    setTPOScenarios((prev) =>
+      prev.map((s, i) => (i === index ? { ...s, ...updates } : s))
+    );
+  };
+
+  const removeTPOScenario = (index: number) => {
+    if (tpoScenarios.length <= 2) return;
+    setTPOScenarios((prev) => prev.filter((_, i) => i !== index));
+  };
   
   // Calculate results for all scenarios
   const results = useMemo(() => scenarios.map(calculateResults), [scenarios]);
@@ -673,6 +747,16 @@ export default function AnalysisWhatIfPage() {
         </div>
         
         <div className="flex items-center gap-2">
+          <Button
+            variant={showTPOPanel ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setShowTPOPanel(!showTPOPanel)}
+            className={showTPOPanel ? 'bg-purple-600 hover:bg-purple-700' : ''}
+          >
+            <FlaskConical className="h-4 w-4 mr-2" />
+            TPO AI
+            {isConnected && <span className="w-2 h-2 ml-2 rounded-full bg-green-500" />}
+          </Button>
           <Button variant="outline" size="sm" onClick={() => setScenarios([{ ...defaultParams }])}>
             <RotateCcw className="h-4 w-4 mr-2" />
             Reset
@@ -687,6 +771,181 @@ export default function AnalysisWhatIfPage() {
           </Button>
         </div>
       </div>
+
+      {/* TPO AI Simulation Panel */}
+      {showTPOPanel && (
+        <Card className="border-purple-500">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2">
+                <FlaskConical className="h-5 w-5 text-purple-500" />
+                TPO AI What-If Simulation
+              </CardTitle>
+              {healthLoading ? (
+                <Badge variant="outline"><Loader2 className="w-3 h-3 mr-1 animate-spin" /> Connecting...</Badge>
+              ) : isConnected ? (
+                <Badge variant="outline" className="text-green-600 border-green-600">
+                  <Wifi className="w-3 h-3 mr-1" /> Connected
+                </Badge>
+              ) : (
+                <Badge variant="outline" className="text-yellow-600 border-yellow-600">
+                  <WifiOff className="w-3 h-3 mr-1" /> Not Connected
+                </Badge>
+              )}
+            </div>
+            <CardDescription>Compare promotion scenarios using TPO ML models</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {/* TPO Scenarios */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <Label>Scenarios ({tpoScenarios.length}/5)</Label>
+                <Button variant="outline" size="sm" onClick={addTPOScenario} disabled={tpoScenarios.length >= 5}>
+                  <Plus className="h-4 w-4 mr-1" /> Add
+                </Button>
+              </div>
+              {tpoScenarios.map((scenario, index) => (
+                <div key={scenario.scenario_id} className="p-3 border rounded-lg space-y-3">
+                  <div className="flex items-center justify-between">
+                    <Input
+                      value={scenario.scenario_name}
+                      onChange={(e) => updateTPOScenario(index, { scenario_name: e.target.value })}
+                      className="w-40 h-8"
+                    />
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => removeTPOScenario(index)}
+                      disabled={tpoScenarios.length <= 2}
+                    >
+                      <Trash2 className="h-4 w-4 text-red-500" />
+                    </Button>
+                  </div>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                    <div>
+                      <Label className="text-xs">Mechanic</Label>
+                      <Select
+                        value={scenario.mechanic_type}
+                        onValueChange={(v) => updateTPOScenario(index, { mechanic_type: v as MechanicType })}
+                      >
+                        <SelectTrigger className="h-8"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          {mechanics.map((m) => (
+                            <SelectItem key={m.type} value={m.type}>{m.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label className="text-xs">Channel</Label>
+                      <Select
+                        value={scenario.channel}
+                        onValueChange={(v) => updateTPOScenario(index, { channel: v as ChannelType })}
+                      >
+                        <SelectTrigger className="h-8"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          {channels.map((ch) => (
+                            <SelectItem key={ch.type} value={ch.type}>{ch.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label className="text-xs">Discount %</Label>
+                      <Input
+                        type="number"
+                        className="h-8"
+                        value={scenario.discount_percent}
+                        onChange={(e) => updateTPOScenario(index, { discount_percent: Number(e.target.value) })}
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-xs">Budget (M)</Label>
+                      <Input
+                        type="number"
+                        className="h-8"
+                        value={scenario.budget_amount / 1000000}
+                        onChange={(e) => updateTPOScenario(index, { budget_amount: Number(e.target.value) * 1000000 })}
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <Button onClick={handleTPOSimulation} disabled={tpoLoading || !isConnected} className="w-full bg-purple-600 hover:bg-purple-700">
+              {tpoLoading ? (
+                <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Running Simulation...</>
+              ) : (
+                <><FlaskConical className="w-4 h-4 mr-2" /> Run TPO Simulation</>
+              )}
+            </Button>
+
+            {/* TPO Results */}
+            {tpoResult && (
+              <div className="space-y-4 pt-4 border-t">
+                {/* Winner */}
+                <div className="p-4 bg-green-50 dark:bg-green-950/20 rounded-lg border border-green-500">
+                  <div className="flex items-center gap-3">
+                    <Trophy className="w-8 h-8 text-yellow-500" />
+                    <div>
+                      <div className="text-sm text-muted-foreground">Recommended Scenario</div>
+                      <div className="text-xl font-bold text-green-600">{tpoResult.recommended_scenario}</div>
+                      <p className="text-sm text-muted-foreground mt-1">{tpoResult.recommendation_rationale}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Comparison */}
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b">
+                        <th className="text-left py-2">Scenario</th>
+                        <th className="text-right py-2">ROI</th>
+                        <th className="text-right py-2">Profit</th>
+                        <th className="text-right py-2">Uplift</th>
+                        <th className="text-right py-2">Confidence</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {tpoResult.comparisons.map((c) => (
+                        <tr key={c.scenario_id} className={c.scenario_id === tpoResult.recommended_scenario ? 'bg-green-50 dark:bg-green-950/20' : ''}>
+                          <td className="py-2 font-medium">
+                            {c.scenario_name}
+                            {c.scenario_id === tpoResult.recommended_scenario && (
+                              <Badge className="ml-2" variant="default">Winner</Badge>
+                            )}
+                          </td>
+                          <td className="text-right py-2 font-bold text-green-600">{c.predicted_roi}%</td>
+                          <td className="text-right py-2">{formatCurrencyCompact(c.predicted_profit, 'VND')}</td>
+                          <td className="text-right py-2">+{c.sales_uplift_percent.toFixed(1)}%</td>
+                          <td className="text-right py-2">{(c.confidence_score * 100).toFixed(0)}%</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Insights */}
+                {tpoResult.key_insights.length > 0 && (
+                  <div className="p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
+                    <h4 className="font-medium mb-2 flex items-center gap-2">
+                      <Lightbulb className="h-4 w-4 text-yellow-500" />
+                      Key Insights
+                    </h4>
+                    <ul className="space-y-1">
+                      {tpoResult.key_insights.map((insight, i) => (
+                        <li key={i} className="text-sm text-muted-foreground">• {insight}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
       
       {/* Main Content */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">

@@ -8,17 +8,20 @@ import { cn } from '@/lib/utils';
 
 // Concentric Circles Background Pattern - Suntory PepsiCo Style
 const ConcentricCirclesPattern = ({ isDark }: { isDark: boolean }) => {
-  // Lighter cyan for light theme
-  const strokeColor = isDark ? '#7DD3E8' : '#6DCFE5';
-  const strokeWidthLarge = isDark ? 1.5 : 1.5;
-  const strokeWidthMedium = isDark ? 1 : 1;
+  // Light theme: Dark green (matches sidebar), very subtle
+  // Dark theme: Cyan (original)
+  const strokeColor = isDark ? '#7DD3E8' : '#1B5E20';
+  const strokeWidthLarge = 1.5;
+  const strokeWidthMedium = 1;
 
+  // Light theme: very low opacity (5-7%) to avoid distraction
+  // Dark theme: keep original subtle opacity
   return (
     <div className="fixed inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0 }}>
       {/* Top-right large circles */}
       <svg
         className="absolute -top-32 -right-32 w-[600px] h-[600px]"
-        style={{ opacity: isDark ? 0.05 : 0.20 }}
+        style={{ opacity: isDark ? 0.05 : 0.06 }}
         viewBox="0 0 400 400"
       >
         <circle cx="200" cy="200" r="190" fill="none" stroke={strokeColor} strokeWidth={strokeWidthLarge} />
@@ -32,7 +35,7 @@ const ConcentricCirclesPattern = ({ isDark }: { isDark: boolean }) => {
       {/* Top-left medium circles */}
       <svg
         className="absolute -top-20 left-[20%] w-[400px] h-[400px]"
-        style={{ opacity: isDark ? 0.03 : 0.15 }}
+        style={{ opacity: isDark ? 0.03 : 0.05 }}
         viewBox="0 0 300 300"
       >
         <circle cx="150" cy="150" r="140" fill="none" stroke={strokeColor} strokeWidth={strokeWidthMedium} />
@@ -44,7 +47,7 @@ const ConcentricCirclesPattern = ({ isDark }: { isDark: boolean }) => {
       {/* Center large circles */}
       <svg
         className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px]"
-        style={{ opacity: isDark ? 0.04 : 0.17 }}
+        style={{ opacity: isDark ? 0.04 : 0.05 }}
         viewBox="0 0 400 400"
       >
         <circle cx="200" cy="200" r="195" fill="none" stroke={strokeColor} strokeWidth={strokeWidthMedium} />
@@ -58,7 +61,7 @@ const ConcentricCirclesPattern = ({ isDark }: { isDark: boolean }) => {
       {/* Bottom-left circles */}
       <svg
         className="absolute -bottom-48 -left-32 w-[650px] h-[650px]"
-        style={{ opacity: isDark ? 0.045 : 0.18 }}
+        style={{ opacity: isDark ? 0.045 : 0.06 }}
         viewBox="0 0 400 400"
       >
         <circle cx="200" cy="200" r="190" fill="none" stroke={strokeColor} strokeWidth={strokeWidthLarge} />
@@ -71,7 +74,7 @@ const ConcentricCirclesPattern = ({ isDark }: { isDark: boolean }) => {
       {/* Bottom-right circles */}
       <svg
         className="absolute -bottom-20 right-[15%] w-[450px] h-[450px]"
-        style={{ opacity: isDark ? 0.04 : 0.17 }}
+        style={{ opacity: isDark ? 0.04 : 0.05 }}
         viewBox="0 0 300 300"
       >
         <circle cx="150" cy="150" r="145" fill="none" stroke={strokeColor} strokeWidth={strokeWidthMedium} />
@@ -84,7 +87,7 @@ const ConcentricCirclesPattern = ({ isDark }: { isDark: boolean }) => {
       {/* Right-center small circles */}
       <svg
         className="absolute top-1/3 -right-16 w-[380px] h-[380px]"
-        style={{ opacity: isDark ? 0.045 : 0.18 }}
+        style={{ opacity: isDark ? 0.045 : 0.06 }}
         viewBox="0 0 200 200"
       >
         <circle cx="100" cy="100" r="95" fill="none" stroke={strokeColor} strokeWidth={strokeWidthLarge} />
@@ -96,7 +99,7 @@ const ConcentricCirclesPattern = ({ isDark }: { isDark: boolean }) => {
       {/* Left-center circles */}
       <svg
         className="absolute top-[60%] -left-24 w-[400px] h-[400px]"
-        style={{ opacity: isDark ? 0.03 : 0.15 }}
+        style={{ opacity: isDark ? 0.03 : 0.04 }}
         viewBox="0 0 250 250"
       >
         <circle cx="125" cy="125" r="120" fill="none" stroke={strokeColor} strokeWidth={strokeWidthMedium} />
