@@ -4,7 +4,7 @@
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import prisma from '../../_lib/prisma';
+import prisma from '@/_lib/prisma';
 import { getUserFromRequest } from '../../_lib/auth';
 
 interface PeriodData {
@@ -170,7 +170,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           _sum: { sellOutValue: true },
         });
 
-        const prevMap = new Map(
+        const prevMap = new Map<string, number>(
           prevByProduct.map((p) => [p.productId, Number(p._sum.sellOutValue || 0)])
         );
 

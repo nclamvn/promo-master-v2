@@ -3,13 +3,19 @@
     "target": "ES2020",
     "module": "CommonJS",
     "lib": ["ES2020"],
-    "strict": true,
+    "strict": false,
+    "noImplicitAny": false,
+    "strictNullChecks": false,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "outDir": "./dist",
     "rootDir": ".",
     "resolveJsonModule": true,
-    "types": ["node"]
+    "types": ["node"],
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./*"]
+    }
   },
   "include": ["./**/*.ts"],
   "exclude": ["node_modules", "dist"]

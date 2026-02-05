@@ -49,7 +49,7 @@ export const logger = pino({
 
   // Custom serializers
   serializers: {
-    req: (req) => ({
+    req: (req: Request) => ({
       method: req.method,
       url: req.url,
       path: req.path,
@@ -59,7 +59,7 @@ export const logger = pino({
       contentType: req.headers?.['content-type'],
       requestId: req.headers?.['x-request-id'],
     }),
-    res: (res) => ({
+    res: (res: Response) => ({
       statusCode: res.statusCode,
       contentType: res.getHeader?.('content-type'),
     }),
@@ -155,15 +155,18 @@ export function logAudit(event: {
  * Log a security event
  */
 export function logSecurity(event: {
-  type: 'auth_failure' | 'rate_limit' | 'suspicious_activity' | 'permission_denied';
+  eventType: 'auth_failure' | 'rate_limit' | 'suspicious_activity' | 'permission_denied';
   ip: string;
   userId?: string;
-  details?: Record<string, any>;
+  details?: Record<string, unknown>;
 }) {
   logger.warn({
     type: 'security',
-    ...event,
-  }, `Security: ${event.type}`);
+    securityEventType: event.eventType,
+    ip: event.ip,
+    userId: event.userId,
+    details: event.details,
+  }, `Security: ${event.eventType}`);
 }
 
 /**

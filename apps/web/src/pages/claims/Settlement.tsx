@@ -568,7 +568,7 @@ export default function ClaimsSettlementPage() {
             <div className="space-y-6 py-4">
               {/* Status Badge */}
               <div className="flex items-center justify-between">
-                <StatusBadge status={selectedClaimForDetail.status} />
+                {getStatusBadge(selectedClaimForDetail.status)}
                 {selectedClaimForDetail.settledAt && (
                   <span className="text-xs text-muted-foreground">
                     Settled: {new Date(selectedClaimForDetail.settledAt).toLocaleDateString('vi-VN')}

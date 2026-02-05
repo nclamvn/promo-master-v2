@@ -28,7 +28,7 @@ export const securityHeaders = helmet({
   },
 
   // HTTP Strict Transport Security
-  strictTransportSecurity: {
+  hsts: {
     maxAge: 31536000, // 1 year
     includeSubDomains: true,
     preload: true,
@@ -75,7 +75,7 @@ const getAllowedOrigins = (): string[] => {
 };
 
 export const corsConfig = cors({
-  origin: (origin, callback) => {
+  origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
     const allowedOrigins = getAllowedOrigins();
 
     // Allow requests with no origin (like mobile apps or curl)

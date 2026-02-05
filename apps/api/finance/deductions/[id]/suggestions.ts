@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import prisma from '../../../_lib/prisma';
+import prisma from '@/_lib/prisma';
 import { getUserFromRequest } from '../../../_lib/auth';
 
 interface MatchingSuggestion {

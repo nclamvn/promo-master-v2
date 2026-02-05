@@ -4,7 +4,7 @@
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import prisma from '../../_lib/prisma';
+import prisma from '@/_lib/prisma';
 import { getUserFromRequest } from '../../_lib/auth';
 
 interface SnapshotItem {
@@ -86,8 +86,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         : [],
     ]);
 
-    const customerMap = new Map(customers.map((c) => [c.code, c.id]));
-    const productMap = new Map(products.map((p) => [p.sku, p.id]));
+    const customerMap = new Map<string, string>(customers.map((c) => [c.code, c.id]));
+    const productMap = new Map<string, string>(products.map((p) => [p.sku, p.id]));
 
     // Process items
     const results: BulkResult[] = [];

@@ -1,6 +1,14 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import prisma from '../../_lib/prisma';
+import prisma from '@/_lib/prisma';
 import { getUserFromRequest } from '../../_lib/auth';
+
+interface ClashData {
+  promotionId: string;
+  clashWithId: string;
+  clashType: string;
+  severity: string;
+  description: string;
+}
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method === 'OPTIONS') {
@@ -79,7 +87,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         },
       });
 
-      const clashes = [];
+      const clashes: ClashData[] = [];
       for (const other of overlapping) {
         const customerOverlap = promotion.customers.some(c =>
           other.customers.some(oc => oc.customerId === c.customerId)

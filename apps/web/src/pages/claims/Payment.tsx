@@ -960,7 +960,7 @@ export default function ClaimsPaymentPage() {
             <div className="space-y-6 py-4">
               {/* Status */}
               <div className="flex items-center justify-between">
-                <PaymentStatusBadge status={selectedPayment.paymentStatus} />
+                {getPaymentStatusBadge(selectedPayment.paymentStatus)}
                 {isOverdue(selectedPayment.dueDate, selectedPayment.paymentStatus) && (
                   <Badge variant="destructive" className="gap-1">
                     <AlertTriangle className="h-3 w-3" />

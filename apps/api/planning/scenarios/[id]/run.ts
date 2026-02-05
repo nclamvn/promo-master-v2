@@ -4,7 +4,7 @@
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import prisma from '../../../_lib/prisma';
+import prisma from '@/_lib/prisma';
 
 interface ScenarioParameters {
   promotionType: string;
