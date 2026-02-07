@@ -43,6 +43,26 @@ enum FundType {
   VARIABLE // Off-Invoice (performance-based)
 }
 
+// Aforza-style Budget Fund Types (for Budget model)
+enum BudgetFundType {
+  PROMOTIONAL // Quỹ khuyến mãi - gắn với promotion cụ thể
+  TACTICAL // Quỹ chiến thuật - linh hoạt, ngắn hạn
+  FIXED_INVESTMENT // Đầu tư cố định - dài hạn, theo hợp đồng
+  TRADE_SPEND // Chi phí thương mại chung
+  LISTING_FEE // Phí niêm yết sản phẩm mới
+  DISPLAY // Phí trưng bày
+}
+
+// Budget Approval Workflow Status
+enum BudgetApprovalStatus {
+  DRAFT // Mới tạo, chưa submit
+  SUBMITTED // Đã submit, chờ review
+  UNDER_REVIEW // Đang review
+  APPROVED // Đã duyệt
+  REJECTED // Từ chối
+  REVISION_NEEDED // Cần sửa đổi
+}
+
 enum TransactionType {
   BUDGET_ALLOCATION
   COMMITMENT
@@ -240,6 +260,8 @@ model Company {
   baselines              Baseline[]
   // Clash Detection
   clashRules             ClashRule[]
+  // Phase 5: Budget & Target Integration
+  budgets                Budget[]
 }
 
 model User {
@@ -336,28 +358,28 @@ model Customer {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
-  companyId      String
-  company        Company                      @relation(fields: [companyId], references: [id])
-  funds          Fund[]
-  promotions     Promotion[]
-  claims         Claim[]
-  adl            AuthorizedDistributionList[]
-  adlEntries     ADLEntry[]                   @relation("ADLEntries")
+  companyId           String
+  company             Company                      @relation(fields: [companyId], references: [id])
+  funds               Fund[]
+  promotions          Promotion[]
+  claims              Claim[]
+  adl                 AuthorizedDistributionList[]
+  adlEntries          ADLEntry[]                   @relation("ADLEntries")
   // Deduction Management
-  deductions     Deduction[]
+  deductions          Deduction[]
   // Business Planning
-  baselines      Baseline[]
+  baselines           Baseline[]
   // Migration Week 1 additions
-  cheques        ChequebookEntry[]            @relation("ChequePayee")
-  deliveryOrders DeliveryOrder[]              @relation("DeliveryCustomer")
-  sellTracking   SellTracking[]               @relation("SellTrackingCustomer")
-  inventories    InventorySnapshot[]          @relation("InventoryCustomer")
+  cheques             ChequebookEntry[]            @relation("ChequePayee")
+  deliveryOrders      DeliveryOrder[]              @relation("DeliveryCustomer")
+  sellTracking        SellTracking[]               @relation("SellTrackingCustomer")
+  inventories         InventorySnapshot[]          @relation("InventoryCustomer")
   // Module 7: Sell Tracking
-  sellIns              SellIn[]              @relation("CustomerSellIns")
-  sellOuts             SellOut[]             @relation("CustomerSellOuts")
-  customerInventories  CustomerInventory[]   @relation("CustomerInventories")
+  sellIns             SellIn[]                     @relation("CustomerSellIns")
+  sellOuts            SellOut[]                    @relation("CustomerSellOuts")
+  customerInventories CustomerInventory[]          @relation("CustomerInventories")
   // Module 9: Delivery Profile
-  deliveryProfile      DeliveryProfile?      @relation("CustomerDeliveryProfile")
+  deliveryProfile     DeliveryProfile?             @relation("CustomerDeliveryProfile")
 
   @@unique([companyId, code])
   @@index([companyId])
@@ -378,21 +400,21 @@ model Product {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  companyId     String
-  company       Company                      @relation(fields: [companyId], references: [id])
-  tacticItems   TacticItem[]
-  adl           AuthorizedDistributionList[]
-  adlEntries    ADLEntry[]                   @relation("ADLEntries")
+  companyId          String
+  company            Company                      @relation(fields: [companyId], references: [id])
+  tacticItems        TacticItem[]
+  adl                AuthorizedDistributionList[]
+  adlEntries         ADLEntry[]                   @relation("ADLEntries")
   // Business Planning
-  baselines     Baseline[]
+  baselines          Baseline[]
   // Migration Week 1 additions
-  deliveryLines DeliveryLine[]               @relation("DeliveryProduct")
-  sellTracking  SellTracking[]               @relation("SellTrackingProduct")
-  inventories   InventorySnapshot[]          @relation("InventoryProduct")
+  deliveryLines      DeliveryLine[]               @relation("DeliveryProduct")
+  sellTracking       SellTracking[]               @relation("SellTrackingProduct")
+  inventories        InventorySnapshot[]          @relation("InventoryProduct")
   // Module 7: Sell Tracking
-  productSellIns        SellIn[]             @relation("ProductSellIns")
-  productSellOuts       SellOut[]            @relation("ProductSellOuts")
-  productInventories    CustomerInventory[]  @relation("ProductInventories")
+  productSellIns     SellIn[]                     @relation("ProductSellIns")
+  productSellOuts    SellOut[]                    @relation("ProductSellOuts")
+  productInventories CustomerInventory[]          @relation("ProductInventories")
 
   @@unique([companyId, sku])
   @@index([companyId])
@@ -449,19 +471,19 @@ model Promotion {
   templateId   String? // If created from template
   clonedFromId String? // If cloned from another promotion
 
-  tactics        Tactic[]
-  claims         Claim[]
-  transactions   Transaction[]
-  poas           POA[]
+  tactics             Tactic[]
+  claims              Claim[]
+  transactions        Transaction[]
+  poas                POA[]
   // Accrual Engine
-  accrualEntries AccrualEntry[]
+  accrualEntries      AccrualEntry[]
   // Deduction Management
-  deductions     Deduction[]
+  deductions          Deduction[]
   // Clash Detection
-  clashesAsA     PromotionClash[] @relation("ClashPromotionA")
-  clashesAsB     PromotionClash[] @relation("ClashPromotionB")
+  clashesAsA          PromotionClash[]    @relation("ClashPromotionA")
+  clashesAsB          PromotionClash[]    @relation("ClashPromotionB")
   // Migration Week 1 additions
-  deliveryOrders DeliveryOrder[]  @relation("DeliveryPromotion")
+  deliveryOrders      DeliveryOrder[]     @relation("DeliveryPromotion")
   // Module 7: Sell Tracking
   sellIns             SellIn[]            @relation("PromotionSellIns")
   sellOuts            SellOut[]           @relation("PromotionSellOuts")
@@ -2924,103 +2946,134 @@ enum TargetMetric {
 
 // Geographic Unit - Master Data for hierarchy
 model GeographicUnit {
-  id          String           @id @default(cuid())
-  code        String           @unique
-  name        String
-  nameEn      String?
-  level       GeographicLevel
+  id     String          @id @default(cuid())
+  code   String          @unique
+  name   String
+  nameEn String?
+  level  GeographicLevel
 
   // Self-referencing hierarchy
-  parentId    String?
-  parent      GeographicUnit?  @relation("GeographicHierarchy", fields: [parentId], references: [id])
-  children    GeographicUnit[] @relation("GeographicHierarchy")
+  parentId String?
+  parent   GeographicUnit?  @relation("GeographicHierarchy", fields: [parentId], references: [id])
+  children GeographicUnit[] @relation("GeographicHierarchy")
 
   // Metadata
-  latitude    Float?
-  longitude   Float?
-  isActive    Boolean          @default(true)
-  sortOrder   Int              @default(0)
+  latitude  Float?
+  longitude Float?
+  isActive  Boolean @default(true)
+  sortOrder Int     @default(0)
 
   // Relations
-  budgetAllocations  BudgetAllocation[]
-  targetAllocations  TargetAllocation[]
+  budgetAllocations BudgetAllocation[]
+  targetAllocations TargetAllocation[]
 
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([parentId])
   @@index([level])
   @@index([code])
 }
 
-// Budget - Main budget entity for allocation
+// Budget - Main budget entity for allocation (Aforza-enhanced)
 model Budget {
-  id              String            @id @default(cuid())
-  code            String            @unique
-  name            String
-  description     String?
+  id          String  @id @default(cuid())
+  code        String  @unique
+  name        String
+  description String?
+  category    String? // Budget category (e.g., "Trade Marketing", "Sales")
+
+  // Aforza Fund Type
+  fundType BudgetFundType @default(PROMOTIONAL)
 
   // Period
-  year            Int
-  quarter         Int?              // 1-4, null for annual
+  year      Int
+  quarter   Int? // 1-4, null for annual
+  startDate DateTime?
+  endDate   DateTime?
 
   // Budget amounts (VND)
-  totalAmount     Decimal           @db.Decimal(18, 2)
-  allocatedAmount Decimal           @db.Decimal(18, 2) @default(0)
-  spentAmount     Decimal           @db.Decimal(18, 2) @default(0)
+  totalAmount     Decimal @db.Decimal(18, 2)
+  allocatedAmount Decimal @default(0) @db.Decimal(18, 2)
+  spentAmount     Decimal @default(0) @db.Decimal(18, 2)
+
+  // Approval Workflow (Aforza-style)
+  approvalStatus BudgetApprovalStatus @default(DRAFT)
+  approvalLevel  Int                  @default(0) // Required approval levels (calculated from amount)
+  currentLevel   Int                  @default(0) // Current approval level reached
 
   // Status
-  status          String            @default("DRAFT")
-  isActive        Boolean           @default(true)
+  status   String  @default("DRAFT")
+  isActive Boolean @default(true)
+
+  // Budget Constraints (JSON for flexibility)
+  constraints Json? // e.g., {"maxRegionPercent": 30, "minTacticalPercent": 15}
+
+  // Period Comparison (link to previous period budget)
+  previousPeriodId String? @unique
+  previousPeriod   Budget? @relation("PeriodComparison", fields: [previousPeriodId], references: [id])
+  nextPeriod       Budget? @relation("PeriodComparison")
+
+  // Company relation (for multi-tenant)
+  companyId String?
+  company   Company? @relation(fields: [companyId], references: [id])
 
   // Relations
-  allocations     BudgetAllocation[]
+  allocations BudgetAllocation[]
+  approvals   BudgetApproval[] // Approval history/audit trail
+  activities  FundActivity[] // Activities linked to this budget
 
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
-  createdBy       String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  createdBy String?
 
   @@index([year, quarter])
   @@index([status])
+  @@index([approvalStatus])
+  @@index([companyId])
+  @@index([fundType])
 }
 
 // Budget Allocation - Hierarchical budget distribution
 model BudgetAllocation {
-  id                  String            @id @default(cuid())
-  code                String            @unique
+  id   String @id @default(cuid())
+  code String @unique
 
   // Link to parent Budget
-  budgetId            String
-  budget              Budget            @relation(fields: [budgetId], references: [id], onDelete: Cascade)
+  budgetId String
+  budget   Budget @relation(fields: [budgetId], references: [id], onDelete: Cascade)
 
   // Link to Geographic Unit
-  geographicUnitId    String
-  geographicUnit      GeographicUnit    @relation(fields: [geographicUnitId], references: [id])
+  geographicUnitId String
+  geographicUnit   GeographicUnit @relation(fields: [geographicUnitId], references: [id])
 
   // Self-referencing hierarchy (for allocation tree)
-  parentId            String?
-  parent              BudgetAllocation? @relation("BudgetAllocationHierarchy", fields: [parentId], references: [id])
-  children            BudgetAllocation[] @relation("BudgetAllocationHierarchy")
+  parentId String?
+  parent   BudgetAllocation?  @relation("BudgetAllocationHierarchy", fields: [parentId], references: [id])
+  children BudgetAllocation[] @relation("BudgetAllocationHierarchy")
 
   // Amounts (in VND)
-  allocatedAmount     Decimal           @db.Decimal(18, 2)  // Amount allocated to this level
-  spentAmount         Decimal           @db.Decimal(18, 2) @default(0)  // Amount already spent
+  allocatedAmount Decimal @db.Decimal(18, 2) // Amount allocated to this level
+  spentAmount     Decimal @default(0) @db.Decimal(18, 2) // Amount already spent
 
   // Computed fields (updated by triggers/jobs)
-  childrenAllocated   Decimal           @db.Decimal(18, 2) @default(0)  // Sum allocated to children
-  availableToAllocate Decimal           @db.Decimal(18, 2) @default(0)  // allocatedAmount - childrenAllocated
+  childrenAllocated   Decimal @default(0) @db.Decimal(18, 2) // Sum allocated to children
+  availableToAllocate Decimal @default(0) @db.Decimal(18, 2) // allocatedAmount - childrenAllocated
 
   // Status & Workflow
-  status              AllocationStatus  @default(DRAFT)
-  approvedBy          String?
-  approvedAt          DateTime?
+  status     AllocationStatus @default(DRAFT)
+  approvedBy String?
+  approvedAt DateTime?
 
   // Metadata
-  notes               String?
+  notes String?
 
-  createdAt           DateTime          @default(now())
-  updatedAt           DateTime          @updatedAt
-  createdBy           String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  createdBy String?
+
+  // Relations to FundActivity
+  activities FundActivity[]
 
   @@unique([budgetId, geographicUnitId])
   @@index([budgetId])
@@ -3029,33 +3082,115 @@ model BudgetAllocation {
   @@index([status])
 }
 
-// Target - Main target entity
-model Target {
-  id              String            @id @default(cuid())
-  code            String            @unique
-  name            String
-  description     String?
+// Budget Approval - Audit trail for multi-level approval workflow (Aforza-style)
+model BudgetApproval {
+  id String @id @default(cuid())
+
+  // Link to Budget
+  budgetId String
+  budget   Budget @relation(fields: [budgetId], references: [id], onDelete: Cascade)
+
+  // Approval Level Info
+  level Int // 1, 2, 3 (approval sequence)
+  role  String // KAM Manager, Trade Marketing Manager, Finance Director
+
+  // Approval Status
+  status BudgetApprovalStatus @default(UNDER_REVIEW)
+
+  // Reviewer Info
+  reviewerId   String?
+  reviewerName String?
+  comments     String? @db.Text
+
+  // Timestamps
+  submittedAt DateTime  @default(now())
+  reviewedAt  DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([budgetId])
+  @@index([status])
+  @@index([level])
+}
+
+// Fund Activity - Link budget/allocation to specific activities (Aforza-style)
+model FundActivity {
+  id String @id @default(cuid())
+
+  // Link to Budget (top-level tracking)
+  budgetId String
+  budget   Budget @relation(fields: [budgetId], references: [id], onDelete: Cascade)
+
+  // Link to specific allocation (optional - for more granular tracking)
+  budgetAllocationId String?
+  budgetAllocation   BudgetAllocation? @relation(fields: [budgetAllocationId], references: [id])
+
+  // Link to Promotion (if applicable)
+  promotionId String?
+
+  // Activity Details
+  activityType String // 'promotion', 'display', 'sampling', 'event', 'listing_fee'
+  activityName String
+  activityCode String?
+
+  // Financial Tracking
+  allocatedAmount Decimal @db.Decimal(18, 2)
+  spentAmount     Decimal @default(0) @db.Decimal(18, 2)
+
+  // Performance Metrics (for ROI calculation)
+  revenueGenerated Decimal? @db.Decimal(18, 2)
+  unitsImpacted    Int?
+  roi              Decimal? @db.Decimal(8, 4) // Calculated: revenue/spent
 
   // Period
-  year            Int
-  quarter         Int?              // 1-4, null for annual
-  month           Int?              // 1-12, null for quarterly/annual
-
-  // Overall target
-  totalTarget     Decimal           @db.Decimal(18, 2)
-  totalAchieved   Decimal           @db.Decimal(18, 2) @default(0)
-  metric          TargetMetric      @default(CASES)
+  startDate DateTime
+  endDate   DateTime
 
   // Status
-  status          String            @default("DRAFT")
-  isActive        Boolean           @default(true)
+  status String @default("PLANNED") // PLANNED, ACTIVE, COMPLETED, CANCELLED
+
+  // Metadata
+  notes String? @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  createdBy String?
+
+  @@index([budgetId])
+  @@index([budgetAllocationId])
+  @@index([activityType])
+  @@index([status])
+  @@index([promotionId])
+}
+
+// Target - Main target entity
+model Target {
+  id          String  @id @default(cuid())
+  code        String  @unique
+  name        String
+  description String?
+
+  // Period
+  year    Int
+  quarter Int? // 1-4, null for annual
+  month   Int? // 1-12, null for quarterly/annual
+
+  // Overall target
+  totalTarget   Decimal      @db.Decimal(18, 2)
+  totalAchieved Decimal      @default(0) @db.Decimal(18, 2)
+  metric        TargetMetric @default(CASES)
+
+  // Status
+  status   String  @default("DRAFT")
+  isActive Boolean @default(true)
 
   // Relations
-  allocations     TargetAllocation[]
+  allocations TargetAllocation[]
 
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
-  createdBy       String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  createdBy String?
 
   @@index([year, quarter])
   @@index([status])
@@ -3063,40 +3198,40 @@ model Target {
 
 // Target Allocation - Hierarchical target distribution
 model TargetAllocation {
-  id                  String            @id @default(cuid())
-  code                String            @unique
+  id   String @id @default(cuid())
+  code String @unique
 
   // Link to parent Target
-  targetId            String
-  target              Target            @relation(fields: [targetId], references: [id], onDelete: Cascade)
+  targetId String
+  target   Target @relation(fields: [targetId], references: [id], onDelete: Cascade)
 
   // Link to Geographic Unit
-  geographicUnitId    String
-  geographicUnit      GeographicUnit    @relation(fields: [geographicUnitId], references: [id])
+  geographicUnitId String
+  geographicUnit   GeographicUnit @relation(fields: [geographicUnitId], references: [id])
 
   // Self-referencing hierarchy
-  parentId            String?
-  parent              TargetAllocation? @relation("TargetAllocationHierarchy", fields: [parentId], references: [id])
-  children            TargetAllocation[] @relation("TargetAllocationHierarchy")
+  parentId String?
+  parent   TargetAllocation?  @relation("TargetAllocationHierarchy", fields: [parentId], references: [id])
+  children TargetAllocation[] @relation("TargetAllocationHierarchy")
 
   // Target values
-  targetValue         Decimal           @db.Decimal(18, 2)  // Target for this level
-  achievedValue       Decimal           @db.Decimal(18, 2) @default(0)  // Achieved so far
-  metric              TargetMetric      @default(CASES)
+  targetValue   Decimal      @db.Decimal(18, 2) // Target for this level
+  achievedValue Decimal      @default(0) @db.Decimal(18, 2) // Achieved so far
+  metric        TargetMetric @default(CASES)
 
   // Computed fields
-  childrenTarget      Decimal           @db.Decimal(18, 2) @default(0)  // Sum of children targets
-  progressPercent     Decimal           @db.Decimal(5, 2) @default(0)   // (achieved/target)*100
+  childrenTarget  Decimal @default(0) @db.Decimal(18, 2) // Sum of children targets
+  progressPercent Decimal @default(0) @db.Decimal(5, 2) // (achieved/target)*100
 
   // Status
-  status              AllocationStatus  @default(DRAFT)
+  status AllocationStatus @default(DRAFT)
 
   // Metadata
-  notes               String?
+  notes String?
 
-  createdAt           DateTime          @default(now())
-  updatedAt           DateTime          @updatedAt
-  createdBy           String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  createdBy String?
 
   @@unique([targetId, geographicUnitId])
   @@index([targetId])
@@ -3109,43 +3244,43 @@ model TargetAllocation {
 // ═══════════════════════════════════════════════════════════════
 
 model SellIn {
-  id              String       @id @default(cuid())
-  companyId       String
+  id        String @id @default(cuid())
+  companyId String
 
-  transactionCode String       @unique
+  transactionCode String   @unique
   transactionDate DateTime
 
-  promotionId     String?
-  promotion       Promotion?   @relation("PromotionSellIns", fields: [promotionId], references: [id])
+  promotionId String?
+  promotion   Promotion? @relation("PromotionSellIns", fields: [promotionId], references: [id])
 
-  customerId      String
-  customer        Customer     @relation("CustomerSellIns", fields: [customerId], references: [id])
+  customerId String
+  customer   Customer @relation("CustomerSellIns", fields: [customerId], references: [id])
 
-  channelId       String?
-  regionId        String?
+  channelId String?
+  regionId  String?
 
-  productId       String
-  product         Product      @relation("ProductSellIns", fields: [productId], references: [id])
+  productId String
+  product   Product @relation("ProductSellIns", fields: [productId], references: [id])
 
-  quantity        Int
-  quantityCase    Decimal?    @db.Decimal(18, 2)
+  quantity     Int
+  quantityCase Decimal? @db.Decimal(18, 2)
 
-  grossValue      Decimal     @db.Decimal(18, 2)
-  discountValue   Decimal?    @db.Decimal(18, 2)
-  netValue        Decimal     @db.Decimal(18, 2)
+  grossValue    Decimal  @db.Decimal(18, 2)
+  discountValue Decimal? @db.Decimal(18, 2)
+  netValue      Decimal  @db.Decimal(18, 2)
 
   sourceSystem    String?
   sourceReference String?
 
-  periodYear      Int
-  periodMonth     Int
-  periodWeek      Int
+  periodYear  Int
+  periodMonth Int
+  periodWeek  Int
 
-  importedAt      DateTime    @default(now())
-  importedById    String?
+  importedAt   DateTime @default(now())
+  importedById String?
 
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([companyId, transactionDate])
   @@index([companyId, promotionId])
@@ -3155,42 +3290,42 @@ model SellIn {
 }
 
 model SellOut {
-  id              String       @id @default(cuid())
-  companyId       String
+  id        String @id @default(cuid())
+  companyId String
 
-  transactionCode String       @unique
+  transactionCode String   @unique
   transactionDate DateTime
 
-  promotionId     String?
-  promotion       Promotion?   @relation("PromotionSellOuts", fields: [promotionId], references: [id])
+  promotionId String?
+  promotion   Promotion? @relation("PromotionSellOuts", fields: [promotionId], references: [id])
 
-  customerId      String
-  customer        Customer     @relation("CustomerSellOuts", fields: [customerId], references: [id])
+  customerId String
+  customer   Customer @relation("CustomerSellOuts", fields: [customerId], references: [id])
 
-  channelId       String?
-  regionId        String?
+  channelId String?
+  regionId  String?
 
-  productId       String
-  product         Product      @relation("ProductSellOuts", fields: [productId], references: [id])
+  productId String
+  product   Product @relation("ProductSellOuts", fields: [productId], references: [id])
 
-  quantity        Int
-  quantityCase    Decimal?    @db.Decimal(18, 2)
+  quantity     Int
+  quantityCase Decimal? @db.Decimal(18, 2)
 
-  sellingPrice    Decimal     @db.Decimal(18, 2)
-  totalValue      Decimal     @db.Decimal(18, 2)
+  sellingPrice Decimal @db.Decimal(18, 2)
+  totalValue   Decimal @db.Decimal(18, 2)
 
   sourceSystem    String?
   sourceReference String?
 
-  periodYear      Int
-  periodMonth     Int
-  periodWeek      Int
+  periodYear  Int
+  periodMonth Int
+  periodWeek  Int
 
-  importedAt      DateTime    @default(now())
-  importedById    String?
+  importedAt   DateTime @default(now())
+  importedById String?
 
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([companyId, transactionDate])
   @@index([companyId, promotionId])
@@ -3200,36 +3335,36 @@ model SellOut {
 }
 
 model CustomerInventory {
-  id              String       @id @default(cuid())
-  companyId       String
+  id        String @id @default(cuid())
+  companyId String
 
-  snapshotDate    DateTime
+  snapshotDate DateTime
 
-  customerId      String
-  customer        Customer     @relation("CustomerInventories", fields: [customerId], references: [id])
+  customerId String
+  customer   Customer @relation("CustomerInventories", fields: [customerId], references: [id])
 
-  productId       String
-  product         Product      @relation("ProductInventories", fields: [productId], references: [id])
+  productId String
+  product   Product @relation("ProductInventories", fields: [productId], references: [id])
 
-  openingStock    Int          @default(0)
-  receivedQty     Int          @default(0)
-  soldQty         Int          @default(0)
-  adjustments     Int          @default(0)
-  closingStock    Int          @default(0)
+  openingStock Int @default(0)
+  receivedQty  Int @default(0)
+  soldQty      Int @default(0)
+  adjustments  Int @default(0)
+  closingStock Int @default(0)
 
-  avgDailySales   Decimal?     @db.Decimal(18, 2)
-  daysOfStock     Int?
+  avgDailySales Decimal? @db.Decimal(18, 2)
+  daysOfStock   Int?
 
-  stockValue      Decimal?     @db.Decimal(18, 2)
+  stockValue Decimal? @db.Decimal(18, 2)
 
-  periodYear      Int
-  periodMonth     Int
-  periodWeek      Int?
+  periodYear  Int
+  periodMonth Int
+  periodWeek  Int?
 
-  sourceSystem    String?
+  sourceSystem String?
 
-  createdAt       DateTime     @default(now())
-  updatedAt       DateTime     @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([companyId, customerId, productId, snapshotDate])
   @@index([companyId, snapshotDate])
@@ -3271,54 +3406,54 @@ enum DeliveryPriority {
 }
 
 model DeliveryProfile {
-  id                   String              @id @default(cuid())
-  companyId            String
+  id        String @id @default(cuid())
+  companyId String
 
-  customerId           String              @unique
-  customer             Customer            @relation("CustomerDeliveryProfile", fields: [customerId], references: [id])
+  customerId String   @unique
+  customer   Customer @relation("CustomerDeliveryProfile", fields: [customerId], references: [id])
 
-  deliveryAddress      String?
-  deliveryCity         String?
-  deliveryRegion       String?
-  deliveryZone         String?
+  deliveryAddress String?
+  deliveryCity    String?
+  deliveryRegion  String?
+  deliveryZone    String?
 
-  contactPerson        String?
-  contactPhone         String?
-  contactEmail         String?
+  contactPerson String?
+  contactPhone  String?
+  contactEmail  String?
 
-  preferredDays        DeliveryDay[]       @default([])
-  preferredTimeStart   String?
-  preferredTimeEnd     String?
+  preferredDays      DeliveryDay[] @default([])
+  preferredTimeStart String?
+  preferredTimeEnd   String?
 
-  standardLeadTime     Int                 @default(2)
-  expressLeadTime      Int?
+  standardLeadTime Int  @default(2)
+  expressLeadTime  Int?
 
   maxDeliveriesPerWeek Int?
   maxUnitsPerDelivery  Int?
   warehouseCapacity    Int?
 
-  requiresAppointment  Boolean             @default(false)
-  requiresPOD          Boolean             @default(true)
-  specialInstructions  String?
+  requiresAppointment Boolean @default(false)
+  requiresPOD         Boolean @default(true)
+  specialInstructions String?
 
-  blackoutDates        DateTime[]          @default([])
-  holidaySchedule      String?
+  blackoutDates   DateTime[] @default([])
+  holidaySchedule String?
 
-  routeCode            String?
-  routeSequence        Int?
-  distanceFromDC       Decimal?            @db.Decimal(10, 2)
+  routeCode      String?
+  routeSequence  Int?
+  distanceFromDC Decimal? @db.Decimal(10, 2)
 
-  avgDeliveryTime      Decimal?            @db.Decimal(5, 2)
-  onTimeRate           Decimal?            @db.Decimal(5, 2)
+  avgDeliveryTime Decimal? @db.Decimal(5, 2)
+  onTimeRate      Decimal? @db.Decimal(5, 2)
 
-  isActive             Boolean             @default(true)
+  isActive Boolean @default(true)
 
-  createdById          String?
-  createdAt            DateTime            @default(now())
-  updatedAt            DateTime            @updatedAt
+  createdById String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  schedules            DeliverySchedule[]
-  promotionDeliveries  PromotionDelivery[]
+  schedules           DeliverySchedule[]
+  promotionDeliveries PromotionDelivery[]
 
   @@index([companyId, isActive])
   @@index([companyId, routeCode])
@@ -3326,35 +3461,35 @@ model DeliveryProfile {
 }
 
 model DeliverySchedule {
-  id               String              @id @default(cuid())
-  companyId        String
+  id        String @id @default(cuid())
+  companyId String
 
-  profileId        String
-  profile          DeliveryProfile     @relation(fields: [profileId], references: [id])
+  profileId String
+  profile   DeliveryProfile @relation(fields: [profileId], references: [id])
 
-  scheduleType     ScheduleType        @default(RECURRING)
+  scheduleType ScheduleType @default(RECURRING)
 
-  frequency        DeliveryFrequency?
-  dayOfWeek        DeliveryDay?
-  dayOfMonth       Int?
-  weekOfMonth      Int?
+  frequency   DeliveryFrequency?
+  dayOfWeek   DeliveryDay?
+  dayOfMonth  Int?
+  weekOfMonth Int?
 
-  specificDate     DateTime?
+  specificDate DateTime?
 
-  timeWindowStart  String?
-  timeWindowEnd    String?
+  timeWindowStart String?
+  timeWindowEnd   String?
 
-  estimatedUnits   Int?
-  estimatedValue   Decimal?            @db.Decimal(18, 2)
-  priority         DeliveryPriority    @default(NORMAL)
+  estimatedUnits Int?
+  estimatedValue Decimal?         @db.Decimal(18, 2)
+  priority       DeliveryPriority @default(NORMAL)
 
-  isActive         Boolean             @default(true)
+  isActive Boolean @default(true)
 
-  effectiveFrom    DateTime            @default(now())
-  effectiveTo      DateTime?
+  effectiveFrom DateTime  @default(now())
+  effectiveTo   DateTime?
 
-  createdAt        DateTime            @default(now())
-  updatedAt        DateTime            @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([companyId, profileId])
   @@index([companyId, scheduleType])
@@ -3362,34 +3497,34 @@ model DeliverySchedule {
 }
 
 model PromotionDelivery {
-  id               String              @id @default(cuid())
-  companyId        String
+  id        String @id @default(cuid())
+  companyId String
 
-  promotionId      String
-  promotion        Promotion           @relation("PromotionDeliveries", fields: [promotionId], references: [id])
+  promotionId String
+  promotion   Promotion @relation("PromotionDeliveries", fields: [promotionId], references: [id])
 
-  profileId        String
-  profile          DeliveryProfile     @relation(fields: [profileId], references: [id])
+  profileId String
+  profile   DeliveryProfile @relation(fields: [profileId], references: [id])
 
-  plannedDate      DateTime
-  actualDate       DateTime?
+  plannedDate DateTime
+  actualDate  DateTime?
 
-  plannedUnits     Int
-  actualUnits      Int?
+  plannedUnits Int
+  actualUnits  Int?
 
-  plannedValue     Decimal             @db.Decimal(18, 2)
-  actualValue      Decimal?            @db.Decimal(18, 2)
+  plannedValue Decimal  @db.Decimal(18, 2)
+  actualValue  Decimal? @db.Decimal(18, 2)
 
-  status           DeliveryStatus      @default(PLANNED)
-  priority         DeliveryPriority    @default(NORMAL)
+  status   DeliveryStatus   @default(PLANNED)
+  priority DeliveryPriority @default(NORMAL)
 
-  deliveryNote     String?
-  podReference     String?
-  podSignedAt      DateTime?
-  podSignedBy      String?
+  deliveryNote String?
+  podReference String?
+  podSignedAt  DateTime?
+  podSignedBy  String?
 
-  createdAt        DateTime            @default(now())
-  updatedAt        DateTime            @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([companyId, promotionId])
   @@index([companyId, profileId])
