@@ -10,9 +10,21 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { LoadingSpinner } from '@/components/shared/LoadingSpinner';
-import { KPICard, ChartWidget, ExportButton } from '@/components/bi';
+import { StatCard, StatCardGroup } from '@/components/ui/stat-card';
+import { ChartWidget, ExportButton } from '@/components/bi';
 import { useDashboard } from '@/hooks/bi';
-import type { DashboardParams } from '@/types/advanced';
+import type { DashboardParams, KPI } from '@/types/advanced';
+
+function formatKPIValue(kpi: KPI): string {
+  switch (kpi.format) {
+    case 'CURRENCY':
+      return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 }).format(kpi.value);
+    case 'PERCENTAGE':
+      return `${kpi.value.toFixed(1)}%`;
+    default:
+      return new Intl.NumberFormat('vi-VN').format(kpi.value);
+  }
+}
 
 export default function BIDashboard() {
   const navigate = useNavigate();
@@ -33,14 +45,14 @@ export default function BIDashboard() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0">
           <h1 className="text-2xl font-bold">Business Intelligence</h1>
           <p className="text-muted-foreground">
             Analytics, reports, and insights
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2 shrink-0">
           <Button variant="outline" onClick={() => navigate('/bi/reports')}>
             <FileText className="mr-2 h-4 w-4" />
             Reports
@@ -52,7 +64,7 @@ export default function BIDashboard() {
       {/* Date Range */}
       <Card>
         <CardContent className="pt-4">
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center gap-4">
             <div className="flex items-center gap-2">
               <Label htmlFor="dateFrom">From</Label>
               <Input
@@ -87,47 +99,27 @@ export default function BIDashboard() {
       ) : (
         <>
           {/* KPIs */}
-          <div className="grid gap-4 md:grid-cols-4">
+          <StatCardGroup cols={4}>
             {kpis.length > 0 ? (
-              kpis.map((kpi, index) => <KPICard key={index} kpi={kpi} />)
+              kpis.map((kpi: KPI, index: number) => (
+                <StatCard
+                  key={index}
+                  title={kpi.name}
+                  value={formatKPIValue(kpi)}
+                  subtitle={kpi.subtitle}
+                  trend={kpi.change !== undefined ? { value: kpi.change } : undefined}
+                  color={kpi.trend === 'UP' ? 'success' : kpi.trend === 'DOWN' ? 'danger' : 'default'}
+                />
+              ))
             ) : (
-              // Default KPIs if none returned
               <>
-                <KPICard
-                  kpi={{
-                    name: 'Total Promotions',
-                    value: 0,
-                    format: 'NUMBER',
-                    subtitle: 'This period',
-                  }}
-                />
-                <KPICard
-                  kpi={{
-                    name: 'Active Budget',
-                    value: 0,
-                    format: 'CURRENCY',
-                    subtitle: 'Allocated',
-                  }}
-                />
-                <KPICard
-                  kpi={{
-                    name: 'Claims Processed',
-                    value: 0,
-                    format: 'NUMBER',
-                    subtitle: 'This period',
-                  }}
-                />
-                <KPICard
-                  kpi={{
-                    name: 'Avg ROI',
-                    value: 0,
-                    format: 'PERCENTAGE',
-                    subtitle: 'Return on investment',
-                  }}
-                />
+                <StatCard title="Total Promotions" value="0" subtitle="This period" color="primary" />
+                <StatCard title="Active Budget" value="0 ₫" subtitle="Allocated" color="success" />
+                <StatCard title="Claims Processed" value="0" subtitle="This period" color="info" />
+                <StatCard title="Avg ROI" value="0%" subtitle="Return on investment" color="purple" />
               </>
             )}
-          </div>
+          </StatCardGroup>
 
           {/* Charts */}
           <div className="grid gap-6 md:grid-cols-2">

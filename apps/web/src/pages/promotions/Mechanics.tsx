@@ -223,7 +223,7 @@ const formatSlabRange = (slab: Slab, type: MechanicType) => {
 
 export default function MechanicsPage() {
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedType, setSelectedType] = useState<string>('all');
+  const [selectedType, _setSelectedType] = useState<string>('all');
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('all');
@@ -544,7 +544,7 @@ export default function MechanicsPage() {
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-4">
-            <div className="p-4 rounded-lg bg-blue-500/10 border border-blue-500/20">
+            <div className="p-4 rounded-lg bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800/30">
               <div className="flex items-center gap-2 mb-2">
                 <Percent className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                 <h4 className="font-semibold text-blue-600 dark:text-blue-400">Discount</h4>
@@ -553,7 +553,7 @@ export default function MechanicsPage() {
                 Giảm giá trực tiếp theo % hoặc số tiền cố định trên đơn hàng.
               </p>
             </div>
-            <div className="p-4 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+            <div className="p-4 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/30">
               <div className="flex items-center gap-2 mb-2">
                 <DollarSign className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
                 <h4 className="font-semibold text-emerald-600 dark:text-emerald-400">Rebate</h4>
@@ -562,7 +562,7 @@ export default function MechanicsPage() {
                 Hoàn tiền theo doanh số tích lũy (tháng/quý/năm).
               </p>
             </div>
-            <div className="p-4 rounded-lg bg-purple-500/10 border border-purple-500/20">
+            <div className="p-4 rounded-lg bg-violet-50 dark:bg-violet-950/30 border border-violet-200 dark:border-violet-800/30">
               <div className="flex items-center gap-2 mb-2">
                 <Gift className="h-5 w-5 text-purple-600 dark:text-purple-400" />
                 <h4 className="font-semibold text-purple-600 dark:text-purple-400">Free Goods</h4>
@@ -571,7 +571,7 @@ export default function MechanicsPage() {
                 Tặng sản phẩm miễn phí khi mua đạt số lượng nhất định.
               </p>
             </div>
-            <div className="p-4 rounded-lg bg-amber-500/10 border border-amber-500/20">
+            <div className="p-4 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/30">
               <div className="flex items-center gap-2 mb-2">
                 <Package className="h-5 w-5 text-amber-600 dark:text-amber-400" />
                 <h4 className="font-semibold text-amber-600 dark:text-amber-400">Bundle</h4>

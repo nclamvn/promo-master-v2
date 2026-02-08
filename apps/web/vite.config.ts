@@ -1,10 +1,23 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import { visualizer } from 'rollup-plugin-visualizer';
+import { compression } from 'vite-plugin-compression2';
 import path from 'path';
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    visualizer({
+      filename: 'bundle-stats.html',
+      gzipSize: true,
+      brotliSize: true,
+      template: 'treemap',
+    }),
+    // Pre-compress assets for static hosting
+    compression({ algorithm: 'gzip', exclude: [/\.(br|gz)$/] }),
+    compression({ algorithm: 'brotliCompress', exclude: [/\.(br|gz)$/] }),
+  ],
 
   resolve: {
     alias: {
@@ -36,46 +49,59 @@ export default defineConfig({
 
   build: {
     outDir: 'dist',
-    sourcemap: true,
-    // Optimize chunk size
+    sourcemap: false,
+    // Filter out large chunks from modulepreload — they load on demand via lazy routes
+    modulePreload: {
+      resolveDependencies: (_url, deps, { hostType }) => {
+        if (hostType !== 'html') return deps;
+        return deps.filter(
+          (dep) => !dep.includes('charts') && !dep.includes('msw')
+        );
+      },
+    },
     chunkSizeWarningLimit: 500,
     rollupOptions: {
       output: {
-        manualChunks: {
-          // Core React libraries
-          vendor: ['react', 'react-dom', 'react-router-dom'],
-          // UI component libraries
-          ui: [
-            '@radix-ui/react-dialog',
-            '@radix-ui/react-dropdown-menu',
-            '@radix-ui/react-select',
-            '@radix-ui/react-tabs',
-            '@radix-ui/react-tooltip',
-            '@radix-ui/react-popover',
-            '@radix-ui/react-scroll-area',
-          ],
-          // Charts (large library)
-          charts: ['recharts'],
-          // Form handling + validation
-          forms: ['react-hook-form', '@hookform/resolvers', 'zod'],
-          // Data fetching
-          query: ['@tanstack/react-query'],
-          // State management
-          state: ['zustand'],
-          // Date utilities
-          dates: ['date-fns'],
-          // Data table
-          datatable: ['@tanstack/react-table'],
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            // Charts + visualization (large, lazy-loaded)
+            if (/recharts|d3-|es-toolkit/.test(id)) return 'charts';
+            // All Radix UI primitives
+            if (/@radix-ui/.test(id)) return 'ui';
+            // React core runtime
+            if (/react-dom|react\/|scheduler/.test(id)) return 'vendor-react';
+            // Router
+            if (/react-router/.test(id)) return 'vendor-router';
+            // Forms + validation
+            if (/react-hook-form|@hookform|zod/.test(id)) return 'forms';
+            // Data fetching
+            if (/@tanstack\/react-query/.test(id)) return 'query';
+            // Data table
+            if (/@tanstack\/react-table/.test(id)) return 'datatable';
+            // Date utilities
+            if (/date-fns|react-day-picker/.test(id)) return 'dates';
+            // Icons
+            if (/lucide-react/.test(id)) return 'icons';
+            // HTTP client
+            if (/axios/.test(id)) return 'http';
+            // MSW + its dependencies (loaded async, never blocks render)
+            if (/msw|@mswjs|tough-cookie|tldts|statuses|cookie|headers-polyfill|outvariant|is-node-process/.test(id)) return 'msw';
+          }
         },
-        // Optimize chunk names for better caching
         chunkFileNames: 'assets/[name]-[hash].js',
         entryFileNames: 'assets/[name]-[hash].js',
         assetFileNames: 'assets/[name]-[hash].[ext]',
       },
     },
-    // Enable minification optimizations
-    minify: 'esbuild',
-    target: 'es2020',
+    // Terser for better minification + dead code removal
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: true,
+        drop_debugger: true,
+      },
+    },
+    target: 'es2022',
   },
 
   optimizeDeps: {

@@ -31,7 +31,7 @@ import {
 import { PromotionStatusBadge } from '@/components/promotions/PromotionStatusBadge';
 import { LoadingSpinner } from '@/components/shared/LoadingSpinner';
 import { useFund, useDeleteFund } from '@/hooks/useFunds';
-import { formatDate } from '@/lib/utils';
+import { formatDate, safePercentageNumber } from '@/lib/utils';
 import { CurrencyDisplay } from '@/components/ui/currency-display';
 import type { Fund, Promotion, FundType } from '@/types';
 
@@ -364,7 +364,7 @@ export default function FundDetail() {
                     <div className="mt-2 flex items-center gap-2">
                       <TrendingUp className="h-3 w-3 text-muted-foreground" />
                       <span className="text-xs text-muted-foreground">
-                        {Math.round((promo.actualSpend / promo.budget) * 100)}% utilized
+                        {Math.round(safePercentageNumber(promo.actualSpend, promo.budget))}% utilized
                       </span>
                     </div>
                   </Link>

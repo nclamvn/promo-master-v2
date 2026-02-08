@@ -116,7 +116,7 @@ export function useKeyboardShortcuts(options: UseKeyboardShortcutsOptions = {}) 
         const keyMatch = event.key.toLowerCase() === shortcut.key.toLowerCase();
         const metaMatch = shortcut.metaKey ? event.metaKey || event.ctrlKey : true;
         const ctrlMatch = shortcut.ctrlKey ? event.ctrlKey : true;
-        const shiftMatch = shortcut.shiftKey ? event.shiftKey : !event.shiftKey || shortcut.key === '/';
+
 
         if (keyMatch && metaMatch && ctrlMatch && (shortcut.shiftKey ? event.shiftKey : true)) {
           event.preventDefault();

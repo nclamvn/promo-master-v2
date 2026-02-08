@@ -15,6 +15,10 @@ import {
   sleep,
   isEmpty,
   formatRelativeTime,
+  safeDivide,
+  safePercentage,
+  safePercentageNumber,
+  safeNumber,
 } from '@/lib/utils';
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -331,5 +335,187 @@ describe('formatRelativeTime', () => {
   it('should handle Date object', () => {
     const date = new Date('2024-01-15T11:30:00Z');
     expect(formatRelativeTime(date)).toBe('30m ago');
+  });
+});
+
+// ══════════════════════════════════════════════════════════════════════════════
+// safeDivide
+// ══════════════════════════════════════════════════════════════════════════════
+
+describe('safeDivide', () => {
+  it('should divide normally', () => {
+    expect(safeDivide(10, 2)).toBe(5);
+  });
+
+  it('should handle decimal results', () => {
+    expect(safeDivide(7, 3)).toBeCloseTo(2.333, 2);
+  });
+
+  it('should return fallback for division by zero', () => {
+    expect(safeDivide(10, 0)).toBe(0);
+  });
+
+  it('should return custom fallback for division by zero', () => {
+    expect(safeDivide(10, 0, -1)).toBe(-1);
+  });
+
+  it('should return fallback for null numerator', () => {
+    expect(safeDivide(null, 10)).toBe(0);
+  });
+
+  it('should return fallback for undefined numerator', () => {
+    expect(safeDivide(undefined, 10)).toBe(0);
+  });
+
+  it('should return fallback for null denominator', () => {
+    expect(safeDivide(10, null)).toBe(0);
+  });
+
+  it('should return fallback for undefined denominator', () => {
+    expect(safeDivide(10, undefined)).toBe(0);
+  });
+
+  it('should return fallback for NaN numerator', () => {
+    expect(safeDivide(NaN, 10)).toBe(0);
+  });
+
+  it('should return fallback for NaN denominator', () => {
+    expect(safeDivide(10, NaN)).toBe(0);
+  });
+
+  it('should return fallback for Infinity result', () => {
+    expect(safeDivide(1, Number.MIN_VALUE * 0)).toBe(0);
+  });
+
+  it('should handle negative numbers', () => {
+    expect(safeDivide(-10, 2)).toBe(-5);
+    expect(safeDivide(10, -2)).toBe(-5);
+  });
+
+  it('should handle zero numerator', () => {
+    expect(safeDivide(0, 10)).toBe(0);
+  });
+});
+
+// ══════════════════════════════════════════════════════════════════════════════
+// safePercentage (returns string)
+// ══════════════════════════════════════════════════════════════════════════════
+
+describe('safePercentage', () => {
+  it('should calculate percentage as string', () => {
+    expect(safePercentage(50, 100)).toBe('50.0');
+  });
+
+  it('should handle custom decimals', () => {
+    expect(safePercentage(33, 100, 2)).toBe('33.00');
+  });
+
+  it('should return "0" for zero denominator', () => {
+    expect(safePercentage(50, 0)).toBe('0');
+  });
+
+  it('should return "0" for null numerator', () => {
+    expect(safePercentage(null, 100)).toBe('0');
+  });
+
+  it('should return "0" for null denominator', () => {
+    expect(safePercentage(50, null)).toBe('0');
+  });
+
+  it('should return "0" for undefined inputs', () => {
+    expect(safePercentage(undefined, 100)).toBe('0');
+    expect(safePercentage(50, undefined)).toBe('0');
+  });
+
+  it('should handle percentages over 100', () => {
+    const result = parseFloat(safePercentage(150, 100));
+    expect(result).toBe(150);
+  });
+
+  it('should handle very small percentages', () => {
+    expect(safePercentage(1, 10000)).toBe('0.0');
+    expect(safePercentage(1, 10000, 3)).toBe('0.010');
+  });
+});
+
+// ══════════════════════════════════════════════════════════════════════════════
+// safePercentageNumber (returns number)
+// ══════════════════════════════════════════════════════════════════════════════
+
+describe('safePercentageNumber', () => {
+  it('should calculate percentage as number', () => {
+    expect(safePercentageNumber(50, 100)).toBe(50);
+  });
+
+  it('should handle 100% case', () => {
+    expect(safePercentageNumber(100, 100)).toBe(100);
+  });
+
+  it('should handle over 100%', () => {
+    expect(safePercentageNumber(150, 100)).toBe(150);
+  });
+
+  it('should return fallback for zero denominator', () => {
+    expect(safePercentageNumber(50, 0)).toBe(0);
+  });
+
+  it('should return custom fallback', () => {
+    expect(safePercentageNumber(50, 0, -1)).toBe(-1);
+  });
+
+  it('should return fallback for null numerator', () => {
+    expect(safePercentageNumber(null, 100)).toBe(0);
+  });
+
+  it('should return fallback for undefined denominator', () => {
+    expect(safePercentageNumber(50, undefined)).toBe(0);
+  });
+
+  it('should return fallback for NaN inputs', () => {
+    expect(safePercentageNumber(NaN, 100)).toBe(0);
+    expect(safePercentageNumber(50, NaN)).toBe(0);
+  });
+
+  it('should handle fractional results', () => {
+    expect(safePercentageNumber(1, 3)).toBeCloseTo(33.33, 1);
+  });
+
+  it('should handle negative numerator', () => {
+    expect(safePercentageNumber(-50, 100)).toBe(-50);
+  });
+});
+
+// ══════════════════════════════════════════════════════════════════════════════
+// safeNumber
+// ══════════════════════════════════════════════════════════════════════════════
+
+describe('safeNumber', () => {
+  it('should format valid number', () => {
+    expect(safeNumber(1000000)).toBe('1.000.000');
+  });
+
+  it('should return fallback for null', () => {
+    expect(safeNumber(null)).toBe('0');
+  });
+
+  it('should return fallback for undefined', () => {
+    expect(safeNumber(undefined)).toBe('0');
+  });
+
+  it('should return fallback for NaN', () => {
+    expect(safeNumber(NaN)).toBe('0');
+  });
+
+  it('should return custom fallback', () => {
+    expect(safeNumber(null, 'N/A')).toBe('N/A');
+  });
+
+  it('should handle zero', () => {
+    expect(safeNumber(0)).toBe('0');
+  });
+
+  it('should handle negative numbers', () => {
+    const result = safeNumber(-1000);
+    expect(result).toContain('1.000');
   });
 });

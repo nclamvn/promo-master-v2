@@ -44,7 +44,6 @@ import {
   Percent,
   Zap,
   Award,
-  AlertTriangle,
   Loader2,
   Wifi,
   WifiOff,
@@ -207,8 +206,8 @@ export default function TPOPage() {
 
   // TPO AI Integration
   const { isConnected, isLoading: tpoLoading, mechanics, channels } = useTPO();
-  const { getSuggestions, suggestions, isLoading: suggestionsLoading, reset: resetSuggestions } = usePromotionSuggestions();
-  const { predict, result: roiResult, isLoading: roiLoading, reset: resetROI } = useROIPrediction();
+  const { getSuggestions, suggestions, isLoading: suggestionsLoading, reset: _resetSuggestions } = usePromotionSuggestions();
+  const { predict, result: roiResult, isLoading: roiLoading, reset: _resetROI } = useROIPrediction();
 
   // TPO AI Form State
   const [tpoForm, setTpoForm] = useState({

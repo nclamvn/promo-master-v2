@@ -11,13 +11,14 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { KPICard } from '@/components/charts/KPICard';
+import { StatCard, StatCardGroup } from '@/components/ui/stat-card';
 import { LineChart } from '@/components/charts/LineChart';
 import { BarChart } from '@/components/charts/BarChart';
 import { PieChart } from '@/components/charts/PieChart';
 import { AreaChart } from '@/components/charts/AreaChart';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { CurrencyDisplay, formatCurrencyCompact } from '@/components/ui/currency-display';
+import { formatCurrencyCompact } from '@/components/ui/currency-display';
+import { safeDivide } from '@/lib/utils';
 import {
   DollarSign,
   TrendingUp,
@@ -103,32 +104,38 @@ export default function Analytics() {
       </div>
 
       {/* KPI Summary */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <KPICard
+      <StatCardGroup cols={4}>
+        <StatCard
           title="Total Revenue"
+          value=""
           amount={9680000000}
           icon={DollarSign}
           trend={{ value: 18.5, label: 'YoY' }}
+          color="success"
         />
-        <KPICard
+        <StatCard
           title="Total Spend"
+          value=""
           amount={2900000000}
           icon={TrendingUp}
           trend={{ value: 12.3, label: 'YoY' }}
+          color="primary"
         />
-        <KPICard
+        <StatCard
           title="Average ROI"
           value="234%"
           icon={Percent}
           trend={{ value: 5.2, label: 'YoY' }}
+          color="purple"
         />
-        <KPICard
+        <StatCard
           title="Target Achievement"
           value="92.5%"
           icon={Target}
           trend={{ value: 8.1, label: 'vs plan' }}
+          color="cyan"
         />
-      </div>
+      </StatCardGroup>
 
       {/* Main Charts */}
       <Tabs defaultValue="overview" className="space-y-4">
@@ -250,7 +257,7 @@ export default function Analytics() {
                     <td className="py-3 px-4 text-right">{formatCurrencyCompact(row.spend, 'VND')}</td>
                     <td className="py-3 px-4 text-right text-emerald-600 dark:text-emerald-400">{row.roi}%</td>
                     <td className="py-3 px-4 text-right">
-                      {((row.revenue / row.spend) * 100).toFixed(1)}%
+                      {(safeDivide(row.revenue, row.spend) * 100).toFixed(1)}%
                     </td>
                   </tr>
                 ))}

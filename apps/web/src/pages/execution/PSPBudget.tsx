@@ -55,6 +55,7 @@ import {
   Line,
 } from 'recharts';
 import { CurrencyDisplay, formatCurrencyCompact } from '@/components/ui/currency-display';
+import { safePercentage, safePercentageNumber } from '@/lib/utils';
 
 // Types
 interface PSPItem {
@@ -234,9 +235,9 @@ export default function PSPBudgetPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-blue-600 dark:text-blue-400"><CurrencyDisplay amount={totalCommitted} size="lg" showToggle={false} /></div>
-            <Progress value={(totalCommitted / totalPlanned) * 100} className="mt-2" />
+            <Progress value={safePercentageNumber(totalCommitted, totalPlanned)} className="mt-2" />
             <p className="text-xs text-muted-foreground mt-1">
-              {((totalCommitted / totalPlanned) * 100).toFixed(0)}% of planned
+              {safePercentage(totalCommitted, totalPlanned, 0)}% of planned
             </p>
           </CardContent>
         </Card>
@@ -248,9 +249,9 @@ export default function PSPBudgetPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400"><CurrencyDisplay amount={totalActual} size="lg" showToggle={false} /></div>
-            <Progress value={(totalActual / totalCommitted) * 100} className="mt-2" />
+            <Progress value={safePercentageNumber(totalActual, totalCommitted)} className="mt-2" />
             <p className="text-xs text-muted-foreground mt-1">
-              {((totalActual / totalCommitted) * 100).toFixed(0)}% of committed
+              {safePercentage(totalActual, totalCommitted, 0)}% of committed
             </p>
           </CardContent>
         </Card>

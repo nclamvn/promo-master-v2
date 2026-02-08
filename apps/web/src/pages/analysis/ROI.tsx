@@ -4,7 +4,7 @@
 // Path: apps/web/src/pages/analysis/ROI.tsx
 // ============================================================================
 
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import {
   Card,
   CardContent,
@@ -14,7 +14,6 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Select,
   SelectContent,
@@ -35,7 +34,6 @@ import {
   Area,
   BarChart,
   Bar,
-  LineChart,
   Line,
   XAxis,
   YAxis,
@@ -52,25 +50,13 @@ import {
 } from 'recharts';
 import {
   TrendingUp,
-  TrendingDown,
-  DollarSign,
-  Target,
-  Award,
   AlertTriangle,
-  ArrowUpRight,
-  ArrowDownRight,
-  BarChart3,
-  PieChart as PieChartIcon,
   Download,
-  Filter,
-  Calendar,
   RefreshCw,
-  Info,
   Lightbulb,
   CheckCircle2,
-  XCircle,
 } from 'lucide-react';
-import { cn, formatPercent } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 import { CurrencyDisplay } from '@/components/ui/currency-display';
 
 // ============================================================================
@@ -431,7 +417,7 @@ const ROIByChannelChart = ({ data }: { data: ROIByChannel[] }) => {
               <Tooltip />
               <Legend />
               <Bar dataKey="roi" name="ROI %" fill="#3b82f6" radius={[0, 4, 4, 0]}>
-                {data.map((entry, index) => (
+                {data.map((_entry, index) => (
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Bar>
@@ -465,7 +451,7 @@ const ROIByTypeChart = ({ data }: { data: ROIByType[] }) => {
                 dataKey="investment"
                 label={({ payload }: { payload?: ROIByType }) => payload ? `${payload.type}: ${payload.roi}%` : ''}
               >
-                {data.map((entry, index) => (
+                {data.map((_entry, index) => (
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>
@@ -633,10 +619,10 @@ const PromotionsTable = ({ data }: { data: PromotionROI[] }) => {
 export default function AnalysisROIPage() {
   const [period, setPeriod] = useState('q1-2026');
   const [channel, setChannel] = useState('all');
-  const [promotionType, setPromotionType] = useState('all');
+  const [_promotionType, _setPromotionType] = useState('all');
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>

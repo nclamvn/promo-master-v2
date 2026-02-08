@@ -18,7 +18,7 @@ import { DataTable } from '@/components/shared/DataTable';
 import { Pagination } from '@/components/shared/Pagination';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { formatNumber } from '@/lib/utils';
+import { formatNumber, safeDivide, safePercentage } from '@/lib/utils';
 import { formatCurrencyCompact } from '@/components/ui/currency-display';
 import type { ColumnDef } from '@tanstack/react-table';
 import type { Target } from '@/types';
@@ -175,7 +175,7 @@ export default function TargetList() {
   // Calculate summary
   const totalTargets = targets.length;
   const achievedTargets = targets.filter((t: Target) => t.status === 'ACHIEVED').length;
-  const avgAchievement = targets.reduce((sum: number, t: Target) => sum + t.achievementRate, 0) / totalTargets;
+  const avgAchievement = safeDivide(targets.reduce((sum: number, t: Target) => sum + t.achievementRate, 0), totalTargets);
 
   const updateFilters = (updates: Partial<typeof filters>) => {
     const params = new URLSearchParams(searchParams);
@@ -232,7 +232,7 @@ export default function TargetList() {
           <CardContent>
             <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{achievedTargets}</div>
             <p className="text-xs text-muted-foreground">
-              {((achievedTargets / totalTargets) * 100).toFixed(0)}% of total
+              {safePercentage(achievedTargets, totalTargets, 0)}% of total
             </p>
           </CardContent>
         </Card>

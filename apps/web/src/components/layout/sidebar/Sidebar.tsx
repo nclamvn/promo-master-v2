@@ -14,7 +14,7 @@ import { SidebarUser } from './SidebarUser';
 // ============================================================================
 // WAVE PATTERN SVG - Theme-aware background
 // ============================================================================
-const WavePattern = ({ isDark }: { isDark: boolean }) => {
+const WavePattern = ({ isDark: _isDark }: { isDark: boolean }) => {
   // Both themes now use white strokes
   const strokeColor = 'white';
   return (

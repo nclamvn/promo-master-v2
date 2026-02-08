@@ -28,7 +28,7 @@ export function ClashCard({ clash, onResolve, onDismiss }: ClashCardProps) {
   const isResolved = clash.status === 'RESOLVED' || clash.status === 'DISMISSED';
 
   return (
-    <Card className={`${clash.severity === 'HIGH' && !isResolved ? 'border-red-300 bg-red-500/10 dark:bg-red-500/20' : ''}`}>
+    <Card className={`${clash.severity === 'HIGH' && !isResolved ? 'border-red-200 bg-red-50 dark:border-red-800/30 dark:bg-red-950/30' : ''}`}>
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-2">
@@ -120,7 +120,7 @@ export function ClashCard({ clash, onResolve, onDismiss }: ClashCardProps) {
 
         {/* Potential Impact */}
         {clash.potentialImpact > 0 && (
-          <div className="flex items-center gap-2 p-2 bg-amber-500/10 dark:bg-amber-500/20 rounded border border-amber-500/30">
+          <div className="flex items-center gap-2 p-2 bg-amber-50 dark:bg-amber-950/30 rounded border border-amber-200 dark:border-amber-800/30">
             <DollarSign className="h-4 w-4 text-amber-600 dark:text-amber-400" />
             <span className="text-sm flex items-center gap-1">
               Potential Impact:{' '}

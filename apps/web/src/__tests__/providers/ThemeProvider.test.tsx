@@ -14,23 +14,21 @@ vi.mock('@/stores/uiStore', () => ({
 }));
 
 describe('ThemeProvider', () => {
-  const originalMatchMedia = window.matchMedia;
+  const mockSetTheme = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
-    // Clear any theme classes from previous tests
     document.documentElement.classList.remove('light', 'dark');
   });
 
   afterEach(() => {
-    window.matchMedia = originalMatchMedia;
     document.documentElement.classList.remove('light', 'dark');
     vi.clearAllMocks();
   });
 
   it('applies light class when theme is light', () => {
-    (useUIStore as unknown as ReturnType<typeof vi.fn>).mockImplementation((selector) => {
-      const state = { theme: 'light' };
+    (useUIStore as unknown as ReturnType<typeof vi.fn>).mockImplementation((selector: any) => {
+      const state = { theme: 'light', setTheme: mockSetTheme };
       return selector ? selector(state) : state;
     });
 
@@ -45,8 +43,8 @@ describe('ThemeProvider', () => {
   });
 
   it('applies dark class when theme is dark', () => {
-    (useUIStore as unknown as ReturnType<typeof vi.fn>).mockImplementation((selector) => {
-      const state = { theme: 'dark' };
+    (useUIStore as unknown as ReturnType<typeof vi.fn>).mockImplementation((selector: any) => {
+      const state = { theme: 'dark', setTheme: mockSetTheme };
       return selector ? selector(state) : state;
     });
 
@@ -60,19 +58,9 @@ describe('ThemeProvider', () => {
     expect(document.documentElement.classList.contains('light')).toBe(false);
   });
 
-  it('applies system preference when theme is system (dark)', () => {
-    // Mock system preference as dark
-    window.matchMedia = vi.fn().mockImplementation((query) => ({
-      matches: query === '(prefers-color-scheme: dark)',
-      media: query,
-      onchange: null,
-      addEventListener: vi.fn(),
-      removeEventListener: vi.fn(),
-      dispatchEvent: vi.fn(),
-    }));
-
-    (useUIStore as unknown as ReturnType<typeof vi.fn>).mockImplementation((selector) => {
-      const state = { theme: 'system' };
+  it('converts system theme to light and calls setTheme', () => {
+    (useUIStore as unknown as ReturnType<typeof vi.fn>).mockImplementation((selector: any) => {
+      const state = { theme: 'system', setTheme: mockSetTheme };
       return selector ? selector(state) : state;
     });
 
@@ -82,39 +70,14 @@ describe('ThemeProvider', () => {
       </ThemeProvider>
     );
 
-    expect(document.documentElement.classList.contains('dark')).toBe(true);
-    expect(document.documentElement.classList.contains('light')).toBe(false);
-  });
-
-  it('applies system preference when theme is system (light)', () => {
-    // Mock system preference as light
-    window.matchMedia = vi.fn().mockImplementation((query) => ({
-      matches: query !== '(prefers-color-scheme: dark)',
-      media: query,
-      onchange: null,
-      addEventListener: vi.fn(),
-      removeEventListener: vi.fn(),
-      dispatchEvent: vi.fn(),
-    }));
-
-    (useUIStore as unknown as ReturnType<typeof vi.fn>).mockImplementation((selector) => {
-      const state = { theme: 'system' };
-      return selector ? selector(state) : state;
-    });
-
-    render(
-      <ThemeProvider>
-        <div>Test content</div>
-      </ThemeProvider>
-    );
-
+    // Provider converts 'system' to 'light' and calls setTheme
+    expect(mockSetTheme).toHaveBeenCalledWith('light');
     expect(document.documentElement.classList.contains('light')).toBe(true);
-    expect(document.documentElement.classList.contains('dark')).toBe(false);
   });
 
   it('renders children correctly', () => {
-    (useUIStore as unknown as ReturnType<typeof vi.fn>).mockImplementation((selector) => {
-      const state = { theme: 'dark' };
+    (useUIStore as unknown as ReturnType<typeof vi.fn>).mockImplementation((selector: any) => {
+      const state = { theme: 'dark', setTheme: mockSetTheme };
       return selector ? selector(state) : state;
     });
 

@@ -345,7 +345,7 @@ export const mockTargetsForAllocation = [
 // BUDGET ALLOCATIONS - Hierarchical (matching BudgetAllocation interface)
 // ═══════════════════════════════════════════════════════════════════════
 
-export const mockBudgetAllocations = [
+export const mockBudgetAllocations: any = [
   // Region Level - under Vietnam (Country)
   {
     id: 'ba-north',
@@ -667,7 +667,7 @@ export const mockBudgetAllocations = [
 // TARGET ALLOCATIONS - Hierarchical (matching TargetAllocation interface)
 // ═══════════════════════════════════════════════════════════════════════
 
-export const mockTargetAllocations = [
+export const mockTargetAllocations: any = [
   // Region Level
   {
     id: 'ta-north',
@@ -1020,12 +1020,12 @@ export function buildAllocationTree<T extends { id: string; parentId: string | n
 
 // Build hierarchical trees
 export function getBudgetAllocationTree(budgetId: string) {
-  const allocations = mockBudgetAllocations.filter(a => a.budgetId === budgetId);
+  const allocations = mockBudgetAllocations.filter((a: any) => a.budgetId === budgetId);
   return buildAllocationTree(allocations);
 }
 
 export function getTargetAllocationTree(targetId: string) {
-  const allocations = mockTargetAllocations.filter(a => a.targetId === targetId);
+  const allocations = mockTargetAllocations.filter((a: any) => a.targetId === targetId);
   return buildAllocationTree(allocations);
 }
 

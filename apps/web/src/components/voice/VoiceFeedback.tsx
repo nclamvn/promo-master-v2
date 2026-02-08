@@ -32,8 +32,8 @@ export function VoiceFeedback({ response, isProcessing = false, onNavigate }: Vo
       className={cn(
         'rounded-lg p-4 border',
         response.success
-          ? 'bg-green-500/10 dark:bg-green-500/20 border-green-500/30'
-          : 'bg-red-500/10 dark:bg-red-500/20 border-red-500/30'
+          ? 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800/30'
+          : 'bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800/30'
       )}
     >
       <div className="flex items-start gap-3">

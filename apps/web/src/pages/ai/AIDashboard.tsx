@@ -8,7 +8,7 @@ import { Sparkles, Lightbulb, Eye, AlertCircle, Target, RefreshCw } from 'lucide
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { LoadingSpinner } from '@/components/shared/LoadingSpinner';
-import { StatCard } from '@/components/integration';
+import { StatCard, StatCardGroup } from '@/components/ui/stat-card';
 import { InsightFeed, RecommendationCard, AnomalyAlert } from '@/components/ai';
 import {
   useInsights,
@@ -136,14 +136,14 @@ export default function AIDashboard() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0">
           <h1 className="text-2xl font-bold">AI Assistant</h1>
           <p className="text-muted-foreground">
             Intelligent insights and recommendations
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2 shrink-0">
           <Button
             variant="outline"
             onClick={handleGenerateInsights}
@@ -166,29 +166,32 @@ export default function AIDashboard() {
       <AnomalyAlert insights={insights} />
 
       {/* Stats */}
-      <div className="grid gap-4 md:grid-cols-4">
+      <StatCardGroup cols={4}>
         <StatCard
           title="Active Insights"
           value={insightSummary?.total || 0}
-          icon={<Eye className="h-4 w-4" />}
+          icon={Eye}
+          color="primary"
         />
         <StatCard
           title="Action Required"
           value={insightSummary?.actionRequired || 0}
-          icon={<AlertCircle className="h-4 w-4" />}
-          variant={insightSummary?.actionRequired && insightSummary.actionRequired > 0 ? 'warning' : 'default'}
+          icon={AlertCircle}
+          color={insightSummary?.actionRequired && insightSummary.actionRequired > 0 ? 'warning' : 'default'}
         />
         <StatCard
           title="Pending Recommendations"
           value={recSummary?.pending || 0}
-          icon={<Lightbulb className="h-4 w-4" />}
+          icon={Lightbulb}
+          color="purple"
         />
         <StatCard
           title="Avg Confidence"
           value={`${((recSummary?.avgConfidence || 0) * 100).toFixed(0)}%`}
-          icon={<Target className="h-4 w-4" />}
+          icon={Target}
+          color="cyan"
         />
-      </div>
+      </StatCardGroup>
 
       <div className="grid gap-6 md:grid-cols-2">
         {/* Recent Insights */}

@@ -7,11 +7,12 @@ import { format, startOfWeek, endOfWeek, subWeeks } from 'date-fns';
 import { CalendarIcon, Download, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { KPICard } from '@/components/charts/KPICard';
+import { StatCard, StatCardGroup } from '@/components/ui/stat-card';
 import { LineChart } from '@/components/charts/LineChart';
 import { BarChart } from '@/components/charts/BarChart';
 import { Progress } from '@/components/ui/progress';
 import { CurrencyDisplay, formatCurrencyCompact } from '@/components/ui/currency-display';
+import { safePercentageNumber } from '@/lib/utils';
 import {
   DollarSign,
   Target,
@@ -55,7 +56,7 @@ export default function WeeklyKPI() {
 
   const totalActual = weeklyTrend.reduce((sum, d) => sum + d.actual, 0);
   const totalTarget = weeklyTrend.reduce((sum, d) => sum + d.target, 0);
-  const achievementRate = (totalActual / totalTarget) * 100;
+  const achievementRate = totalTarget > 0 ? (totalActual / totalTarget) * 100 : 0;
 
   return (
     <div className="space-y-6">
@@ -88,35 +89,40 @@ export default function WeeklyKPI() {
       </div>
 
       {/* KPI Summary */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <KPICard
+      <StatCardGroup cols={4}>
+        <StatCard
           title="Total Spend"
+          value=""
           amount={totalActual}
           subtitle={`Target: ${formatCurrencyCompact(totalTarget)}`}
           icon={DollarSign}
           trend={{ value: 8.5, label: 'vs last week' }}
+          color="success"
         />
-        <KPICard
+        <StatCard
           title="Achievement Rate"
           value={`${achievementRate.toFixed(1)}%`}
           subtitle={achievementRate >= 100 ? 'Target exceeded!' : 'On track'}
           icon={Target}
           trend={{ value: achievementRate >= 100 ? 5.2 : -2.1 }}
+          color={achievementRate >= 100 ? 'success' : 'warning'}
         />
-        <KPICard
+        <StatCard
           title="Claims Processed"
           value="39"
           subtitle="24 approved, 12 pending"
           icon={CheckCircle}
           trend={{ value: 15.3, label: 'vs last week' }}
+          color="primary"
         />
-        <KPICard
+        <StatCard
           title="Active Promotions"
           value="18"
           subtitle="4 ending this week"
           icon={Clock}
+          color="purple"
         />
-      </div>
+      </StatCardGroup>
 
       {/* Charts */}
       <div className="grid gap-6 lg:grid-cols-2">
@@ -149,7 +155,7 @@ export default function WeeklyKPI() {
         <CardContent>
           <div className="space-y-4">
             {topPromotions.map((promo) => {
-              const progress = (promo.spend / promo.target) * 100;
+              const progress = safePercentageNumber(promo.spend, promo.target);
               return (
                 <div key={promo.name} className="space-y-2">
                   <div className="flex items-center justify-between">

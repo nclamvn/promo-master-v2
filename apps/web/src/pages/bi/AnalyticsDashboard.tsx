@@ -17,9 +17,10 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { LoadingSpinner } from '@/components/shared/LoadingSpinner';
-import { KPICard, ChartWidget } from '@/components/bi';
+import { StatCard, StatCardGroup } from '@/components/ui/stat-card';
+import { ChartWidget } from '@/components/bi';
 import { useDashboard, useTrends } from '@/hooks/bi';
-import type { DashboardParams } from '@/types/advanced';
+import type { DashboardParams, KPI } from '@/types/advanced';
 
 const METRICS = [
   { value: 'promotions', label: 'Promotions' },
@@ -27,6 +28,17 @@ const METRICS = [
   { value: 'spend', label: 'Spend' },
   { value: 'roi', label: 'ROI' },
 ];
+
+function formatKPIValue(kpi: KPI): string {
+  switch (kpi.format) {
+    case 'CURRENCY':
+      return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 }).format(kpi.value);
+    case 'PERCENTAGE':
+      return `${kpi.value.toFixed(1)}%`;
+    default:
+      return new Intl.NumberFormat('vi-VN').format(kpi.value);
+  }
+}
 
 export default function AnalyticsDashboard() {
   const navigate = useNavigate();
@@ -60,19 +72,19 @@ export default function AnalyticsDashboard() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => navigate('/bi')}>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-4 min-w-0">
+          <Button variant="ghost" size="icon" className="shrink-0" onClick={() => navigate('/bi')}>
             <ArrowLeft className="h-4 w-4" />
           </Button>
-          <div>
+          <div className="min-w-0">
             <h1 className="text-2xl font-bold">Analytics</h1>
             <p className="text-muted-foreground">
               Deep dive into your data
             </p>
           </div>
         </div>
-        <Button variant="outline" onClick={() => refetch()}>
+        <Button variant="outline" className="shrink-0 self-start sm:self-auto" onClick={() => refetch()}>
           <RefreshCw className="mr-2 h-4 w-4" />
           Refresh
         </Button>
@@ -128,50 +140,27 @@ export default function AnalyticsDashboard() {
       ) : (
         <>
           {/* KPIs */}
-          <div className="grid gap-4 md:grid-cols-4">
+          <StatCardGroup cols={4}>
             {kpis.length > 0 ? (
-              kpis.map((kpi, index) => <KPICard key={index} kpi={kpi} />)
+              kpis.map((kpi: KPI, index: number) => (
+                <StatCard
+                  key={index}
+                  title={kpi.name}
+                  value={formatKPIValue(kpi)}
+                  subtitle={kpi.subtitle}
+                  trend={kpi.change !== undefined ? { value: kpi.change } : undefined}
+                  color={kpi.trend === 'UP' ? 'success' : kpi.trend === 'DOWN' ? 'danger' : 'default'}
+                />
+              ))
             ) : (
               <>
-                <KPICard
-                  kpi={{
-                    name: 'Total Promotions',
-                    value: 156,
-                    change: 12.5,
-                    trend: 'UP',
-                    format: 'NUMBER',
-                  }}
-                />
-                <KPICard
-                  kpi={{
-                    name: 'Active Budget',
-                    value: 2500000000,
-                    change: -5.2,
-                    trend: 'DOWN',
-                    format: 'CURRENCY',
-                  }}
-                />
-                <KPICard
-                  kpi={{
-                    name: 'Claims Processed',
-                    value: 423,
-                    change: 8.3,
-                    trend: 'UP',
-                    format: 'NUMBER',
-                  }}
-                />
-                <KPICard
-                  kpi={{
-                    name: 'Avg ROI',
-                    value: 24.5,
-                    change: 3.2,
-                    trend: 'UP',
-                    format: 'PERCENTAGE',
-                  }}
-                />
+                <StatCard title="Total Promotions" value="156" trend={{ value: 12.5 }} color="success" />
+                <StatCard title="Active Budget" value="2.500.000.000 ₫" trend={{ value: -5.2 }} color="danger" />
+                <StatCard title="Claims Processed" value="423" trend={{ value: 8.3 }} color="success" />
+                <StatCard title="Avg ROI" value="24.5%" trend={{ value: 3.2 }} color="success" />
               </>
             )}
-          </div>
+          </StatCardGroup>
 
           {/* Trend Chart */}
           <Card>

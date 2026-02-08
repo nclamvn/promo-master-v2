@@ -4,7 +4,7 @@
 // Path: apps/web/src/pages/analysis/Efficiency.tsx
 // ============================================================================
 
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import {
   Card,
   CardContent,
@@ -15,7 +15,6 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Select,
   SelectContent,
@@ -45,39 +44,15 @@ import {
   CartesianGrid,
   Tooltip,
   Legend,
-  LineChart,
   Line,
   ComposedChart,
-  Area,
-  ScatterChart,
-  Scatter,
-  Cell,
 } from 'recharts';
 import {
-  Target,
   TrendingUp,
-  TrendingDown,
-  Zap,
-  Award,
-  AlertTriangle,
-  CheckCircle2,
-  XCircle,
-  BarChart3,
-  PieChart,
-  Activity,
   Download,
   RefreshCw,
-  Filter,
-  Calendar,
-  DollarSign,
-  Users,
-  ShoppingCart,
-  Percent,
-  ArrowUpRight,
-  ArrowDownRight,
-  Gauge,
 } from 'lucide-react';
-import { cn, formatPercent, formatNumber } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 import { CurrencyDisplay } from '@/components/ui/currency-display';
 
 // ============================================================================
@@ -619,7 +594,7 @@ export default function AnalysisEfficiencyPage() {
   const [channel, setChannel] = useState('all');
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>

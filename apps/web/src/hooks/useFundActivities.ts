@@ -137,7 +137,7 @@ interface ListParams {
  */
 export function useFundActivities(params: ListParams = {}) {
   return useQuery({
-    queryKey: fundActivityKeys.list(params),
+    queryKey: fundActivityKeys.list(params as Record<string, unknown>),
     queryFn: async () => {
       const response = await api.get('/fund-activities', { params });
       return response.data;
@@ -269,9 +269,9 @@ export function getActivityTypeColor(type: FundActivityType): string {
     display: 'bg-purple-100 text-purple-700',
     sampling: 'bg-green-100 text-green-700',
     event: 'bg-orange-100 text-orange-700',
-    listing_fee: 'bg-gray-100 text-gray-700',
+    listing_fee: 'bg-muted text-foreground-muted',
   };
-  return colors[type] || 'bg-gray-100 text-gray-700';
+  return colors[type] || 'bg-muted text-foreground-muted';
 }
 
 export function getStatusLabel(status: FundActivityStatus): string {
@@ -286,12 +286,12 @@ export function getStatusLabel(status: FundActivityStatus): string {
 
 export function getStatusColor(status: FundActivityStatus): string {
   const colors: Record<FundActivityStatus, string> = {
-    PLANNED: 'bg-gray-100 text-gray-700',
+    PLANNED: 'bg-muted text-foreground-muted',
     ACTIVE: 'bg-blue-100 text-blue-700',
     COMPLETED: 'bg-green-100 text-green-700',
     CANCELLED: 'bg-red-100 text-red-700',
   };
-  return colors[status] || 'bg-gray-100 text-gray-700';
+  return colors[status] || 'bg-muted text-foreground-muted';
 }
 
 export function formatCurrency(value: number): string {

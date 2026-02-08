@@ -2,6 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import { seedUsers } from './users';
 import { seedGeographicUnits } from './geographic-units';
 import { seedDemoData } from './demo-data';
+import { seedPepsiData } from './seed-pepsi';
 
 const prisma = new PrismaClient();
 
@@ -18,6 +19,10 @@ async function main() {
 
   // Seed Demo Data (budgets, targets, allocations, activities)
   await seedDemoData();
+  console.log('');
+
+  // Seed Pepsi V3 Data (products, stores, contracts, suggestions)
+  await seedPepsiData();
   console.log('');
 
   console.log('🎉 Database seed completed!');

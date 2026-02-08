@@ -22,10 +22,8 @@ import {
   useTargets,
   useTargetProgress,
   useCreateTargetAllocationNested,
-  useUpdateTargetAllocationNested,
   useUpdateTargetProgress,
   getProgressStatusColor,
-  getProgressStatusLabel,
 } from '@/hooks/useTargets';
 import { useToast } from '@/hooks/useToast';
 import type { Target as TargetType } from '@/types';

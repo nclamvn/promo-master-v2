@@ -11,7 +11,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { CurrencyDisplay, formatCurrencyCompact } from '@/components/ui/currency-display';
+import { formatCurrencyCompact } from '@/components/ui/currency-display';
 import { MoreVertical, Pencil, Play, Eye, Trash2, Copy } from 'lucide-react';
 import type { PromotionTemplate } from '@/types/planning';
 

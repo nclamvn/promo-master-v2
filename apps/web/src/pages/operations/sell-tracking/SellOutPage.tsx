@@ -12,7 +12,7 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { LoadingSpinner } from '@/components/shared/LoadingSpinner';
 import { SellTrendChart } from '@/components/operations/SellTrendChart';
-import { StatCard } from '@/components/operations/OperationsStats';
+import { StatCard, StatCardGroup } from '@/components/ui/stat-card';
 import {
   Table,
   TableBody,
@@ -69,42 +69,44 @@ export default function SellOutPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-4 min-w-0">
           <Link to="/operations/sell-tracking">
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="icon" className="shrink-0">
               <ArrowLeft className="h-4 w-4" />
             </Button>
           </Link>
-          <div>
-            <h1 className="text-2xl font-bold">Sell-Out Analysis</h1>
-            <p className="text-muted-foreground">
+          <div className="min-w-0">
+            <h1 className="text-2xl font-bold truncate">Sell-Out Analysis</h1>
+            <p className="text-muted-foreground truncate">
               Analyze products sold by customers to consumers
             </p>
           </div>
         </div>
-        <Button variant="outline">
+        <Button variant="outline" className="shrink-0 self-start sm:self-auto">
           <Download className="mr-2 h-4 w-4" />
           Export
         </Button>
       </div>
 
       {/* Summary Cards */}
-      <div className="grid gap-4 md:grid-cols-4">
+      <StatCardGroup cols={4}>
         <StatCard
           title="Total Sell-Out"
           value={formatNumber(data?.totals?.quantity || 0)}
           subtitle="Units"
-          icon={<TrendingDown className="h-4 w-4" />}
+          icon={TrendingDown}
+          color="primary"
         />
         <StatCard
           title="Total Value"
           value={formatCurrencyCompact(data?.totals?.value || 0, 'VND')}
+          color="success"
         />
         <StatCard
           title="Avg Sell-Through"
           value={formatPercent(data?.analysis?.avgSellThroughRate || 0)}
-          variant={
+          color={
             (data?.analysis?.avgSellThroughRate || 0) >= 70
               ? 'success'
               : (data?.analysis?.avgSellThroughRate || 0) >= 50
@@ -115,7 +117,7 @@ export default function SellOutPage() {
         <StatCard
           title="Growth"
           value={`${data?.analysis?.overallGrowth > 0 ? '+' : ''}${data?.analysis?.overallGrowth || 0}%`}
-          variant={
+          color={
             (data?.analysis?.overallGrowth || 0) > 0
               ? 'success'
               : (data?.analysis?.overallGrowth || 0) < 0
@@ -123,7 +125,7 @@ export default function SellOutPage() {
               : 'default'
           }
         />
-      </div>
+      </StatCardGroup>
 
       {/* Filters */}
       <Card>
@@ -207,7 +209,7 @@ export default function SellOutPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {data?.data?.length === 0 ? (
+                    {!Array.isArray(data?.data) || data.data.length === 0 ? (
                       <TableRow>
                         <TableCell
                           colSpan={filters.groupBy === 'period' ? 5 : 4}
@@ -217,7 +219,7 @@ export default function SellOutPage() {
                         </TableCell>
                       </TableRow>
                     ) : (
-                      data?.data?.map((row: any) => (
+                      data.data.map((row: any) => (
                         <TableRow key={row.groupKey}>
                           <TableCell className="font-medium">{row.groupName}</TableCell>
                           <TableCell className="text-right">

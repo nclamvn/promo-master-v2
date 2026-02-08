@@ -55,6 +55,7 @@ import {
   Treemap,
 } from 'recharts';
 import { CurrencyDisplay, formatCurrencyCompact } from '@/components/ui/currency-display';
+import { safePercentageNumber } from '@/lib/utils';
 
 // Mock data
 const categorySpending = [
@@ -104,7 +105,7 @@ export default function SpendingAnalysisPage() {
   // Summary stats
   const totalSpent = channelSpending.reduce((sum, item) => sum + item.value, 0) * 1000000;
   const totalBudget = 12000000000;
-  const utilizationRate = (totalSpent / totalBudget) * 100;
+  const utilizationRate = safePercentageNumber(totalSpent, totalBudget);
 
   return (
     <div className="space-y-6">
@@ -245,7 +246,7 @@ export default function SpendingAnalysisPage() {
                           </span>
                         </div>
                       </div>
-                      <Progress value={(cat.spent / cat.budget) * 100} className="h-2" />
+                      <Progress value={safePercentageNumber(cat.spent, cat.budget)} className="h-2" />
                     </div>
                   ))}
                 </div>

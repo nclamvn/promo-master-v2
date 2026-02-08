@@ -56,7 +56,63 @@ export function formatNumber(num: number | string, locale = 'vi-VN'): string {
  * Format percentage
  */
 export function formatPercent(value: number, decimals = 1): string {
+  if (value == null || isNaN(value) || !isFinite(value)) return '0%';
   return `${value.toFixed(decimals)}%`;
+}
+
+/**
+ * Safely divide two numbers, returning fallback if division would fail
+ */
+export function safeDivide(
+  numerator: number | null | undefined,
+  denominator: number | null | undefined,
+  fallback = 0,
+): number {
+  if (numerator == null || isNaN(numerator)) return fallback;
+  if (denominator == null || isNaN(denominator) || denominator === 0) return fallback;
+  const result = numerator / denominator;
+  if (!isFinite(result)) return fallback;
+  return result;
+}
+
+/**
+ * Calculate percentage safely, returning '0' for invalid inputs
+ */
+export function safePercentage(
+  numerator: number | null | undefined,
+  denominator: number | null | undefined,
+  decimals = 1,
+): string {
+  if (!numerator || !denominator || denominator === 0) return '0';
+  const pct = (numerator / denominator) * 100;
+  if (isNaN(pct) || !isFinite(pct)) return '0';
+  return pct.toFixed(decimals);
+}
+
+/**
+ * Calculate percentage safely as a number (0-100 scale)
+ */
+export function safePercentageNumber(
+  numerator: number | null | undefined,
+  denominator: number | null | undefined,
+  fallback = 0,
+): number {
+  if (numerator == null || isNaN(numerator)) return fallback;
+  if (denominator == null || isNaN(denominator) || denominator === 0) return fallback;
+  const pct = (numerator / denominator) * 100;
+  if (!isFinite(pct)) return fallback;
+  return pct;
+}
+
+/**
+ * Format number safely, returning fallback for invalid inputs
+ */
+export function safeNumber(
+  value: number | null | undefined,
+  fallback = '0',
+): string {
+  if (value == null || isNaN(value)) return fallback;
+  return formatNumber(value);
 }
 
 /**

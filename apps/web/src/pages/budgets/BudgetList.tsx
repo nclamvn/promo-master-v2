@@ -22,6 +22,7 @@ import { Badge } from '@/components/ui/badge';
 import { CurrencyDisplay } from '@/components/ui/currency-display';
 import type { ColumnDef } from '@tanstack/react-table';
 import type { Budget } from '@/types';
+import { safePercentage, safePercentageNumber } from '@/lib/utils';
 
 // Demo data
 const demoBudgets: Budget[] = [
@@ -110,7 +111,7 @@ const columns: ColumnDef<Budget>[] = [
     id: 'utilization',
     header: 'Utilization',
     cell: ({ row }) => {
-      const percent = (row.original.spentAmount / row.original.totalAmount) * 100;
+      const percent = safePercentageNumber(row.original.spentAmount, row.original.totalAmount);
       return (
         <div className="w-32">
           <div className="flex justify-between text-xs mb-1">
@@ -206,7 +207,7 @@ export default function BudgetList() {
           <CardContent>
             <div className="text-2xl font-bold"><CurrencyDisplay amount={totalSpent} size="lg" /></div>
             <p className="text-xs text-muted-foreground">
-              {((totalSpent / totalBudget) * 100).toFixed(1)}% of total
+              {safePercentage(totalSpent, totalBudget)}% of total
             </p>
           </CardContent>
         </Card>

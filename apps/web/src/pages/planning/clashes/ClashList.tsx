@@ -101,7 +101,7 @@ export default function ClashList() {
   const pagination = data?.pagination;
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -136,7 +136,7 @@ export default function ClashList() {
               </div>
             </CardContent>
           </Card>
-          <Card className={stats.unresolvedHigh > 0 ? 'border-red-500/50 bg-red-500/10 dark:bg-red-500/20' : ''}>
+          <Card className={stats.unresolvedHigh > 0 ? 'border-red-200 dark:border-red-800/30 bg-red-50 dark:bg-red-950/30' : ''}>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
                 High Severity

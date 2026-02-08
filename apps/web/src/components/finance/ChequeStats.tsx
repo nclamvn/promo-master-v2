@@ -2,7 +2,7 @@
  * Cheque Stats Component
  */
 
-import { StatCard } from './FinanceStats';
+import { StatCard, StatCardGroup } from '@/components/ui/stat-card';
 import { CreditCard, CheckCircle, XCircle, Clock } from 'lucide-react';
 
 interface ChequeStatsProps {
@@ -19,35 +19,39 @@ interface ChequeStatsProps {
 
 export function ChequeStats({ summary }: ChequeStatsProps) {
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <StatCardGroup cols={4}>
       <StatCard
         title="Issued Cheques"
-        value={summary.issuedAmount}
-        subValue={`${summary.totalIssued} outstanding`}
-        icon={<CreditCard className="h-4 w-4" />}
-        variant="warning"
+        value=""
+        amount={summary.issuedAmount}
+        subtitle={`${summary.totalIssued} outstanding`}
+        icon={CreditCard}
+        color="warning"
       />
       <StatCard
         title="Cleared"
-        value={summary.clearedAmount}
-        subValue={`${summary.totalCleared} processed`}
-        icon={<CheckCircle className="h-4 w-4" />}
-        variant="success"
+        value=""
+        amount={summary.clearedAmount}
+        subtitle={`${summary.totalCleared} processed`}
+        icon={CheckCircle}
+        color="success"
       />
       <StatCard
         title="Voided"
         value={summary.totalVoided}
-        subValue="Cancelled cheques"
-        icon={<XCircle className="h-4 w-4" />}
-        variant="destructive"
+        subtitle="Cancelled cheques"
+        icon={XCircle}
+        color="danger"
       />
       <StatCard
         title="Pending"
-        value={summary.pendingAmount}
-        subValue={`${summary.totalPending} awaiting`}
-        icon={<Clock className="h-4 w-4" />}
+        value=""
+        amount={summary.pendingAmount}
+        subtitle={`${summary.totalPending} awaiting`}
+        icon={Clock}
+        color="primary"
       />
-    </div>
+    </StatCardGroup>
   );
 }
 

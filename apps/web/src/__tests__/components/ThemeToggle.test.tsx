@@ -25,7 +25,7 @@ describe('ThemeToggle', () => {
   });
 
   describe('ThemeToggle (full)', () => {
-    it('renders all three theme options', () => {
+    it('renders light and dark theme options', () => {
       (useUIStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
         theme: 'dark',
         setTheme: mockSetTheme,
@@ -35,7 +35,6 @@ describe('ThemeToggle', () => {
 
       expect(screen.getByTitle('Light')).toBeInTheDocument();
       expect(screen.getByTitle('Dark')).toBeInTheDocument();
-      expect(screen.getByTitle('System')).toBeInTheDocument();
     });
 
     it('shows labels when showLabel is true', () => {
@@ -48,7 +47,6 @@ describe('ThemeToggle', () => {
 
       expect(screen.getByText('Light')).toBeInTheDocument();
       expect(screen.getByText('Dark')).toBeInTheDocument();
-      expect(screen.getByText('System')).toBeInTheDocument();
     });
 
     it('highlights the current theme', () => {
@@ -73,9 +71,6 @@ describe('ThemeToggle', () => {
 
       fireEvent.click(screen.getByTitle('Light'));
       expect(mockSetTheme).toHaveBeenCalledWith('light');
-
-      fireEvent.click(screen.getByTitle('System'));
-      expect(mockSetTheme).toHaveBeenCalledWith('system');
     });
   });
 
@@ -88,12 +83,11 @@ describe('ThemeToggle', () => {
 
       render(<ThemeToggleCompact />);
 
-      // Should have a button with title showing current theme
       const button = screen.getByTitle('Theme: Dark. Click to change.');
       expect(button).toBeInTheDocument();
     });
 
-    it('cycles through themes on click', () => {
+    it('toggles from light to dark on click', () => {
       (useUIStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
         theme: 'light',
         setTheme: mockSetTheme,
@@ -104,11 +98,10 @@ describe('ThemeToggle', () => {
       const button = screen.getByTitle('Theme: Light. Click to change.');
       fireEvent.click(button);
 
-      // Should cycle to dark (light -> dark)
       expect(mockSetTheme).toHaveBeenCalledWith('dark');
     });
 
-    it('cycles from dark to system', () => {
+    it('toggles from dark to light on click', () => {
       (useUIStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
         theme: 'dark',
         setTheme: mockSetTheme,
@@ -119,22 +112,6 @@ describe('ThemeToggle', () => {
       const button = screen.getByTitle('Theme: Dark. Click to change.');
       fireEvent.click(button);
 
-      // Should cycle to system (dark -> system)
-      expect(mockSetTheme).toHaveBeenCalledWith('system');
-    });
-
-    it('cycles from system back to light', () => {
-      (useUIStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
-        theme: 'system',
-        setTheme: mockSetTheme,
-      });
-
-      render(<ThemeToggleCompact />);
-
-      const button = screen.getByTitle('Theme: System. Click to change.');
-      fireEvent.click(button);
-
-      // Should cycle to light (system -> light)
       expect(mockSetTheme).toHaveBeenCalledWith('light');
     });
   });

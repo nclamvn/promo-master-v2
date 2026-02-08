@@ -11,7 +11,6 @@ import {
   useBudgets,
   useBudget,
   useFundHealthScore,
-  useBudgetComparison,
 } from '@/hooks/useBudgets';
 import {
   useBudgetAllocationTree,
@@ -25,7 +24,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
@@ -33,7 +31,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Select,
   SelectContent,
@@ -48,7 +46,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 import {
   AlertDialog,
@@ -91,13 +88,9 @@ import {
   Trash2,
   Copy,
   Download,
-  Upload,
   RefreshCw,
   Search,
-  Filter,
-  ArrowUpDown,
   TrendingUp,
-  TrendingDown,
   AlertTriangle,
   CheckCircle2,
   Clock,
@@ -112,12 +105,11 @@ import {
   Lock,
   Unlock,
   Save,
-  Undo,
   Calculator,
   Percent,
   DollarSign,
 } from 'lucide-react';
-import { cn, formatPercent } from '@/lib/utils';
+import { cn, formatPercent, safePercentageNumber } from '@/lib/utils';
 import { CurrencyDisplay, formatCurrencyCompact } from '@/components/ui/currency-display';
 
 // ============================================================================
@@ -211,7 +203,7 @@ function transformAllocationsToTree(
 }
 
 // Calculate summary from allocations
-function calculateSummary(budget: any, allocations: AllocationNode[]): BudgetSummary {
+function calculateSummary(budget: any, _allocations: AllocationNode[]): BudgetSummary {
   const totalBudget = budget?.totalAmount || 0;
   const allocated = budget?.allocatedAmount || 0;
   const spent = budget?.spentAmount || 0;
@@ -526,9 +518,9 @@ const getTypeColor = (type: AllocationNode['type']) => {
     case 'DISTRICT':
       return 'text-orange-600 bg-orange-50';
     case 'DEALER':
-      return 'text-gray-600 bg-gray-50';
+      return 'text-muted-foreground bg-muted/50';
     default:
-      return 'text-gray-600 bg-gray-50';
+      return 'text-muted-foreground bg-muted/50';
   }
 };
 
@@ -537,11 +529,11 @@ const getStatusBadge = (status: AllocationNode['status']) => {
     case 'DRAFT':
       return <Badge variant="outline">Nháp</Badge>;
     case 'PENDING':
-      return <Badge className="bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/20 hover:bg-amber-500/20">Chờ duyệt</Badge>;
+      return <Badge className="bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800/30 hover:bg-amber-200 dark:hover:bg-amber-900/70">Chờ duyệt</Badge>;
     case 'APPROVED':
-      return <Badge className="bg-blue-500/15 text-blue-700 dark:text-blue-400 border-blue-500/20 hover:bg-blue-500/20">Đã duyệt</Badge>;
+      return <Badge className="bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800/30 hover:bg-blue-200 dark:hover:bg-blue-900/70">Đã duyệt</Badge>;
     case 'ACTIVE':
-      return <Badge className="bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20">Đang hoạt động</Badge>;
+      return <Badge className="bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/30 hover:bg-emerald-200 dark:hover:bg-emerald-900/70">Đang hoạt động</Badge>;
     default:
       return <Badge variant="outline">{status}</Badge>;
   }
@@ -646,8 +638,7 @@ const TreeNode = ({
 }) => {
   const Icon = getTypeIcon(node.type);
   const hasChildren = node.children && node.children.length > 0;
-  const utilizationPercent = (node.spentBudget / node.totalBudget) * 100;
-  const allocationPercent = (node.allocatedBudget / node.totalBudget) * 100;
+  const utilizationPercent = safePercentageNumber(node.spentBudget, node.totalBudget);
   
   return (
     <div className="select-none">
@@ -846,7 +837,7 @@ const TableView = ({
         <TableBody>
           {flatData.map((node) => {
             const Icon = getTypeIcon(node.type);
-            const utilizationPercent = (node.spentBudget / node.totalBudget) * 100;
+            const utilizationPercent = safePercentageNumber(node.spentBudget, node.totalBudget);
 
             return (
               <TableRow
@@ -1007,8 +998,8 @@ const FlowView = ({
             <div className="space-y-4">
               {regions.map((region, index) => {
                 const colors = regionColors[index % regionColors.length];
-                const percent = (region.totalBudget / summary.totalBudget) * 100;
-                const utilizationPercent = (region.spentBudget / region.totalBudget) * 100;
+                const percent = safePercentageNumber(region.totalBudget, summary.totalBudget);
+                const utilizationPercent = safePercentageNumber(region.spentBudget, region.totalBudget);
 
                 return (
                   <div key={region.id} className={cn('p-4 rounded-lg', colors.light)}>
@@ -1465,27 +1456,27 @@ export default function BudgetAllocationPage() {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0">
           <h1 className="text-2xl font-bold">Phân Bổ Ngân Sách</h1>
           <p className="text-muted-foreground">
             Quản lý phân bổ ngân sách theo cấp bậc địa lý
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
           {/* Budget Selector */}
           <Select value={selectedBudgetId} onValueChange={handleBudgetSelect}>
-            <SelectTrigger className="w-[250px]">
+            <SelectTrigger className="w-full sm:w-[250px]">
               <SelectValue placeholder="Chọn ngân sách..." />
             </SelectTrigger>
             <SelectContent>
               {budgetsLoading ? (
-                <SelectItem value="" disabled>Loading...</SelectItem>
+                <SelectItem value="__loading__" disabled>Loading...</SelectItem>
               ) : budgets.length === 0 ? (
-                <SelectItem value="" disabled>No approved budgets</SelectItem>
+                <SelectItem value="__empty__" disabled>No approved budgets</SelectItem>
               ) : (
                 budgets.map((b: any) => (
                   <SelectItem key={b.id} value={b.id}>
@@ -1748,7 +1739,7 @@ export default function BudgetAllocationPage() {
 // Add Allocation Form Component
 function AddAllocationForm({
   geoUnits,
-  existingAllocations,
+  existingAllocations: _existingAllocations,
   parentOptions,
   onSubmit,
   onCancel,
@@ -1762,7 +1753,7 @@ function AddAllocationForm({
   isLoading: boolean;
 }) {
   const [selectedGeoUnit, setSelectedGeoUnit] = useState('');
-  const [selectedParent, setSelectedParent] = useState('');
+  const [selectedParent, setSelectedParent] = useState('__none__');
   const [amount, setAmount] = useState('');
 
   // Flatten geo units for select
@@ -1795,7 +1786,7 @@ function AddAllocationForm({
 
   const handleSubmit = () => {
     if (!selectedGeoUnit || !amount) return;
-    onSubmit(selectedGeoUnit, parseFloat(amount), selectedParent || undefined);
+    onSubmit(selectedGeoUnit, parseFloat(amount), selectedParent === '__none__' ? undefined : selectedParent);
   };
 
   return (
@@ -1823,7 +1814,7 @@ function AddAllocationForm({
             <SelectValue placeholder="Không có (root level)" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Không có (root level)</SelectItem>
+            <SelectItem value="__none__">Không có (root level)</SelectItem>
             {flatParents.map((node) => (
               <SelectItem key={node.id} value={node.id}>
                 {'  '.repeat(node.depth)}{node.name}

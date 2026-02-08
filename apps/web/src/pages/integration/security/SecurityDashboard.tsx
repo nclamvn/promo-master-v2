@@ -7,7 +7,7 @@ import { Key, Shield, FileText, AlertTriangle, ArrowRight } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { LoadingSpinner } from '@/components/shared/LoadingSpinner';
-import { StatCard } from '@/components/integration';
+import { StatCard, StatCardGroup } from '@/components/ui/stat-card';
 import { AuditLogTable } from '@/components/integration/AuditLogTable';
 import { useAPIKeys, useAuditLogs, useSecurityDashboard } from '@/hooks/integration/useSecurity';
 
@@ -52,7 +52,7 @@ export default function SecurityDashboard() {
 
       {/* Alerts */}
       {expiringSoon > 0 && (
-        <Card className="border-yellow-500/50 bg-yellow-500/10 dark:bg-yellow-500/20">
+        <Card className="border-amber-200 dark:border-amber-800/30 bg-amber-50 dark:bg-amber-950/30">
           <CardContent className="py-4">
             <div className="flex items-center gap-3">
               <AlertTriangle className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
@@ -73,33 +73,36 @@ export default function SecurityDashboard() {
       )}
 
       {/* Stats */}
-      <div className="grid gap-4 md:grid-cols-4">
+      <StatCardGroup cols={4}>
         <StatCard
           title="Total API Keys"
           value={apiKeys.length}
           subtitle={`${activeKeys} active`}
-          icon={<Key className="h-4 w-4" />}
-          variant={activeKeys > 0 ? 'success' : 'default'}
+          icon={Key}
+          color={activeKeys > 0 ? 'success' : 'default'}
         />
         <StatCard
           title="Total API Usage"
           value={dashboard?.apiKeys?.totalUsage?.toLocaleString() || '0'}
           subtitle="Requests"
-          icon={<Shield className="h-4 w-4" />}
+          icon={Shield}
+          color="primary"
         />
         <StatCard
           title="Today's Logins"
           value={dashboard?.audit?.todayLogins || 0}
           subtitle="Sessions"
-          icon={<AlertTriangle className="h-4 w-4" />}
+          icon={AlertTriangle}
+          color="warning"
         />
         <StatCard
           title="Audit Events"
           value={auditLogs.length}
           subtitle="Recent"
-          icon={<FileText className="h-4 w-4" />}
+          icon={FileText}
+          color="info"
         />
-      </div>
+      </StatCardGroup>
 
       {/* Quick Actions */}
       <div className="grid gap-4 md:grid-cols-2">

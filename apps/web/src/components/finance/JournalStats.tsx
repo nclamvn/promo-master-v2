@@ -2,7 +2,7 @@
  * Journal Stats Component
  */
 
-import { StatCard } from './FinanceStats';
+import { StatCard, StatCardGroup } from '@/components/ui/stat-card';
 import { FileEdit, CheckCircle, RotateCcw, DollarSign } from 'lucide-react';
 
 interface JournalStatsProps {
@@ -17,35 +17,39 @@ interface JournalStatsProps {
 
 export function JournalStats({ summary }: JournalStatsProps) {
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <StatCardGroup cols={4}>
       <StatCard
         title="Draft Journals"
-        value={summary.draftAmount}
-        subValue={`${summary.totalDraft} pending`}
-        icon={<FileEdit className="h-4 w-4" />}
-        variant="warning"
+        value=""
+        amount={summary.draftAmount}
+        subtitle={`${summary.totalDraft} pending`}
+        icon={FileEdit}
+        color="warning"
       />
       <StatCard
         title="Posted"
-        value={summary.postedAmount}
-        subValue={`${summary.totalPosted} journals`}
-        icon={<CheckCircle className="h-4 w-4" />}
-        variant="success"
+        value=""
+        amount={summary.postedAmount}
+        subtitle={`${summary.totalPosted} journals`}
+        icon={CheckCircle}
+        color="success"
       />
       <StatCard
         title="Reversed"
         value={summary.totalReversed}
-        subValue="Reversed entries"
-        icon={<RotateCcw className="h-4 w-4" />}
-        variant="destructive"
+        subtitle="Reversed entries"
+        icon={RotateCcw}
+        color="danger"
       />
       <StatCard
         title="Total Posted Value"
-        value={summary.postedAmount}
-        subValue="GL impact"
-        icon={<DollarSign className="h-4 w-4" />}
+        value=""
+        amount={summary.postedAmount}
+        subtitle="GL impact"
+        icon={DollarSign}
+        color="primary"
       />
-    </div>
+    </StatCardGroup>
   );
 }
 

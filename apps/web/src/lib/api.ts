@@ -22,9 +22,8 @@ interface ApiResponse<T = unknown> {
   };
 }
 
-// Use /api for MSW to intercept (demo mode)
-// When real API is ready, change to: import.meta.env.VITE_API_URL || '/api'
-const baseURL = '/api';
+// Use VITE_API_URL for real API, fallback to /api for MSW demo mode
+const baseURL = import.meta.env.VITE_API_URL || '/api';
 
 // Create instance
 const api = axios.create({

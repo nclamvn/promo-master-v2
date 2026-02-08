@@ -26,7 +26,6 @@ import {
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   CheckCircle,
@@ -58,7 +57,6 @@ import {
   useSubmitBudget,
   useReviewBudget,
   useApprovalHistory,
-  type ApprovalHistoryResponse,
 } from '@/hooks/useBudgets';
 
 // Types
@@ -166,7 +164,7 @@ function ApprovalHistoryDialog({
                 <Badge variant="outline">{historyData.workflow.progress}% Complete</Badge>
               </div>
               <div className="flex items-center gap-2">
-                {historyData.workflow.levels.map((level, idx) => (
+                {historyData.workflow.levels.map((level: any, idx: number) => (
                   <div key={idx} className="flex items-center gap-1">
                     <div
                       className={`h-8 w-8 rounded-full flex items-center justify-center text-sm font-medium ${
@@ -176,19 +174,19 @@ function ApprovalHistoryDialog({
                           ? 'bg-yellow-500 text-white'
                           : level.status === 'REJECTED'
                           ? 'bg-red-500 text-white'
-                          : 'bg-gray-200 text-gray-600'
+                          : 'bg-muted text-muted-foreground'
                       }`}
                     >
                       {level.level}
                     </div>
                     {idx < historyData.workflow.levels.length - 1 && (
-                      <div className={`h-1 w-8 ${level.status === 'APPROVED' ? 'bg-green-500' : 'bg-gray-200'}`} />
+                      <div className={`h-1 w-8 ${level.status === 'APPROVED' ? 'bg-green-500' : 'bg-border'}`} />
                     )}
                   </div>
                 ))}
               </div>
               <div className="flex gap-4 mt-2 text-xs text-muted-foreground">
-                {historyData.workflow.levels.map((level, idx) => (
+                {historyData.workflow.levels.map((level: any, idx: number) => (
                   <div key={idx} className="text-center" style={{ width: '40px' }}>
                     {level.role.split(' ')[0]}
                   </div>
@@ -203,7 +201,7 @@ function ApprovalHistoryDialog({
                 {historyData.timeline.length === 0 ? (
                   <p className="text-sm text-muted-foreground">No approval history yet.</p>
                 ) : (
-                  historyData.timeline.map((item, idx) => (
+                  historyData.timeline.map((item: any, idx: number) => (
                     <div
                       key={idx}
                       className={`flex items-start gap-3 p-3 rounded-lg border ${
@@ -219,10 +217,10 @@ function ApprovalHistoryDialog({
                       <div
                         className={`mt-0.5 rounded-full p-1 ${
                           item.status === 'APPROVED'
-                            ? 'bg-emerald-500/20 text-emerald-600'
+                            ? 'bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600'
                             : item.status === 'REJECTED'
-                            ? 'bg-red-500/20 text-red-600'
-                            : 'bg-amber-500/20 text-amber-600'
+                            ? 'bg-red-100 dark:bg-red-900/50 text-red-600'
+                            : 'bg-amber-100 dark:bg-amber-900/50 text-amber-600'
                         }`}
                       >
                         {item.status === 'APPROVED' ? (
@@ -303,7 +301,7 @@ export default function BudgetApprovalPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTab, setSelectedTab] = useState<'pending' | 'approved' | 'rejected' | 'all'>('pending');
   const [selectedBudget, setSelectedBudget] = useState<Budget | null>(null);
-  const [isDetailOpen, setIsDetailOpen] = useState(false);
+  const [_isDetailOpen, _setIsDetailOpen] = useState(false);
   const [isActionDialogOpen, setIsActionDialogOpen] = useState(false);
   const [actionType, setActionType] = useState<'approve' | 'reject' | 'revision_needed' | 'submit'>('approve');
   const [actionComment, setActionComment] = useState('');
@@ -569,7 +567,7 @@ export default function BudgetApprovalPage() {
                                     : 'bg-green-500'
                                   : idx === budget.currentLevel && (budget.approvalStatus === 'SUBMITTED' || budget.approvalStatus === 'UNDER_REVIEW')
                                   ? 'bg-yellow-500'
-                                  : 'bg-gray-200'
+                                  : 'bg-border'
                               }`}
                               title={`Level ${idx + 1}`}
                             />

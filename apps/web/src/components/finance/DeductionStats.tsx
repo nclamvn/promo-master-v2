@@ -2,7 +2,7 @@
  * Deduction Stats Component
  */
 
-import { StatCard } from './FinanceStats';
+import { StatCard, StatCardGroup } from '@/components/ui/stat-card';
 import { AlertCircle, CheckCircle, XCircle, Clock } from 'lucide-react';
 
 interface DeductionStatsProps {
@@ -19,35 +19,39 @@ interface DeductionStatsProps {
 
 export function DeductionStats({ summary }: DeductionStatsProps) {
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <StatCardGroup cols={4}>
       <StatCard
         title="Open Deductions"
-        value={summary.openAmount}
-        subValue={`${summary.totalOpen} pending`}
-        icon={<Clock className="h-4 w-4" />}
-        variant="warning"
+        value=""
+        amount={summary.openAmount}
+        subtitle={`${summary.totalOpen} pending`}
+        icon={Clock}
+        color="warning"
       />
       <StatCard
         title="Matched"
-        value={summary.matchedAmount}
-        subValue={`${summary.totalMatched} resolved`}
-        icon={<CheckCircle className="h-4 w-4" />}
-        variant="success"
+        value=""
+        amount={summary.matchedAmount}
+        subtitle={`${summary.totalMatched} resolved`}
+        icon={CheckCircle}
+        color="success"
       />
       <StatCard
         title="Disputed"
-        value={summary.disputedAmount}
-        subValue={`${summary.totalDisputed} in review`}
-        icon={<AlertCircle className="h-4 w-4" />}
-        variant="destructive"
+        value=""
+        amount={summary.disputedAmount}
+        subtitle={`${summary.totalDisputed} in review`}
+        icon={AlertCircle}
+        color="danger"
       />
       <StatCard
         title="Resolved/Written Off"
         value={summary.totalResolved}
-        subValue="Closed cases"
-        icon={<XCircle className="h-4 w-4" />}
+        subtitle="Closed cases"
+        icon={XCircle}
+        color="default"
       />
-    </div>
+    </StatCardGroup>
   );
 }
 
