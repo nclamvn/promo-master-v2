@@ -18,7 +18,7 @@ services:
     plan: free
     rootDir: apps/api-nestjs
     buildCommand: npm install --include=dev && npx prisma generate && npm run build
-    startCommand: node dist/main
+    startCommand: node dist/src/main
     healthCheckPath: /api/health
     envVars:
       - key: NODE_ENV
