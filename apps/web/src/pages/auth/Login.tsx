@@ -95,7 +95,7 @@ export default function Login() {
       <div className="rounded-lg border border-primary/30 bg-primary/10 p-3 text-sm">
         <p className="font-medium text-primary">Test Accounts:</p>
         <p className="text-primary/80">Admin: admin@promomaster.com / admin123</p>
-        <p className="text-primary/80">Manager: manager@promomaster.com / manager123</p>
+        <p className="text-primary/80">Manager: manager@promomaster.com / admin123</p>
         <Button
           type="button"
           variant="secondary"

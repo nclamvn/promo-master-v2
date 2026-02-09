@@ -17,7 +17,8 @@ services:
     runtime: node
     plan: free
     rootDir: apps/api-nestjs
-    buildCommand: npm install --include=dev && npx prisma generate && npm run build
+    buildCommand: npm install --include=dev && npx prisma generate && npx prisma db push --skip-generate --accept-data-loss && npm run build
+    preDeployCommand: npx prisma db seed
     startCommand: node dist/src/main
     healthCheckPath: /api/health
     envVars:

@@ -14,19 +14,22 @@ const prisma = new PrismaClient();
 async function clearDatabase() {
   console.log('Clearing database...');
 
-  // Clear in reverse dependency order
-  await prisma.transaction.deleteMany();
-  await prisma.settlement.deleteMany();
-  await prisma.claim.deleteMany();
-  await prisma.promotion.deleteMany();
-  await prisma.fund.deleteMany();
-  await prisma.budgetAllocation.deleteMany();
-  await prisma.budget.deleteMany();
-  await prisma.product.deleteMany();
-  await prisma.customer.deleteMany();
-  await prisma.geographicUnit.deleteMany();
-  await prisma.user.deleteMany();
-  await prisma.company.deleteMany();
+  // Use TRUNCATE CASCADE to handle all FK constraints across 101 models
+  const tables = await prisma.$queryRaw<Array<{ tablename: string }>>`
+    SELECT tablename FROM pg_tables WHERE schemaname = 'public'
+  `;
+
+  // Disable FK checks temporarily
+  await prisma.$executeRaw`SET session_replication_role = 'replica'`;
+
+  for (const { tablename } of tables) {
+    if (tablename !== '_prisma_migrations') {
+      await prisma.$executeRawUnsafe(`TRUNCATE TABLE "${tablename}" CASCADE`);
+    }
+  }
+
+  // Re-enable FK checks
+  await prisma.$executeRaw`SET session_replication_role = 'origin'`;
 
   console.log('Database cleared.\n');
 }
