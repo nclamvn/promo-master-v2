@@ -69,6 +69,12 @@ export class AllExceptionsFilter implements ExceptionFilter {
           message = 'A record with this value already exists';
           details = { fields: exception.meta?.target };
           break;
+        case 'P2021':
+          status = HttpStatus.INTERNAL_SERVER_ERROR;
+          code = 'TABLE_NOT_FOUND';
+          message = `Table does not exist. Run prisma db push to create schema.`;
+          details = { prismaCode: exception.code, meta: exception.meta };
+          break;
         case 'P2025':
           status = HttpStatus.NOT_FOUND;
           code = 'NOT_FOUND';
@@ -81,12 +87,18 @@ export class AllExceptionsFilter implements ExceptionFilter {
           break;
         default:
           code = 'DATABASE_ERROR';
-          message = 'Database operation failed';
+          message = `Database error [${exception.code}]`;
+          details = { prismaCode: exception.code, meta: exception.meta };
       }
     } else if (exception instanceof Prisma.PrismaClientValidationError) {
       status = HttpStatus.BAD_REQUEST;
       code = 'VALIDATION_ERROR';
       message = 'Invalid data provided';
+    } else if (
+      exception instanceof Prisma.PrismaClientInitializationError
+    ) {
+      code = 'DATABASE_CONNECTION_ERROR';
+      message = `Database connection failed [${exception.errorCode}]`;
     }
     // Handle other errors
     else if (exception instanceof Error) {
