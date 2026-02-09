@@ -23,20 +23,24 @@ const queryClient = new QueryClient({
 const shouldEnableMSW = import.meta.env.VITE_ENABLE_MSW === 'true'
   || (!import.meta.env.VITE_API_URL && import.meta.env.DEV);
 
-if (shouldEnableMSW) {
-  import('./mocks/browser')
-    .then(({ worker }) =>
-      worker.start({ onUnhandledRequest: 'bypass' })
-    )
-    .catch(() => {});
+async function startApp() {
+  if (shouldEnableMSW) {
+    try {
+      const { worker } = await import('./mocks/browser');
+      await worker.start({ onUnhandledRequest: 'bypass' });
+    } catch {
+      // MSW failed to start, continue without it
+    }
+  }
+
+  ReactDOM.createRoot(document.getElementById('root')!).render(
+    <React.StrictMode>
+      <QueryClientProvider client={queryClient}>
+        <App />
+        {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
+      </QueryClientProvider>
+    </React.StrictMode>
+  );
 }
 
-// Render immediately — don't wait for MSW
-ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <App />
-      {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
-    </QueryClientProvider>
-  </React.StrictMode>
-);
+startApp();
