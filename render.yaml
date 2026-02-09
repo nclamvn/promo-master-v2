@@ -1,11 +1,58 @@
+# ═══════════════════════════════════════════════════════════════
+# PROMO MASTER V2 - RENDER DEPLOYMENT
+# ═══════════════════════════════════════════════════════════════
+
+databases:
+  - name: promo-master-db
+    plan: free
+    databaseName: promo_master
+    user: promo_master_user
+
 services:
+  # ─────────────────────────────────────────────────────────────
+  # BACKEND - NestJS API
+  # ─────────────────────────────────────────────────────────────
+  - type: web
+    name: promo-master-api
+    runtime: node
+    plan: free
+    rootDir: apps/api-nestjs
+    buildCommand: npm install && npx prisma generate && npm run build
+    startCommand: node dist/main
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: DATABASE_URL
+        fromDatabase:
+          name: promo-master-db
+          property: connectionString
+      - key: JWT_ACCESS_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: CORS_ORIGINS
+        value: https://promo-master-v2.onrender.com
+
+  # ─────────────────────────────────────────────────────────────
+  # FRONTEND - Vite + React (Express server)
+  # ─────────────────────────────────────────────────────────────
   - type: web
     name: promo-master-v2
     runtime: node
-    buildCommand: cd apps/web && npm install --include=dev && npm run build
-    startCommand: cd apps/web && npm start
+    plan: free
+    rootDir: apps/web
+    buildCommand: npm install --include=dev && npm run build
+    startCommand: node server.cjs
+    healthCheckPath: /health
     envVars:
-      - key: VITE_API_URL
-        value: https://promo-master-api.onrender.com
       - key: NODE_ENV
         value: production
+      - key: VITE_API_URL
+        value: https://promo-master-api.onrender.com
+      - key: VITE_APP_NAME
+        value: PROMO MASTER
+      - key: VITE_ENABLE_MOCK
+        value: "false"
