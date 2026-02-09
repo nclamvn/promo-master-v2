@@ -51,7 +51,7 @@ services:
       - key: NODE_ENV
         value: production
       - key: VITE_API_URL
-        value: https://promo-master-api.onrender.com
+        value: https://promo-master-api.onrender.com/api
       - key: VITE_APP_NAME
         value: PROMO MASTER
       - key: VITE_ENABLE_MOCK
