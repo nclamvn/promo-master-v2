@@ -4,12 +4,15 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
 import * as compression from 'compression';
 import helmet from 'helmet';
+import * as bcrypt from 'bcrypt';
 import { execSync } from 'child_process';
+import { PrismaClient } from '@prisma/client';
 import { AppModule } from './app.module';
 
 /**
  * Auto-migrate database schema and seed if empty.
- * Runs prisma db push (idempotent) and seeds only when user table is empty.
+ * Runs prisma db push (idempotent) then inline seeds company + users.
+ * No dependency on ts-node or external seed scripts.
  */
 async function ensureDatabase() {
   console.log('[DB] Checking database schema...');
@@ -21,30 +24,63 @@ async function ensureDatabase() {
     console.log('[DB] Schema is up to date.');
   } catch (err) {
     console.error('[DB] prisma db push failed:', err);
-    // Continue anyway - the app may still work if tables already exist
   }
 
-  // Seed only if User table is empty
+  // Inline seed: create company + users if empty
+  const prisma = new PrismaClient();
   try {
-    const { PrismaClient } = require('@prisma/client');
-    const prisma = new PrismaClient();
-    try {
-      const userCount = await prisma.user.count();
-      if (userCount === 0) {
-        console.log('[DB] No users found. Running seed...');
-        execSync('npx prisma db seed', {
-          stdio: 'inherit',
-          timeout: 60000,
-        });
-        console.log('[DB] Seed complete.');
-      } else {
-        console.log(`[DB] ${userCount} users exist. Skipping seed.`);
-      }
-    } finally {
-      await prisma.$disconnect();
+    const userCount = await prisma.user.count();
+    if (userCount > 0) {
+      console.log(`[DB] ${userCount} users exist. Skipping seed.`);
+      return;
     }
+
+    console.log('[DB] No users found. Seeding company + users...');
+    const password = await bcrypt.hash('admin123', 10);
+
+    // Create company
+    let company = await prisma.company.findFirst({ where: { code: 'DEMO' } });
+    if (!company) {
+      company = await prisma.company.create({
+        data: {
+          code: 'DEMO',
+          name: 'Demo FMCG Vietnam',
+          settings: {
+            currency: 'VND',
+            locale: 'vi-VN',
+            timezone: 'Asia/Ho_Chi_Minh',
+            fiscalYearStart: 1,
+          },
+        },
+      });
+      console.log(`[DB] Created company: ${company.name}`);
+    }
+
+    // Create users
+    const users = [
+      { email: 'admin@promomaster.com', name: 'Nguyen Van Admin', role: 'ADMIN' as const },
+      { email: 'manager@promomaster.com', name: 'Tran Thi Manager', role: 'MANAGER' as const },
+      { email: 'kam1@promomaster.com', name: 'Pham Thanh Tung', role: 'KAM' as const },
+      { email: 'finance@promomaster.com', name: 'Hoang Thi Thu', role: 'FINANCE' as const },
+    ];
+
+    for (const u of users) {
+      await prisma.user.create({
+        data: {
+          email: u.email,
+          name: u.name,
+          password,
+          role: u.role,
+          isActive: true,
+          companyId: company.id,
+        },
+      });
+    }
+    console.log(`[DB] Created ${users.length} users (password: admin123)`);
   } catch (err) {
-    console.error('[DB] Seed check failed:', err);
+    console.error('[DB] Seed failed:', err);
+  } finally {
+    await prisma.$disconnect();
   }
 }
 
