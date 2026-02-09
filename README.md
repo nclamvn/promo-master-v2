@@ -1,6 +1,6 @@
 # 🚀 PROMO MASTER - Hệ Thống Quản Lý Khuyến Mãi Thương Mại
 
-[![Build Status](https://github.com/user/promo-master/actions/workflows/ci.yml/badge.svg)](https://github.com/user/promo-master/actions)
+[![Build Status](https://github.com/nclamvn/promo-master-v2/actions/workflows/ci.yml/badge.svg)](https://github.com/nclamvn/promo-master-v2/actions)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.3-blue.svg)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-18.2-61DAFB.svg)](https://reactjs.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -104,15 +104,15 @@
 │                                                                  │
 │  ┌──────────────┐     ┌──────────────┐     ┌──────────────┐    │
 │  │   Frontend   │────▶│   Backend    │────▶│   Database   │    │
-│  │   (Vite)     │     │   (Lambda)   │     │ (PostgreSQL) │    │
-│  │   React 18   │     │   Express    │     │    Neon      │    │
+│  │   (Vite)     │     │  (NestJS /   │     │ (PostgreSQL) │    │
+│  │   React 18   │     │   Vercel)    │     │              │    │
 │  │   TypeScript │     │   Prisma     │     │              │    │
 │  └──────────────┘     └──────────────┘     └──────────────┘    │
 │         │                    │                    │             │
 │         ▼                    ▼                    ▼             │
 │  ┌──────────────┐     ┌──────────────┐     ┌──────────────┐    │
-│  │   Vercel     │     │     AWS      │     │   Power BI   │    │
-│  │   CDN        │     │   Lambda     │     │   Reports    │    │
+│  │   Render /   │     │   Render /   │     │   Power BI   │    │
+│  │   Vercel     │     │   Docker     │     │   Reports    │    │
 │  └──────────────┘     └──────────────┘     └──────────────┘    │
 │                                                                  │
 └─────────────────────────────────────────────────────────────────┘
@@ -123,13 +123,14 @@
 | Tầng | Công Nghệ | Mô Tả |
 |------|-----------|-------|
 | **Frontend** | React 18, TypeScript, Vite | SPA hiện đại, build nhanh |
-| **UI Framework** | Tailwind CSS v4, shadcn/ui | Design system nhất quán |
-| **State Management** | Zustand, React Query | Quản lý state hiệu quả |
-| **Backend** | Node.js, Express, TypeScript | RESTful API |
+| **UI Framework** | Tailwind CSS v4, Lucide Icons, CVA | Design system nhất quán |
+| **State Management** | Zustand, TanStack React Query | Quản lý state hiệu quả |
+| **Backend Option 1** | Vercel Functions (Serverless) | `apps/api` - Lightweight, serverless |
+| **Backend Option 2** | NestJS (Full Framework) | `apps/api-nestjs` - Full-featured, Swagger |
 | **ORM** | Prisma | Type-safe database access |
-| **Database** | PostgreSQL (Neon) | Serverless database |
+| **Database** | PostgreSQL | Local hoặc cloud (Neon, Render) |
 | **Authentication** | JWT, bcrypt | Bảo mật cao |
-| **Deployment** | Vercel, AWS Lambda | Serverless, tự động scale |
+| **Deployment** | Render, Vercel | Auto-deploy từ GitHub |
 | **Testing** | Playwright, Vitest | E2E và Unit tests |
 
 ---
@@ -147,17 +148,19 @@
 
 ```bash
 # 1. Clone repository
-git clone https://github.com/your-username/promo-master.git
-cd promo-master
+git clone https://github.com/nclamvn/promo-master-v2.git
+cd promo-master-v2
 
 # 2. Cài đặt dependencies
 npm install
 
 # 3. Cấu hình môi trường
+cp .env.example .env
 cp apps/api/.env.example apps/api/.env
 cp apps/web/.env.example apps/web/.env
 
 # 4. Chỉnh sửa file .env với thông tin database của bạn
+#    (DATABASE_URL, JWT_SECRET, ...)
 
 # 5. Khởi tạo database
 npm run db:push
@@ -167,12 +170,36 @@ npm run db:seed
 npm run dev
 ```
 
+> **Tip:** Nếu chưa có PostgreSQL, bạn có thể bật mock data bằng cách set `VITE_ENABLE_MOCK=true` trong `apps/web/.env` để xem demo UI mà không cần backend.
+
+### Chọn Backend
+
+Dự án hỗ trợ **2 backend** (chọn 1 tùy nhu cầu):
+
+| Backend | Thư mục | Port | Khi nào dùng |
+|---------|---------|------|-------------|
+| **NestJS** (Khuyến nghị) | `apps/api-nestjs` | 3000 | Full-featured, Swagger docs, Docker-ready |
+| **Vercel Functions** | `apps/api` | 3000 | Serverless, lightweight, deploy lên Vercel |
+
+```bash
+# Option 1: NestJS (khuyến nghị cho local dev)
+cd apps/api-nestjs
+npm install
+npm run start:dev
+# Swagger docs: http://localhost:3000/api/docs
+
+# Option 2: Vercel Functions
+cd apps/api
+npm run dev
+```
+
 ### Truy Cập Ứng Dụng
 
 | Dịch Vụ | URL | Mô Tả |
 |---------|-----|-------|
-| Web App | http://localhost:5180 | Giao diện người dùng |
-| API | http://localhost:4000 | Backend API |
+| Web App | http://localhost:5173 | Giao diện người dùng |
+| API (NestJS) | http://localhost:3000 | Backend API |
+| Swagger Docs | http://localhost:3000/api/docs | API documentation |
 | Prisma Studio | http://localhost:5555 | Công cụ quản lý database |
 
 ### Tài Khoản Mặc Định
@@ -188,42 +215,49 @@ npm run dev
 ## 📁 Cấu Trúc Dự Án
 
 ```
-promo-master/
+promo-master-v2/
 ├── apps/
-│   ├── web/                    # Frontend (Vite + React)
+│   ├── web/                    # Frontend (Vite + React 18)
 │   │   ├── src/
 │   │   │   ├── components/     # React components
-│   │   │   │   ├── ui/         # shadcn/ui components
+│   │   │   │   ├── ui/         # UI components (custom)
 │   │   │   │   ├── layout/     # Layout (Header, Sidebar)
 │   │   │   │   ├── charts/     # Biểu đồ (Recharts)
+│   │   │   │   ├── ai/         # AI-powered components
 │   │   │   │   └── shared/     # Components dùng chung
-│   │   │   ├── pages/          # Các trang
+│   │   │   ├── pages/          # 29 trang (lazy-loaded)
 │   │   │   ├── hooks/          # Custom React hooks
 │   │   │   ├── stores/         # Zustand stores
-│   │   │   ├── lib/            # Utilities, helpers
+│   │   │   ├── lib/            # Utilities, API client (Axios)
 │   │   │   └── types/          # TypeScript types
 │   │   ├── e2e/                # Playwright E2E tests
 │   │   └── package.json
 │   │
-│   └── api/                    # Backend (Express + Prisma)
+│   ├── api/                    # Backend Option 1 (Vercel Functions)
+│   │   ├── api/                # Serverless route handlers
+│   │   ├── prisma/
+│   │   │   ├── schema.prisma   # Database schema (3,900+ dòng)
+│   │   │   └── seeds/          # Seed data files
+│   │   └── package.json
+│   │
+│   └── api-nestjs/             # Backend Option 2 (NestJS)
 │       ├── src/
-│       │   ├── routes/         # API routes
-│       │   ├── middleware/     # Express middleware
-│       │   ├── utils/          # Utilities
-│       │   └── index.ts        # Entry point
+│       │   └── modules/        # 34 NestJS modules
 │       ├── prisma/
 │       │   ├── schema.prisma   # Database schema
-│       │   └── seed.ts         # Dữ liệu mẫu
+│       │   └── seeds/          # Seed data files
 │       └── package.json
+│
+├── docker/                     # Docker configs
+│   ├── docker-compose.yml      # Full stack deployment
+│   ├── Dockerfile.api          # API container
+│   └── Dockerfile.web          # Web container
 │
 ├── packages/
 │   └── shared/                 # Types & utils dùng chung
 │
-├── .github/
-│   └── workflows/
-│       └── ci.yml              # CI/CD pipeline
-│
-├── package.json                # Workspace root
+├── render.yaml                 # Render.com deployment config
+├── package.json                # Workspace root (npm workspaces)
 ├── turbo.json                  # Build orchestration
 └── README.md                   # Tài liệu này
 ```
@@ -235,8 +269,8 @@ promo-master/
 ### Base URL
 
 ```
-Development: http://localhost:4000/api
-Production:  https://api.promomaster.com/api
+Development: http://localhost:3000/api
+Production:  https://promo-master-api.onrender.com/api
 ```
 
 ### Xác Thực (Authentication)
@@ -745,26 +779,34 @@ Giới hạn dữ liệu theo vai trò người dùng:
 
 ## 🚀 Triển Khai
 
-### Frontend (Vercel)
+### Option 1: Render.com (Khuyến nghị - đã cấu hình sẵn)
+
+Dự án có sẵn `render.yaml` để deploy lên Render:
+
+1. Kết nối GitHub repo với [Render](https://render.com)
+2. Chọn **Blueprint** → file `render.yaml` sẽ tự động tạo services
+3. Cấu hình environment variables
+4. Deploy!
+
+**Services được tạo:**
+- `promo-master-db` - PostgreSQL database
+- `promo-master-api` - NestJS backend (port 3000)
+- `promo-master-v2` - Vite frontend
+
+### Option 2: Docker
 
 ```bash
-# Cài đặt Vercel CLI
-npm i -g vercel
+# Chạy toàn bộ stack
+docker-compose -f docker/docker-compose.yml up -d
 
-# Triển khai
-cd apps/web
-vercel --prod
+# Truy cập: http://localhost
 ```
 
-### Backend (AWS Lambda)
+### Option 3: Vercel (Frontend only)
 
 ```bash
-# Cài đặt Serverless Framework
-npm i -g serverless
-
-# Triển khai
-cd apps/api
-serverless deploy --stage production
+cd apps/web
+npx vercel --prod
 ```
 
 ---
