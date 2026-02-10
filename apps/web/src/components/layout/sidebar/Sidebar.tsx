@@ -173,16 +173,7 @@ export function Sidebar({ isMobileOpen = false, onMobileClose }: SidebarProps) {
         {!sidebarCollapsed ? (
           <>
             <div className="flex items-center gap-2.5 min-w-0 flex-1">
-              <div
-                className="flex h-7 w-7 shrink-0 items-center justify-center rounded"
-                style={{ backgroundColor: colors.bgSubtle }}
-              >
-                <BrandIcon
-                  className="h-4 w-4"
-                  style={{ color: colors.text }}
-                  strokeWidth={1.5}
-                />
-              </div>
+              <img src="/logo.png" alt="" className="h-7 w-7 shrink-0 object-contain" />
               <div className="flex flex-col min-w-0">
                 <span
                   className="text-xs font-semibold tracking-tight"
