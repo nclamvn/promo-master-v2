@@ -1,7 +1,8 @@
 # TÀI LIỆU BÀN GIAO DỰ ÁN PROMO MASTER V2
 
 **Ngày tạo:** 2026-02-05
-**Phiên bản:** 2.0
+**Cập nhật lần cuối:** 2026-02-10
+**Phiên bản:** 3.0
 **Dự án:** PROMO MASTER V2 - Trade Promotion Management System (Aforza-style)
 
 ---
@@ -10,12 +11,13 @@
 
 1. [Tổng Quan](#1-tổng-quan)
 2. [Kiến Trúc Hệ Thống](#2-kiến-trúc-hệ-thống)
-3. [Phase 5: Budget & Target Integration](#3-phase-5-budget--target-integration)
-4. [API Endpoints](#4-api-endpoints)
-5. [Frontend Hooks & Components](#5-frontend-hooks--components)
-6. [Cơ Sở Dữ Liệu](#6-cơ-sở-dữ-liệu)
-7. [Hướng Dẫn Phát Triển](#7-hướng-dẫn-phát-triển)
-8. [Pending Tasks](#8-pending-tasks)
+3. [Production Deployment (Render)](#3-production-deployment-render)
+4. [Phase 5: Budget & Target Integration](#4-phase-5-budget--target-integration)
+5. [API Endpoints](#5-api-endpoints)
+6. [Frontend Hooks & Components](#6-frontend-hooks--components)
+7. [Cơ Sở Dữ Liệu](#7-cơ-sở-dữ-liệu)
+8. [Hướng Dẫn Phát Triển](#8-hướng-dẫn-phát-triển)
+9. [Pending Tasks](#9-pending-tasks)
 
 ---
 
@@ -36,17 +38,20 @@
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                        FRONTEND                             │
-│  React 18 | Vite | TailwindCSS | TanStack Query            │
+│  React 18 | Vite | TailwindCSS v4 | TanStack Query         │
+│  MSW (Mock Service Worker) for dev mode                     │
 └─────────────────────────────────────────────────────────────┘
                               ↓ REST API
 ┌─────────────────────────────────────────────────────────────┐
-│                        BACKEND                              │
-│  Vercel Serverless Functions | Prisma 5 | JWT Auth         │
+│                    BACKEND (Dual API)                        │
+│  Production: NestJS (apps/api-nestjs) on Render             │
+│  Legacy:     Vercel Functions (apps/api)                    │
+│  Prisma 5 | JWT Auth | 101 models | 257 endpoints          │
 └─────────────────────────────────────────────────────────────┘
                               ↓
 ┌─────────────────────────────────────────────────────────────┐
 │                       DATABASE                              │
-│            PostgreSQL (Neon) | Prisma ORM                  │
+│     PostgreSQL (Render) | Prisma ORM | 89 enums             │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -55,30 +60,52 @@
 ```
 promo-master-v2/
 ├── apps/
-│   ├── api/                    # Vercel Serverless Functions
-│   │   ├── budgets/           # Budget CRUD + Approval
-│   │   ├── targets/           # Target + Allocations
-│   │   ├── fund-activities/   # Fund-Activity linking
-│   │   ├── budget-allocations/
-│   │   ├── target-allocations/
-│   │   ├── geographic-units/
-│   │   ├── _lib/              # Shared utilities
+│   ├── api/                    # Vercel Serverless Functions (legacy)
+│   ├── api-nestjs/             # NestJS API (production on Render)
+│   │   ├── src/
+│   │   │   ├── main.ts         # Auto-migrate + seed on startup
+│   │   │   ├── modules/        # 37 NestJS modules
+│   │   │   │   ├── auth/       # JWT login/refresh/logout
+│   │   │   │   ├── budgets/
+│   │   │   │   ├── promotions/
+│   │   │   │   └── ...
+│   │   │   └── common/         # Guards, filters, interceptors
 │   │   └── prisma/
-│   │       ├── schema.prisma  # Database schema
-│   │       └── seeds/         # Seed data
+│   │       ├── schema.prisma   # 101 models, 89 enums
+│   │       └── seed/           # Seed data scripts
 │   │
 │   └── web/                    # React + Vite Frontend
+│       ├── public/logo.png     # Brand logo
 │       └── src/
-│           ├── pages/
-│           │   ├── budget/    # Budget pages
-│           │   └── targets/   # Target pages
-│           ├── components/
-│           │   └── budget/    # Budget components
-│           └── hooks/         # React Query hooks
+│           ├── pages/          # Lazy-loaded route pages
+│           ├── components/     # UI components
+│           ├── hooks/          # React Query hooks
+│           ├── stores/         # Zustand stores
+│           ├── mocks/          # MSW handlers (dev mode)
+│           └── lib/api.ts      # Axios client
 │
+├── render.yaml                 # Render deployment config
 └── packages/
-    └── shared/                # Shared types
+    └── shared/                 # Shared types
 ```
+
+### 1.4 Production URLs
+
+| Service | URL |
+|---------|-----|
+| Frontend | https://promo-master-v2.onrender.com |
+| API | https://promo-master-api.onrender.com/api |
+| Swagger Docs | https://promo-master-api.onrender.com/api/docs |
+| Health Check | https://promo-master-api.onrender.com/api/health |
+
+### 1.5 Test Accounts
+
+| Role | Email | Password |
+|------|-------|----------|
+| Admin | admin@promomaster.com | admin123 |
+| Manager | manager@promomaster.com | admin123 |
+| KAM | kam1@promomaster.com | admin123 |
+| Finance | finance@promomaster.com | admin123 |
 
 ---
 
@@ -143,7 +170,64 @@ promo-master-v2/
 
 ---
 
-## 3. PHASE 5: BUDGET & TARGET INTEGRATION
+## 3. PRODUCTION DEPLOYMENT (RENDER)
+
+### 3.1 Architecture
+
+```
+render.yaml defines 2 services + 1 database:
+
+┌─────────────────────────────────────────────────────────────┐
+│  promo-master-v2 (Frontend)                                 │
+│  rootDir: apps/web                                          │
+│  Build: npm install && npm run build                        │
+│  Start: node server.cjs                                     │
+│  Env: VITE_API_URL=https://promo-master-api.onrender.com/api│
+└─────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────┐
+│  promo-master-api (NestJS Backend)                          │
+│  rootDir: apps/api-nestjs                                   │
+│  Build: npm install && prisma generate && npm run build     │
+│  Start: node dist/src/main                                  │
+│  Auto: prisma db push + seed on startup (main.ts)           │
+└─────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────┐
+│  promo-master-db (PostgreSQL)                               │
+│  Plan: free                                                 │
+│  Auto-connected via DATABASE_URL                            │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### 3.2 Auto-Migration & Seed (main.ts)
+
+NestJS `main.ts` runs before app bootstrap:
+1. `prisma db push --skip-generate --accept-data-loss` → creates/syncs all 101 tables
+2. Checks `user.count()` → if 0, seeds company + 4 users with bcrypt-hashed passwords
+3. Idempotent: safe to run on every server start
+
+### 3.3 API Response Format
+
+All responses are wrapped by `TransformInterceptor`:
+```json
+// Success
+{ "success": true, "data": { ... }, "meta": { "timestamp": "...", "requestId": "..." } }
+
+// Error (AllExceptionsFilter)
+{ "success": false, "error": { "code": "...", "message": "..." }, "meta": { ... } }
+```
+
+### 3.4 Key Config Notes
+
+- `render.yaml` is a reference file. Render services may be configured via dashboard.
+- NestJS global prefix: `api` → all routes at `/api/*`
+- CORS: configured for `https://promo-master-v2.onrender.com`
+- JWT secrets: auto-generated by Render via `generateValue: true`
+
+---
+
+## 4. PHASE 5: BUDGET & TARGET INTEGRATION
 
 ### 3.1 Completed Tasks
 
@@ -213,7 +297,7 @@ apps/web/src/
 
 ---
 
-## 4. API ENDPOINTS
+## 5. API ENDPOINTS
 
 ### 4.1 Budget APIs
 
@@ -269,7 +353,7 @@ GET    /fund-activities/summary    # ROI analysis summary
 
 ---
 
-## 5. FRONTEND HOOKS & COMPONENTS
+## 6. FRONTEND HOOKS & COMPONENTS
 
 ### 5.1 Budget Hooks (`useBudgets.ts`)
 
@@ -330,7 +414,7 @@ useDeleteFundActivity()            // Delete
 
 ---
 
-## 6. CƠ SỞ DỮ LIỆU
+## 7. CƠ SỞ DỮ LIỆU
 
 ### 6.1 Key Models Added in Phase 5
 
@@ -390,52 +474,67 @@ npm run db:seed
 
 ---
 
-## 7. HƯỚNG DẪN PHÁT TRIỂN
+## 8. HƯỚNG DẪN PHÁT TRIỂN
 
-### 7.1 Quick Start
+### 8.1 Quick Start (Local Dev with MSW)
 
 ```bash
 # 1. Clone & Install
 cd promo-master-v2
-pnpm install
+npm install
 
-# 2. Setup Environment
-cp apps/api/.env.example apps/api/.env
-cp apps/web/.env.example apps/web/.env
+# 2. Start Frontend (MSW mock mode - no backend needed)
+cd apps/web
+npm run dev
+# → http://localhost:5173 (MSW intercepts all API calls)
+```
 
-# 3. Database
-cd apps/api
+### 8.2 Quick Start (Local Dev with Real Backend)
+
+```bash
+# 1. Setup Database
+cd apps/api-nestjs
+cp .env.example .env  # Set DATABASE_URL
 npx prisma db push
-npm run db:seed
+npx prisma db seed
 
-# 4. Start Development
-pnpm dev
+# 2. Start NestJS API
+npm run start:dev  # → http://localhost:3000/api
+
+# 3. Start Frontend (separate terminal)
+cd apps/web
+VITE_API_URL=http://localhost:3000/api npm run dev
 ```
 
-### 7.2 Environment Variables
+### 8.3 Environment Variables
 
-**API (.env)**
+**API NestJS (.env)**
 ```
-DATABASE_URL=postgresql://...@neon.tech/promo_master
-JWT_SECRET=your-secret
-```
-
-**Web (.env)**
-```
-VITE_API_URL=http://localhost:3000/api
+DATABASE_URL=postgresql://...
+JWT_ACCESS_SECRET=your-secret
+JWT_REFRESH_SECRET=your-refresh-secret
+PORT=3000
 ```
 
-### 7.3 Development URLs
+**Web (.env.development)**
+```
+VITE_API_URL=/api
+VITE_ENABLE_MSW=true      # Enable mock service worker
+VITE_APP_NAME=PROMO MASTER
+```
+
+### 8.4 Development URLs
 
 | Service | URL |
 |---------|-----|
 | Frontend | http://localhost:5173 |
-| API (Vercel Dev) | http://localhost:3000/api |
+| NestJS API | http://localhost:3000/api |
+| Swagger Docs | http://localhost:3000/api/docs |
 | Prisma Studio | npx prisma studio |
 
 ---
 
-## 8. PENDING TASKS
+## 9. PENDING TASKS
 
 ### 8.1 Days 9-10: E2E Testing & Polish
 
@@ -458,6 +557,6 @@ VITE_API_URL=http://localhost:3000/api
 ---
 
 **Tài liệu này được tạo bởi Claude Code.**
-**Cập nhật lần cuối:** 2026-02-05
+**Cập nhật lần cuối:** 2026-02-10
 
-**Repository:** `/Users/mac/TPM-TPO/promo-master-v2`
+**Repository:** https://github.com/nclamvn/promo-master-v2
