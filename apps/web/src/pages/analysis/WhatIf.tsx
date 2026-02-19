@@ -17,8 +17,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Slider } from '@/components/ui/slider';
-import { Switch } from '@/components/ui/switch';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import {
   Select,
@@ -38,9 +36,6 @@ import {
 import {
   AreaChart,
   Area,
-  BarChart,
-  Bar,
-  LineChart,
   Line,
   XAxis,
   YAxis,
@@ -48,37 +43,21 @@ import {
   Tooltip,
   ResponsiveContainer,
   Legend,
-  ComposedChart,
 } from 'recharts';
 import {
-  Play,
-  Pause,
   RotateCcw,
   Save,
   Copy,
   Trash2,
   Plus,
-  Minus,
-  Settings,
   TrendingUp,
-  TrendingDown,
-  DollarSign,
-  Target,
-  Users,
-  ShoppingCart,
-  Percent,
-  ArrowUpRight,
-  ArrowDownRight,
-  Calculator,
   Lightbulb,
   AlertTriangle,
   CheckCircle2,
   GitCompare,
   Layers,
   Download,
-  RefreshCw,
   Sliders,
-  Zap,
   Loader2,
   FlaskConical,
   Trophy,
@@ -87,7 +66,7 @@ import {
 } from 'lucide-react';
 import { useWhatIfSimulation, useTPOHealth, useTPOMechanics, useTPOChannels } from '@/hooks/useTPO';
 import type { MechanicType, ChannelType, WhatIfScenario as TPOScenario } from '@/types/tpo';
-import { cn, formatPercent, formatNumber } from '@/lib/utils';
+import { cn, formatNumber, safeDivide, safePercentageNumber } from '@/lib/utils';
 import { CurrencyDisplay, formatCurrencyCompact } from '@/components/ui/currency-display';
 
 // ============================================================================
@@ -160,11 +139,11 @@ const calculateResults = (params: ScenarioParams): ScenarioResults => {
   const incrementalVolume = Math.round(incrementalRevenue / avgOrderValue);
   const totalVolume = Math.round(totalRevenue / avgOrderValue);
   
-  const roi = ((incrementalRevenue - params.budget) / params.budget) * 100;
-  const costPerUnit = params.budget / totalVolume;
-  const costPerCustomer = params.budget / effectiveCustomers;
+  const roi = safePercentageNumber(incrementalRevenue - params.budget, params.budget);
+  const costPerUnit = safeDivide(params.budget, totalVolume);
+  const costPerCustomer = safeDivide(params.budget, effectiveCustomers);
   const profitImpact = incrementalRevenue - params.budget;
-  const breakEvenDays = Math.ceil((params.budget / incrementalRevenue) * params.duration);
+  const breakEvenDays = Math.ceil(safeDivide(params.budget, incrementalRevenue) * params.duration);
   
   return {
     revenue: totalRevenue,
@@ -630,7 +609,7 @@ export default function AnalysisWhatIfPage() {
   const { isSuccess: isConnected, isLoading: healthLoading } = useTPOHealth();
   const { data: mechanics = [] } = useTPOMechanics();
   const { data: channels = [] } = useTPOChannels();
-  const { simulate: runTPOSimulation, result: tpoResult, isLoading: tpoLoading, reset: resetTPO } = useWhatIfSimulation();
+  const { simulate: runTPOSimulation, result: tpoResult, isLoading: tpoLoading, reset: _resetTPO } = useWhatIfSimulation();
 
   const [showTPOPanel, setShowTPOPanel] = useState(false);
   const [tpoScenarios, setTPOScenarios] = useState<TPOScenario[]>([
@@ -736,7 +715,7 @@ export default function AnalysisWhatIfPage() {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>

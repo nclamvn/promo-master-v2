@@ -56,9 +56,9 @@ const ALERT_CONFIG: Record<
 };
 
 const SEVERITY_CONFIG: Record<AlertSeverity, { bgColor: string; textColor: string }> = {
-  INFO: { bgColor: 'bg-blue-500/10 dark:bg-blue-500/20', textColor: 'text-blue-700 dark:text-blue-300' },
-  WARNING: { bgColor: 'bg-yellow-500/10 dark:bg-yellow-500/20', textColor: 'text-yellow-700 dark:text-yellow-300' },
-  CRITICAL: { bgColor: 'bg-red-500/10 dark:bg-red-500/20', textColor: 'text-red-700 dark:text-red-300' },
+  INFO: { bgColor: 'bg-blue-50 dark:bg-blue-950/30', textColor: 'text-blue-700 dark:text-blue-300' },
+  WARNING: { bgColor: 'bg-amber-50 dark:bg-amber-950/30', textColor: 'text-amber-700 dark:text-amber-300' },
+  CRITICAL: { bgColor: 'bg-red-50 dark:bg-red-950/30', textColor: 'text-red-700 dark:text-red-300' },
 };
 
 export function SellAlertCard({ alert, onClick }: SellAlertCardProps) {
@@ -80,7 +80,7 @@ export function SellAlertCard({ alert, onClick }: SellAlertCardProps) {
           <div
             className={cn(
               'p-2 rounded-full',
-              alert.severity === 'CRITICAL' ? 'bg-red-500/20 dark:bg-red-500/30' : 'bg-surface-hover'
+              alert.severity === 'CRITICAL' ? 'bg-red-100 dark:bg-red-900/50' : 'bg-surface-hover'
             )}
           >
             <Icon className={cn('h-5 w-5', config.color)} />

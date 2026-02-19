@@ -105,7 +105,7 @@ export default function ClashDetail() {
   const analysis = clash.analysis;
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       {/* Header */}
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-4">
@@ -365,7 +365,7 @@ export default function ClashDetail() {
 
       {/* Recommendations */}
       {analysis?.recommendations && analysis.recommendations.length > 0 && (
-        <Card className="bg-blue-500/10 dark:bg-blue-500/20 border-blue-500/30">
+        <Card className="bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800/30">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Lightbulb className="h-5 w-5 text-blue-600 dark:text-blue-400" />
@@ -387,7 +387,7 @@ export default function ClashDetail() {
 
       {/* Resolution Info */}
       {isResolved && (
-        <Card className="bg-green-500/10 dark:bg-green-500/20 border-green-500/30">
+        <Card className="bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800/30">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />

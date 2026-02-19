@@ -52,6 +52,7 @@ import {
   ZAxis,
 } from 'recharts';
 import { CurrencyDisplay, formatCurrencyCompact } from '@/components/ui/currency-display';
+import { safeDivide, safePercentageNumber } from '@/lib/utils';
 
 // Types
 interface PromotionEfficiency {
@@ -161,8 +162,8 @@ export default function PromotionEfficiencyPage() {
     const { investment, expectedLift, baselineRevenue, marginPercent } = calculatorInputs;
     const incrementalRevenue = baselineRevenue * (expectedLift / 100);
     const incrementalProfit = incrementalRevenue * (marginPercent / 100);
-    const roi = ((incrementalProfit - investment) / investment) * 100;
-    const breakeven = investment / (marginPercent / 100);
+    const roi = safePercentageNumber(incrementalProfit - investment, investment);
+    const breakeven = safeDivide(investment, marginPercent / 100);
 
     setCalculatorResults({
       incrementalRevenue,
@@ -173,8 +174,8 @@ export default function PromotionEfficiencyPage() {
   };
 
   // Summary stats
-  const avgROI = mockPromotions.reduce((sum, p) => sum + p.roi, 0) / mockPromotions.length;
-  const avgEfficiency = mockPromotions.reduce((sum, p) => sum + p.efficiency, 0) / mockPromotions.length;
+  const avgROI = safeDivide(mockPromotions.reduce((sum, p) => sum + p.roi, 0), mockPromotions.length);
+  const avgEfficiency = safeDivide(mockPromotions.reduce((sum, p) => sum + p.efficiency, 0), mockPromotions.length);
   const totalInvestment = mockPromotions.reduce((sum, p) => sum + p.investment, 0);
   const totalRevenue = mockPromotions.reduce((sum, p) => sum + p.incrementalRevenue, 0);
 
@@ -250,7 +251,7 @@ export default function PromotionEfficiencyPage() {
           <CardContent>
             <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400"><CurrencyDisplay amount={totalRevenue} size="lg" showToggle={false} /></div>
             <p className="text-xs text-muted-foreground">
-              {((totalRevenue / totalInvestment - 1) * 100).toFixed(0)}% return
+              {(safePercentageNumber(totalRevenue - totalInvestment, totalInvestment)).toFixed(0)}% return
             </p>
           </CardContent>
         </Card>

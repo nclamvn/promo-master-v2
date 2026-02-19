@@ -3,8 +3,16 @@
  */
 
 import { describe, it, expect, beforeAll, afterAll, afterEach } from 'vitest';
-import { renderHook, waitFor } from '@testing-library/react';
-import { useFunds, useFund } from '@/hooks/useFunds';
+import { renderHook, waitFor, act } from '@testing-library/react';
+import {
+  useFunds,
+  useFund,
+  useCreateFund,
+  useUpdateFund,
+  useDeleteFund,
+  useFundUtilization,
+  useFundOptions,
+} from '@/hooks/useFunds';
 import { createWrapper } from '../test-utils';
 import { server } from '../mocks/server';
 import { mockFunds } from '../mocks/handlers';
@@ -74,5 +82,98 @@ describe('useFund', () => {
 
     expect(result.current.isLoading).toBe(false);
     expect(result.current.data).toBeUndefined();
+  });
+});
+
+describe('useCreateFund', () => {
+  it('should create a fund', async () => {
+    const { result } = renderHook(() => useCreateFund(), {
+      wrapper: createWrapper(),
+    });
+
+    await act(async () => {
+      result.current.mutate({
+        code: 'FUND-NEW',
+        name: 'New Fund',
+        totalBudget: 300000000,
+        startDate: '2024-07-01',
+        endDate: '2024-12-31',
+        fundType: 'TRADE_FUND',
+      });
+    });
+
+    await waitFor(() => {
+      expect(result.current.isSuccess).toBe(true);
+    });
+  });
+});
+
+describe('useUpdateFund', () => {
+  it('should update a fund', async () => {
+    const { result } = renderHook(() => useUpdateFund(), {
+      wrapper: createWrapper(),
+    });
+
+    await act(async () => {
+      result.current.mutate({ id: 'fund-1', data: { name: 'Updated Fund Name' } });
+    });
+
+    await waitFor(() => {
+      expect(result.current.isSuccess).toBe(true);
+    });
+  });
+});
+
+describe('useDeleteFund', () => {
+  it('should delete a fund', async () => {
+    const { result } = renderHook(() => useDeleteFund(), {
+      wrapper: createWrapper(),
+    });
+
+    await act(async () => {
+      result.current.mutate('fund-1');
+    });
+
+    await waitFor(() => {
+      expect(result.current.isSuccess).toBe(true);
+    });
+  });
+});
+
+describe('useFundUtilization', () => {
+  it('should fetch fund utilization stats', async () => {
+    const { result } = renderHook(() => useFundUtilization('fund-1'), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => {
+      expect(result.current.isSuccess).toBe(true);
+    });
+
+    expect(result.current.data).toBeDefined();
+  });
+
+  it('should not fetch when ID is empty', async () => {
+    const { result } = renderHook(() => useFundUtilization(''), {
+      wrapper: createWrapper(),
+    });
+
+    expect(result.current.isLoading).toBe(false);
+  });
+});
+
+describe('useFundOptions', () => {
+  it('should fetch fund options for dropdown', async () => {
+    const { result } = renderHook(() => useFundOptions(), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => {
+      expect(result.current.isSuccess).toBe(true);
+    });
+
+    expect(result.current.data).toBeDefined();
+    expect(result.current.data?.[0]).toHaveProperty('value');
+    expect(result.current.data?.[0]).toHaveProperty('label');
   });
 });

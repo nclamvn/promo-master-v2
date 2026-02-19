@@ -9,15 +9,23 @@ import {
   ChevronRight, ChevronDown, Target, MapPin, Building2, Store,
   TrendingUp, TrendingDown, Search, Filter, Plus,
   Check, AlertCircle, Eye, Edit2, Layers,
-  BarChart3, Calendar, Loader2, FolderTree
+  BarChart3, Calendar, Loader2, FolderTree, X, Save
 } from 'lucide-react';
 import {
   useGeographicUnitsTree,
   useTargetAllocationTree,
   type TargetAllocation as TargetAllocationData,
   getMetricLabel,
+  type GeographicUnit,
 } from '@/hooks';
-import { useTargets } from '@/hooks/useTargets';
+import {
+  useTargets,
+  useTargetProgress,
+  useCreateTargetAllocationNested,
+  useUpdateTargetProgress,
+  getProgressStatusColor,
+} from '@/hooks/useTargets';
+import { useToast } from '@/hooks/useToast';
 import type { Target as TargetType } from '@/types';
 
 // Types
@@ -276,9 +284,11 @@ const TargetTreeNode = ({ node, level = 0, expanded, onToggle, onSelect, selecte
 // Detail Panel Component
 interface DetailPanelProps {
   node: TreeNode | null;
+  onAddChild?: () => void;
+  onUpdateProgress?: () => void;
 }
 
-const DetailPanel = ({ node }: DetailPanelProps) => {
+const DetailPanel = ({ node, onAddChild, onUpdateProgress }: DetailPanelProps) => {
   if (!node) return null;
 
   const config = typeConfig[node.type];
@@ -356,13 +366,19 @@ const DetailPanel = ({ node }: DetailPanelProps) => {
       <div className="bg-card rounded-xl border border-border p-4">
         <div className="text-sm font-medium text-foreground mb-3">Thao tác</div>
         <div className="grid grid-cols-2 gap-2">
-          <button className="flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium text-foreground-muted bg-muted hover:bg-surface-hover rounded-lg transition-colors">
+          <button
+            onClick={onAddChild}
+            className="flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium text-foreground-muted bg-muted hover:bg-surface-hover rounded-lg transition-colors"
+          >
             <Plus className="w-4 h-4" strokeWidth={2} />
             Thêm cấp dưới
           </button>
-          <button className="flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium text-foreground-muted bg-muted hover:bg-surface-hover rounded-lg transition-colors">
+          <button
+            onClick={onUpdateProgress}
+            className="flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium text-foreground-muted bg-muted hover:bg-surface-hover rounded-lg transition-colors"
+          >
             <Edit2 className="w-4 h-4" strokeWidth={1.75} />
-            Cập nhật
+            Cập nhật tiến độ
           </button>
           <button className="flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium text-foreground-muted bg-muted hover:bg-surface-hover rounded-lg transition-colors">
             <BarChart3 className="w-4 h-4" strokeWidth={1.75} />
@@ -378,6 +394,381 @@ const DetailPanel = ({ node }: DetailPanelProps) => {
   );
 };
 
+// Create Allocation Dialog
+interface CreateAllocationDialogProps {
+  isOpen: boolean;
+  onClose: () => void;
+  targetId: string;
+  parentNode?: TreeNode | null;
+  geoUnits: GeographicUnit[];
+  onSuccess: () => void;
+}
+
+const CreateAllocationDialog = ({
+  isOpen,
+  onClose,
+  targetId,
+  parentNode,
+  geoUnits,
+  onSuccess,
+}: CreateAllocationDialogProps) => {
+  const [geoUnitId, setGeoUnitId] = useState('');
+  const [targetValue, setTargetValue] = useState('');
+  const [notes, setNotes] = useState('');
+  const { toast } = useToast();
+
+  const createMutation = useCreateTargetAllocationNested(targetId);
+
+  // Filter geo units based on parent level
+  const filteredGeoUnits = useMemo(() => {
+    if (!parentNode) {
+      // Root level - show regions
+      return geoUnits.filter(g => g.level === 'REGION');
+    }
+    // Show children of parent's level
+    const levelOrder = ['COUNTRY', 'REGION', 'PROVINCE', 'DISTRICT', 'DEALER'];
+    const parentLevel = parentNode.type === 'root' ? 'COUNTRY' : parentNode.type.toUpperCase();
+    const parentIdx = levelOrder.indexOf(parentLevel);
+    const childLevel = levelOrder[parentIdx + 1];
+    return geoUnits.filter(g => g.level === childLevel);
+  }, [geoUnits, parentNode]);
+
+  const handleSubmit = async () => {
+    if (!geoUnitId || !targetValue) {
+      toast({
+        title: 'Lỗi',
+        description: 'Vui lòng điền đầy đủ thông tin',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    try {
+      await createMutation.mutateAsync({
+        geographicUnitId: geoUnitId,
+        parentId: parentNode?.allocationId,
+        targetValue: Number(targetValue),
+        notes: notes || undefined,
+      });
+      toast({
+        title: 'Thành công',
+        description: 'Đã tạo phân bổ mới',
+      });
+      onSuccess();
+      onClose();
+      setGeoUnitId('');
+      setTargetValue('');
+      setNotes('');
+    } catch (err) {
+      toast({
+        title: 'Lỗi',
+        description: err instanceof Error ? err.message : 'Không thể tạo phân bổ',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      <div className="absolute inset-0 bg-black/50" onClick={onClose} />
+      <div className="relative bg-card rounded-xl border border-border shadow-xl w-full max-w-md p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold text-foreground">
+            {parentNode ? `Thêm cấp dưới cho ${parentNode.name}` : 'Tạo phân bổ mới'}
+          </h3>
+          <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-1">
+              Đơn vị địa lý
+            </label>
+            <select
+              value={geoUnitId}
+              onChange={(e) => setGeoUnitId(e.target.value)}
+              className="w-full h-10 px-3 bg-card border border-border rounded-lg text-foreground"
+            >
+              <option value="">Chọn đơn vị...</option>
+              {filteredGeoUnits.map((unit) => (
+                <option key={unit.id} value={unit.id}>
+                  {unit.name} ({unit.code})
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-1">
+              Giá trị mục tiêu
+            </label>
+            <input
+              type="number"
+              value={targetValue}
+              onChange={(e) => setTargetValue(e.target.value)}
+              className="w-full h-10 px-3 bg-card border border-border rounded-lg text-foreground"
+              placeholder="0"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-1">
+              Ghi chú
+            </label>
+            <textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              className="w-full px-3 py-2 bg-card border border-border rounded-lg text-foreground resize-none"
+              rows={3}
+              placeholder="Ghi chú (tùy chọn)"
+            />
+          </div>
+        </div>
+
+        <div className="flex justify-end gap-3 mt-6">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 text-sm font-medium text-foreground-muted bg-muted hover:bg-surface-hover rounded-lg"
+          >
+            Hủy
+          </button>
+          <button
+            onClick={handleSubmit}
+            disabled={createMutation.isPending}
+            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary/90 rounded-lg disabled:opacity-50"
+          >
+            {createMutation.isPending ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <Plus className="w-4 h-4" />
+            )}
+            Tạo phân bổ
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Update Progress Dialog
+interface UpdateProgressDialogProps {
+  isOpen: boolean;
+  onClose: () => void;
+  node: TreeNode | null;
+  onSuccess: () => void;
+}
+
+const UpdateProgressDialog = ({
+  isOpen,
+  onClose,
+  node,
+  onSuccess,
+}: UpdateProgressDialogProps) => {
+  const [achievedValue, setAchievedValue] = useState('');
+  const { toast } = useToast();
+  const updateMutation = useUpdateTargetProgress();
+
+  // Initialize with current value
+  useMemo(() => {
+    if (node) {
+      setAchievedValue(String(node.achieved || 0));
+    }
+  }, [node]);
+
+  const handleSubmit = async () => {
+    if (!node?.allocationId || achievedValue === '') {
+      toast({
+        title: 'Lỗi',
+        description: 'Không có dữ liệu để cập nhật',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    try {
+      await updateMutation.mutateAsync({
+        allocationId: node.allocationId,
+        achievedValue: Number(achievedValue),
+      });
+      toast({
+        title: 'Thành công',
+        description: 'Đã cập nhật tiến độ',
+      });
+      onSuccess();
+      onClose();
+    } catch (err) {
+      toast({
+        title: 'Lỗi',
+        description: err instanceof Error ? err.message : 'Không thể cập nhật',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  if (!isOpen || !node) return null;
+
+  const progress = getProgress(Number(achievedValue), node.target);
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      <div className="absolute inset-0 bg-black/50" onClick={onClose} />
+      <div className="relative bg-card rounded-xl border border-border shadow-xl w-full max-w-md p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold text-foreground">
+            Cập nhật tiến độ: {node.name}
+          </h3>
+          <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        <div className="space-y-4">
+          <div className="bg-muted rounded-lg p-4">
+            <div className="flex justify-between text-sm mb-2">
+              <span className="text-muted-foreground">Mục tiêu</span>
+              <span className="font-medium text-foreground">{formatNumber(node.target)}</span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">Hiện tại</span>
+              <span className="font-medium text-foreground">{formatNumber(node.achieved)}</span>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-1">
+              Giá trị đạt được mới
+            </label>
+            <input
+              type="number"
+              value={achievedValue}
+              onChange={(e) => setAchievedValue(e.target.value)}
+              className="w-full h-10 px-3 bg-card border border-border rounded-lg text-foreground"
+              placeholder="0"
+            />
+          </div>
+
+          <div className="bg-muted rounded-lg p-4">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-muted-foreground">Tiến độ mới</span>
+              <span className="text-lg font-semibold" style={{ color: getProgressColor(progress) }}>
+                {progress}%
+              </span>
+            </div>
+            <div className="h-2 bg-background rounded-full overflow-hidden mt-2">
+              <div
+                className="h-full rounded-full transition-all"
+                style={{ width: `${Math.min(progress, 100)}%`, backgroundColor: getProgressColor(progress) }}
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="flex justify-end gap-3 mt-6">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 text-sm font-medium text-foreground-muted bg-muted hover:bg-surface-hover rounded-lg"
+          >
+            Hủy
+          </button>
+          <button
+            onClick={handleSubmit}
+            disabled={updateMutation.isPending}
+            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary/90 rounded-lg disabled:opacity-50"
+          >
+            {updateMutation.isPending ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <Save className="w-4 h-4" />
+            )}
+            Cập nhật
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Progress Summary Panel
+interface ProgressSummaryProps {
+  targetId: string;
+}
+
+const ProgressSummaryPanel = ({ targetId }: ProgressSummaryProps) => {
+  const { data: progressData, isLoading } = useTargetProgress(targetId);
+
+  if (isLoading) {
+    return (
+      <div className="bg-card rounded-xl border border-border p-4">
+        <Loader2 className="w-6 h-6 mx-auto animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  if (!progressData) return null;
+
+  return (
+    <div className="bg-card rounded-xl border border-border p-4 mb-4">
+      <h3 className="text-sm font-medium text-foreground mb-3">Tổng quan tiến độ</h3>
+
+      {/* Status Breakdown */}
+      <div className="grid grid-cols-4 gap-2 mb-4">
+        <div className="text-center p-2 bg-green-50 dark:bg-green-900/20 rounded-lg">
+          <div className="text-lg font-semibold text-green-600">{progressData.statusBreakdown.achieved}</div>
+          <div className="text-xs text-green-600/80">Đạt</div>
+        </div>
+        <div className="text-center p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+          <div className="text-lg font-semibold text-blue-600">{progressData.statusBreakdown.good}</div>
+          <div className="text-xs text-blue-600/80">Tốt</div>
+        </div>
+        <div className="text-center p-2 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
+          <div className="text-lg font-semibold text-yellow-600">{progressData.statusBreakdown.slow}</div>
+          <div className="text-xs text-yellow-600/80">Chậm</div>
+        </div>
+        <div className="text-center p-2 bg-red-50 dark:bg-red-900/20 rounded-lg">
+          <div className="text-lg font-semibold text-red-600">{progressData.statusBreakdown.atRisk}</div>
+          <div className="text-xs text-red-600/80">Rủi ro</div>
+        </div>
+      </div>
+
+      {/* Top Performers */}
+      {progressData.topPerformers.length > 0 && (
+        <div className="mb-3">
+          <div className="text-xs font-medium text-muted-foreground mb-2">Top thành tích</div>
+          <div className="space-y-1">
+            {progressData.topPerformers.slice(0, 3).map((p) => (
+              <div key={p.id} className="flex items-center justify-between text-xs">
+                <span className="text-foreground truncate">{p.name}</span>
+                <span className={`font-medium ${getProgressStatusColor(p.progress >= 100 ? 'ACHIEVED' : p.progress >= 75 ? 'GOOD' : 'SLOW')}`}>
+                  {p.progress.toFixed(1)}%
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Underperformers */}
+      {progressData.underperformers.length > 0 && (
+        <div>
+          <div className="text-xs font-medium text-muted-foreground mb-2">Cần cải thiện</div>
+          <div className="space-y-1">
+            {progressData.underperformers.slice(0, 3).map((p) => (
+              <div key={p.id} className="flex items-center justify-between text-xs">
+                <span className="text-foreground truncate">{p.name}</span>
+                <span className="font-medium text-red-600">{p.progress.toFixed(1)}%</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 // Main Component
 export default function TargetAllocation() {
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
@@ -385,16 +776,34 @@ export default function TargetAllocation() {
   const [, setSelectedPath] = useState<PathItem[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTargetId, setSelectedTargetId] = useState<string>('');
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [showUpdateDialog, setShowUpdateDialog] = useState(false);
+  const [createParentNode, setCreateParentNode] = useState<TreeNode | null>(null);
+  const { toast } = useToast();
 
   // Fetch targets for selection
   const { data: targetsData, isLoading: targetsLoading } = useTargets({ limit: 100 });
   const targets = targetsData?.targets || [];
 
-  // Fetch geographic units tree (for future use in creating allocations)
-  const { isLoading: geoLoading } = useGeographicUnitsTree();
+  // Fetch geographic units tree (for creating allocations)
+  const { data: geoUnitsData, isLoading: geoLoading } = useGeographicUnitsTree();
+  const geoUnits = useMemo(() => {
+    // Flatten the tree for select options
+    const flatten = (units: GeographicUnit[]): GeographicUnit[] => {
+      let result: GeographicUnit[] = [];
+      for (const unit of units) {
+        result.push(unit);
+        if (unit.children && unit.children.length > 0) {
+          result = [...result, ...flatten(unit.children as GeographicUnit[])];
+        }
+      }
+      return result;
+    };
+    return geoUnitsData ? flatten(geoUnitsData) : [];
+  }, [geoUnitsData]);
 
   // Fetch target allocations tree for selected target
-  const { data: allocations, isLoading: allocationsLoading } = useTargetAllocationTree(selectedTargetId);
+  const { data: allocations, isLoading: allocationsLoading, refetch: refetchAllocations } = useTargetAllocationTree(selectedTargetId);
 
   // Transform allocations to tree nodes
   const treeData = useMemo(() => {
@@ -456,6 +865,26 @@ export default function TargetAllocation() {
   // Calculate overall stats
   const overallProgress = rootNode ? getProgress(rootNode.achieved, rootNode.target) : 0;
 
+  // Handlers for dialogs
+  const handleCreateAllocation = (parentNode?: TreeNode) => {
+    setCreateParentNode(parentNode || null);
+    setShowCreateDialog(true);
+  };
+
+  const handleUpdateProgress = () => {
+    if (selectedNode) {
+      setShowUpdateDialog(true);
+    }
+  };
+
+  const handleAllocationSuccess = () => {
+    refetchAllocations();
+    toast({
+      title: 'Dữ liệu đã cập nhật',
+      description: 'Danh sách phân bổ đã được làm mới',
+    });
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -486,7 +915,11 @@ export default function TargetAllocation() {
                 ))}
               </select>
 
-              <button className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground text-sm font-medium rounded-lg hover:bg-primary/90 transition-colors">
+              <button
+                onClick={() => handleCreateAllocation()}
+                disabled={!selectedTargetId}
+                className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground text-sm font-medium rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
+              >
                 <Plus className="w-4 h-4" strokeWidth={2} />
                 Tạo phân bổ
               </button>
@@ -629,7 +1062,10 @@ export default function TargetAllocation() {
                     <p className="text-sm text-muted-foreground mb-4">
                       Mục tiêu này chưa có dữ liệu phân bổ theo vùng miền
                     </p>
-                    <button className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground text-sm font-medium rounded-lg hover:bg-primary/90">
+                    <button
+                      onClick={() => handleCreateAllocation()}
+                      className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground text-sm font-medium rounded-lg hover:bg-primary/90"
+                    >
                       <Plus className="w-4 h-4" />
                       Tạo phân bổ đầu tiên
                     </button>
@@ -640,8 +1076,15 @@ export default function TargetAllocation() {
 
             {/* Right Panel - Details */}
             <div className="w-[360px] flex-shrink-0">
+              {/* Progress Summary */}
+              <ProgressSummaryPanel targetId={selectedTargetId} />
+
               {selectedNode ? (
-                <DetailPanel node={selectedNode} />
+                <DetailPanel
+                  node={selectedNode}
+                  onAddChild={() => handleCreateAllocation(selectedNode)}
+                  onUpdateProgress={handleUpdateProgress}
+                />
               ) : (
                 <div className="bg-card rounded-xl border border-border p-8 text-center">
                   <Target className="w-12 h-12 mx-auto mb-4 text-foreground-subtle" strokeWidth={1.5} />
@@ -655,6 +1098,24 @@ export default function TargetAllocation() {
           </div>
         )}
       </div>
+
+      {/* Create Allocation Dialog */}
+      <CreateAllocationDialog
+        isOpen={showCreateDialog}
+        onClose={() => setShowCreateDialog(false)}
+        targetId={selectedTargetId}
+        parentNode={createParentNode}
+        geoUnits={geoUnits}
+        onSuccess={handleAllocationSuccess}
+      />
+
+      {/* Update Progress Dialog */}
+      <UpdateProgressDialog
+        isOpen={showUpdateDialog}
+        onClose={() => setShowUpdateDialog(false)}
+        node={selectedNode}
+        onSuccess={handleAllocationSuccess}
+      />
     </div>
   );
 }

@@ -3,53 +3,10 @@
  */
 
 import { Link, Database, Webhook, Key, Activity, AlertTriangle, CheckCircle } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
+import { StatCard, StatCardGroup } from '@/components/ui/stat-card';
 
-interface StatCardProps {
-  title: string;
-  value: string | number;
-  subtitle?: string;
-  icon?: React.ReactNode;
-  variant?: 'default' | 'success' | 'warning' | 'danger';
-  className?: string;
-}
-
-export function StatCard({
-  title,
-  value,
-  subtitle,
-  icon,
-  variant = 'default',
-  className,
-}: StatCardProps) {
-  const variantStyles = {
-    default: '',
-    success: 'border-green-500/30 bg-green-500/10 dark:bg-green-500/20',
-    warning: 'border-yellow-500/30 bg-yellow-500/10 dark:bg-yellow-500/20',
-    danger: 'border-red-500/30 bg-red-500/10 dark:bg-red-500/20',
-  };
-
-  const iconColors = {
-    default: 'text-muted-foreground',
-    success: 'text-green-600 dark:text-green-400',
-    warning: 'text-yellow-600 dark:text-yellow-400',
-    danger: 'text-red-600 dark:text-red-400',
-  };
-
-  return (
-    <Card className={cn(variantStyles[variant], className)}>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium">{title}</CardTitle>
-        <div className={iconColors[variant]}>{icon || <Activity className="h-4 w-4" />}</div>
-      </CardHeader>
-      <CardContent>
-        <div className="text-2xl font-bold">{value}</div>
-        {subtitle && <p className="text-xs text-muted-foreground">{subtitle}</p>}
-      </CardContent>
-    </Card>
-  );
-}
+export { StatCard } from '@/components/ui/stat-card';
 
 interface IntegrationSummaryProps {
   erpConnections: number;
@@ -73,36 +30,36 @@ export function IntegrationSummary({
   apiKeysActive,
 }: IntegrationSummaryProps) {
   return (
-    <div className="grid gap-4 md:grid-cols-4">
+    <StatCardGroup cols={4}>
       <StatCard
         title="ERP Connections"
         value={erpConnections}
         subtitle={`${erpActive} active`}
-        icon={<Database className="h-4 w-4" />}
-        variant={erpActive > 0 ? 'success' : 'default'}
+        icon={Database}
+        color={erpActive > 0 ? 'success' : 'default'}
       />
       <StatCard
         title="DMS Connections"
         value={dmsConnections}
         subtitle={`${dmsActive} active`}
-        icon={<Link className="h-4 w-4" />}
-        variant={dmsActive > 0 ? 'success' : 'default'}
+        icon={Link}
+        color={dmsActive > 0 ? 'success' : 'default'}
       />
       <StatCard
         title="Webhook Endpoints"
         value={webhookEndpoints}
         subtitle={`${webhookActive} active`}
-        icon={<Webhook className="h-4 w-4" />}
-        variant={webhookActive > 0 ? 'success' : 'default'}
+        icon={Webhook}
+        color={webhookActive > 0 ? 'success' : 'default'}
       />
       <StatCard
         title="API Keys"
         value={apiKeys}
         subtitle={`${apiKeysActive} active`}
-        icon={<Key className="h-4 w-4" />}
-        variant={apiKeysActive > 0 ? 'success' : 'default'}
+        icon={Key}
+        color={apiKeysActive > 0 ? 'success' : 'default'}
       />
-    </div>
+    </StatCardGroup>
   );
 }
 

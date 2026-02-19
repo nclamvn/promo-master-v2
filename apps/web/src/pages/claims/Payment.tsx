@@ -8,15 +8,12 @@ import { useState, useMemo } from 'react';
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
-  CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
   Select,
@@ -52,12 +49,9 @@ import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import {
   Search,
-  Filter,
   Download,
-  Upload,
   MoreHorizontal,
   CreditCard,
-  Banknote,
   Building2,
   FileText,
   CheckCircle2,
@@ -70,12 +64,8 @@ import {
   Edit2,
   Trash2,
   Plus,
-  Calendar,
   DollarSign,
-  Users,
-  TrendingUp,
   ArrowUpRight,
-  ArrowDownRight,
   Receipt,
   Wallet,
   RefreshCw,
@@ -132,17 +122,6 @@ interface PaymentSummary {
   paidAmount: number;
   overdueCount: number;
   overdueAmount: number;
-}
-
-interface PaymentBatch {
-  id: string;
-  batchCode: string;
-  paymentMethod: string;
-  itemCount: number;
-  totalAmount: number;
-  status: 'DRAFT' | 'PENDING_APPROVAL' | 'APPROVED' | 'PROCESSING' | 'COMPLETED';
-  createdAt: string;
-  createdBy: string;
 }
 
 // ============================================================================
@@ -262,29 +241,6 @@ const mockSummary: PaymentSummary = {
   overdueAmount: 320000000,
 };
 
-const mockBatches: PaymentBatch[] = [
-  {
-    id: 'B1',
-    batchCode: 'BATCH-2026-001',
-    paymentMethod: 'BANK_TRANSFER',
-    itemCount: 12,
-    totalAmount: 580000000,
-    status: 'PENDING_APPROVAL',
-    createdAt: '2026-01-26',
-    createdBy: 'Admin',
-  },
-  {
-    id: 'B2',
-    batchCode: 'BATCH-2026-002',
-    paymentMethod: 'CHEQUE',
-    itemCount: 5,
-    totalAmount: 225000000,
-    status: 'DRAFT',
-    createdAt: '2026-01-27',
-    createdBy: 'Admin',
-  },
-];
-
 // ============================================================================
 // HELPER FUNCTIONS
 // ============================================================================
@@ -302,7 +258,7 @@ const getPaymentStatusBadge = (status: PaymentItem['paymentStatus']) => {
     case 'FAILED':
       return <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">Thất bại</Badge>;
     case 'CANCELLED':
-      return <Badge variant="outline" className="bg-gray-50 text-gray-700 border-gray-200">Đã hủy</Badge>;
+      return <Badge variant="outline" className="bg-muted/50 text-foreground-muted border-border">Đã hủy</Badge>;
     default:
       return <Badge variant="outline">{status}</Badge>;
   }
@@ -411,7 +367,7 @@ const SummaryCards = ({ summary }: { summary: PaymentSummary }) => {
         </CardContent>
       </Card>
       
-      <Card className="border-red-200 bg-red-500/10 dark:bg-red-500/20">
+      <Card className="border-red-200 dark:border-red-800/30 bg-red-50 dark:bg-red-950/30">
         <CardContent className="pt-4">
           <div className="flex items-center justify-between">
             <div>
@@ -423,7 +379,7 @@ const SummaryCards = ({ summary }: { summary: PaymentSummary }) => {
         </CardContent>
       </Card>
 
-      <Card className="border-red-200 bg-red-500/10 dark:bg-red-500/20">
+      <Card className="border-red-200 dark:border-red-800/30 bg-red-50 dark:bg-red-950/30">
         <CardContent className="pt-4">
           <div className="flex items-center justify-between">
             <div>
@@ -759,7 +715,7 @@ export default function ClaimsPaymentPage() {
   }, [payments, selectedIds]);
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>

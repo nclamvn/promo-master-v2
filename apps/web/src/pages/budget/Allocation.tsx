@@ -4,11 +4,26 @@
 // Path: apps/web/src/pages/budget/Allocation.tsx
 // ============================================================================
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { toast } from '@/hooks/useToast';
+import {
+  useBudgets,
+  useBudget,
+  useFundHealthScore,
+} from '@/hooks/useBudgets';
+import {
+  useBudgetAllocationTree,
+  useCreateBudgetAllocation,
+  useUpdateBudgetAllocation,
+  useDeleteBudgetAllocation,
+  type BudgetAllocation as ApiBudgetAllocation,
+} from '@/hooks/useBudgetAllocations';
+import { useGeographicUnitsTree } from '@/hooks/useGeographicUnits';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
@@ -16,7 +31,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Select,
   SelectContent,
@@ -31,8 +46,17 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -64,13 +88,9 @@ import {
   Trash2,
   Copy,
   Download,
-  Upload,
   RefreshCw,
   Search,
-  Filter,
-  ArrowUpDown,
   TrendingUp,
-  TrendingDown,
   AlertTriangle,
   CheckCircle2,
   Clock,
@@ -85,12 +105,11 @@ import {
   Lock,
   Unlock,
   Save,
-  Undo,
   Calculator,
   Percent,
   DollarSign,
 } from 'lucide-react';
-import { cn, formatPercent } from '@/lib/utils';
+import { cn, formatPercent, safePercentageNumber } from '@/lib/utils';
 import { CurrencyDisplay, formatCurrencyCompact } from '@/components/ui/currency-display';
 
 // ============================================================================
@@ -140,7 +159,68 @@ interface BudgetSummary {
 }
 
 // ============================================================================
-// MOCK DATA
+// DATA TRANSFORMATION
+// ============================================================================
+
+// Transform API allocation data to UI AllocationNode format
+function transformAllocationsToTree(
+  allocations: ApiBudgetAllocation[],
+  parentId: string | null = null,
+  level: number = 0
+): AllocationNode[] {
+  const children = allocations.filter(a =>
+    parentId === null ? !a.parentId : a.parentId === parentId
+  );
+
+  return children.map(allocation => {
+    const childNodes = transformAllocationsToTree(allocations, allocation.id, level + 1);
+    const geoUnit = allocation.geographicUnit;
+
+    return {
+      id: allocation.id,
+      code: allocation.code,
+      name: geoUnit?.name || allocation.code,
+      type: (geoUnit?.level || 'REGION') as AllocationNode['type'],
+      parentId: allocation.parentId || null,
+      level,
+      totalBudget: allocation.allocatedAmount,
+      allocatedBudget: allocation.childrenAllocated,
+      spentBudget: allocation.spentAmount,
+      remainingBudget: allocation.allocatedAmount - allocation.spentAmount,
+      allocationPercent: 0, // Calculate from parent if needed
+      allocationMethod: 'MANUAL' as const,
+      isLocked: allocation.status === 'LOCKED',
+      status: allocation.status === 'APPROVED' ? 'ACTIVE' :
+              allocation.status === 'PENDING_APPROVAL' ? 'PENDING' :
+              allocation.status === 'DRAFT' ? 'DRAFT' : 'ACTIVE',
+      customerCount: 0,
+      lastYearSpend: 0,
+      growthTarget: 0,
+      children: childNodes.length > 0 ? childNodes : undefined,
+      isExpanded: level < 2, // Auto-expand first 2 levels
+    } as AllocationNode;
+  });
+}
+
+// Calculate summary from allocations
+function calculateSummary(budget: any, _allocations: AllocationNode[]): BudgetSummary {
+  const totalBudget = budget?.totalAmount || 0;
+  const allocated = budget?.allocatedAmount || 0;
+  const spent = budget?.spentAmount || 0;
+
+  return {
+    totalBudget,
+    allocated,
+    unallocated: totalBudget - allocated,
+    spent,
+    committed: 0, // Would need activity data
+    available: totalBudget - spent,
+    utilizationRate: totalBudget > 0 ? (spent / totalBudget) * 100 : 0,
+  };
+}
+
+// ============================================================================
+// MOCK DATA (fallback when no budget selected)
 // ============================================================================
 
 const mockAllocationTree: AllocationNode[] = [
@@ -438,9 +518,9 @@ const getTypeColor = (type: AllocationNode['type']) => {
     case 'DISTRICT':
       return 'text-orange-600 bg-orange-50';
     case 'DEALER':
-      return 'text-gray-600 bg-gray-50';
+      return 'text-muted-foreground bg-muted/50';
     default:
-      return 'text-gray-600 bg-gray-50';
+      return 'text-muted-foreground bg-muted/50';
   }
 };
 
@@ -449,11 +529,11 @@ const getStatusBadge = (status: AllocationNode['status']) => {
     case 'DRAFT':
       return <Badge variant="outline">Nháp</Badge>;
     case 'PENDING':
-      return <Badge className="bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/20 hover:bg-amber-500/20">Chờ duyệt</Badge>;
+      return <Badge className="bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800/30 hover:bg-amber-200 dark:hover:bg-amber-900/70">Chờ duyệt</Badge>;
     case 'APPROVED':
-      return <Badge className="bg-blue-500/15 text-blue-700 dark:text-blue-400 border-blue-500/20 hover:bg-blue-500/20">Đã duyệt</Badge>;
+      return <Badge className="bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800/30 hover:bg-blue-200 dark:hover:bg-blue-900/70">Đã duyệt</Badge>;
     case 'ACTIVE':
-      return <Badge className="bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20">Đang hoạt động</Badge>;
+      return <Badge className="bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/30 hover:bg-emerald-200 dark:hover:bg-emerald-900/70">Đang hoạt động</Badge>;
     default:
       return <Badge variant="outline">{status}</Badge>;
   }
@@ -558,8 +638,7 @@ const TreeNode = ({
 }) => {
   const Icon = getTypeIcon(node.type);
   const hasChildren = node.children && node.children.length > 0;
-  const utilizationPercent = (node.spentBudget / node.totalBudget) * 100;
-  const allocationPercent = (node.allocatedBudget / node.totalBudget) * 100;
+  const utilizationPercent = safePercentageNumber(node.spentBudget, node.totalBudget);
   
   return (
     <div className="select-none">
@@ -758,7 +837,7 @@ const TableView = ({
         <TableBody>
           {flatData.map((node) => {
             const Icon = getTypeIcon(node.type);
-            const utilizationPercent = (node.spentBudget / node.totalBudget) * 100;
+            const utilizationPercent = safePercentageNumber(node.spentBudget, node.totalBudget);
 
             return (
               <TableRow
@@ -919,8 +998,8 @@ const FlowView = ({
             <div className="space-y-4">
               {regions.map((region, index) => {
                 const colors = regionColors[index % regionColors.length];
-                const percent = (region.totalBudget / summary.totalBudget) * 100;
-                const utilizationPercent = (region.spentBudget / region.totalBudget) * 100;
+                const percent = safePercentageNumber(region.totalBudget, summary.totalBudget);
+                const utilizationPercent = safePercentageNumber(region.spentBudget, region.totalBudget);
 
                 return (
                   <div key={region.id} className={cn('p-4 rounded-lg', colors.light)}>
@@ -1164,16 +1243,74 @@ const AllocationFormDialog = ({
 // ============================================================================
 
 export default function BudgetAllocationPage() {
+  // URL params for budget selection
+  const [searchParams, setSearchParams] = useSearchParams();
+  const selectedBudgetId = searchParams.get('budgetId') || '';
+
   // State
-  const [allocationTree, setAllocationTree] = useState<AllocationNode[]>(mockAllocationTree);
+  const [localTree, setLocalTree] = useState<AllocationNode[]>([]);
   const [selectedNode, setSelectedNode] = useState<string | null>(null);
   const [editingNode, setEditingNode] = useState<AllocationNode | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterMethod, setFilterMethod] = useState<string>('all');
   const [viewMode, setViewMode] = useState<'tree' | 'table' | 'flow'>('tree');
+
+  // Fetch budgets for selection
+  const { data: budgetsData, isLoading: budgetsLoading } = useBudgets({
+    approvalStatus: 'APPROVED',
+    pageSize: 50,
+  });
+  const budgets = budgetsData?.budgets || [];
+
+  // Fetch selected budget details
+  const { data: selectedBudget, isLoading: budgetLoading } = useBudget(selectedBudgetId);
+
+  // Fetch allocations tree for selected budget
+  const {
+    data: apiAllocations,
+    isLoading: allocationsLoading,
+    refetch: refetchAllocations,
+  } = useBudgetAllocationTree(selectedBudgetId);
+
+  // Fetch geographic units for creating new allocations
+  const { data: geoUnits } = useGeographicUnitsTree();
+
+  // Fetch health score
+  const { data: healthScore } = useFundHealthScore(selectedBudgetId);
+
+  // Mutations
+  const createAllocation = useCreateBudgetAllocation();
+  const updateAllocation = useUpdateBudgetAllocation();
+  const deleteAllocation = useDeleteBudgetAllocation();
+
+  // Transform API data to UI format
+  const allocationTree = useMemo(() => {
+    if (!apiAllocations || apiAllocations.length === 0) {
+      return selectedBudgetId ? [] : mockAllocationTree;
+    }
+    return transformAllocationsToTree(apiAllocations);
+  }, [apiAllocations, selectedBudgetId]);
+
+  // Update local tree when API data changes
+  useEffect(() => {
+    setLocalTree(allocationTree);
+  }, [allocationTree]);
+
+  // Calculate summary
+  const budgetSummary = useMemo(() => {
+    if (selectedBudget) {
+      return calculateSummary(selectedBudget, localTree);
+    }
+    return mockBudgetSummary;
+  }, [selectedBudget, localTree]);
+
+  // Loading state
+  const isLoading = budgetLoading || allocationsLoading;
   
-  // Toggle node expansion
+  // Toggle node expansion (local state only)
   const toggleNode = (id: string) => {
     const updateTree = (nodes: AllocationNode[]): AllocationNode[] => {
       return nodes.map((node) => {
@@ -1186,44 +1323,110 @@ export default function BudgetAllocationPage() {
         return node;
       });
     };
-    setAllocationTree(updateTree(allocationTree));
+    setLocalTree(updateTree(localTree));
   };
-  
+
   // Handle edit
   const handleEdit = (node: AllocationNode) => {
     setEditingNode(node);
     setIsEditDialogOpen(true);
   };
-  
-  // Handle save
-  const handleSave = (data: Partial<AllocationNode>) => {
-    console.log('Saving:', data);
+
+  // Handle save - calls real API
+  const handleSave = async (data: Partial<AllocationNode>) => {
+    if (!editingNode) return;
+
+    try {
+      await updateAllocation.mutateAsync({
+        id: editingNode.id,
+        data: {
+          allocatedAmount: data.totalBudget,
+          notes: `Growth target: ${data.growthTarget}%`,
+        },
+      });
+      toast({ title: 'Success', description: 'Allocation updated successfully' });
+      refetchAllocations();
+    } catch (error: any) {
+      toast({ title: 'Error', variant: 'destructive', description: error.response?.data?.error || 'Failed to update allocation' });
+    }
+
     setIsEditDialogOpen(false);
     setEditingNode(null);
   };
-  
-  // Handle delete
+
+  // Handle delete - calls real API
   const handleDelete = (id: string) => {
-    console.log('Delete:', id);
+    setDeleteConfirmId(id);
   };
-  
-  // Handle lock toggle
-  const handleLockToggle = (id: string) => {
-    const updateTree = (nodes: AllocationNode[]): AllocationNode[] => {
-      return nodes.map((node) => {
-        if (node.id === id) {
-          return { ...node, isLocked: !node.isLocked };
-        }
-        if (node.children) {
-          return { ...node, children: updateTree(node.children) };
-        }
-        return node;
+
+  const confirmDelete = async () => {
+    if (!deleteConfirmId) return;
+
+    try {
+      await deleteAllocation.mutateAsync(deleteConfirmId);
+      toast({ title: 'Success', description: 'Allocation deleted' });
+      refetchAllocations();
+    } catch (error: any) {
+      toast({ title: 'Error', variant: 'destructive', description: error.response?.data?.error || 'Failed to delete allocation' });
+    } finally {
+      setDeleteConfirmId(null);
+    }
+  };
+
+  // Handle lock toggle - calls real API
+  const handleLockToggle = async (id: string) => {
+    const node = findNodeById(localTree, id);
+    if (!node) return;
+
+    const newStatus = node.isLocked ? 'APPROVED' : 'LOCKED';
+
+    try {
+      await updateAllocation.mutateAsync({
+        id,
+        data: { status: newStatus as any },
       });
-    };
-    setAllocationTree(updateTree(allocationTree));
+      toast({ title: 'Success', description: node.isLocked ? 'Allocation unlocked' : 'Allocation locked' });
+      refetchAllocations();
+    } catch (error: any) {
+      toast({ title: 'Error', variant: 'destructive', description: error.response?.data?.error || 'Failed to toggle lock' });
+    }
   };
-  
-  // Expand all
+
+  // Helper to find node by id
+  const findNodeById = (nodes: AllocationNode[], id: string): AllocationNode | null => {
+    for (const node of nodes) {
+      if (node.id === id) return node;
+      if (node.children) {
+        const found = findNodeById(node.children, id);
+        if (found) return found;
+      }
+    }
+    return null;
+  };
+
+  // Handle add allocation
+  const handleAddAllocation = async (geoUnitId: string, amount: number, parentId?: string) => {
+    if (!selectedBudgetId) {
+      toast({ title: 'Error', variant: 'destructive', description: 'Please select a budget first' });
+      return;
+    }
+
+    try {
+      await createAllocation.mutateAsync({
+        budgetId: selectedBudgetId,
+        geographicUnitId: geoUnitId,
+        parentId,
+        allocatedAmount: amount,
+      });
+      toast({ title: 'Success', description: 'Allocation created' });
+      setIsAddDialogOpen(false);
+      refetchAllocations();
+    } catch (error: any) {
+      toast({ title: 'Error', variant: 'destructive', description: error.response?.data?.error || 'Failed to create allocation' });
+    }
+  };
+
+  // Expand all (local state)
   const expandAll = () => {
     const updateTree = (nodes: AllocationNode[]): AllocationNode[] => {
       return nodes.map((node) => ({
@@ -1232,10 +1435,10 @@ export default function BudgetAllocationPage() {
         children: node.children ? updateTree(node.children) : undefined,
       }));
     };
-    setAllocationTree(updateTree(allocationTree));
+    setLocalTree(updateTree(localTree));
   };
-  
-  // Collapse all
+
+  // Collapse all (local state)
   const collapseAll = () => {
     const updateTree = (nodes: AllocationNode[]): AllocationNode[] => {
       return nodes.map((node) => ({
@@ -1244,38 +1447,103 @@ export default function BudgetAllocationPage() {
         children: node.children ? updateTree(node.children) : undefined,
       }));
     };
-    setAllocationTree(updateTree(allocationTree));
+    setLocalTree(updateTree(localTree));
+  };
+
+  // Handle budget selection
+  const handleBudgetSelect = (budgetId: string) => {
+    setSearchParams({ budgetId });
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0">
           <h1 className="text-2xl font-bold">Phân Bổ Ngân Sách</h1>
           <p className="text-muted-foreground">
             Quản lý phân bổ ngân sách theo cấp bậc địa lý
           </p>
         </div>
-        
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm">
-            <Upload className="h-4 w-4 mr-2" />
-            Import
+
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
+          {/* Budget Selector */}
+          <Select value={selectedBudgetId} onValueChange={handleBudgetSelect}>
+            <SelectTrigger className="w-full sm:w-[250px]">
+              <SelectValue placeholder="Chọn ngân sách..." />
+            </SelectTrigger>
+            <SelectContent>
+              {budgetsLoading ? (
+                <SelectItem value="__loading__" disabled>Loading...</SelectItem>
+              ) : budgets.length === 0 ? (
+                <SelectItem value="__empty__" disabled>No approved budgets</SelectItem>
+              ) : (
+                budgets.map((b: any) => (
+                  <SelectItem key={b.id} value={b.id}>
+                    {b.code} - {b.name}
+                  </SelectItem>
+                ))
+              )}
+            </SelectContent>
+          </Select>
+
+          <Button variant="outline" size="sm" onClick={() => refetchAllocations()}>
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Refresh
           </Button>
           <Button variant="outline" size="sm">
             <Download className="h-4 w-4 mr-2" />
             Export
           </Button>
-          <Button size="sm">
+          <Button size="sm" onClick={() => setIsAddDialogOpen(true)} disabled={!selectedBudgetId}>
             <Plus className="h-4 w-4 mr-2" />
             Thêm phân bổ
           </Button>
         </div>
       </div>
-      
+
+      {/* Health Score Alert (if exists) */}
+      {healthScore && healthScore.status !== 'EXCELLENT' && (
+        <Card className={cn(
+          'border-l-4',
+          healthScore.status === 'CRITICAL' && 'border-l-red-500 bg-red-50 dark:bg-red-950',
+          healthScore.status === 'WARNING' && 'border-l-amber-500 bg-amber-50 dark:bg-amber-950',
+          healthScore.status === 'GOOD' && 'border-l-blue-500 bg-blue-50 dark:bg-blue-950'
+        )}>
+          <CardContent className="py-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <AlertTriangle className={cn(
+                  'h-5 w-5',
+                  healthScore.status === 'CRITICAL' && 'text-red-600',
+                  healthScore.status === 'WARNING' && 'text-amber-600',
+                  healthScore.status === 'GOOD' && 'text-blue-600'
+                )} />
+                <div>
+                  <p className="font-medium">Fund Health Score: {healthScore.healthScore}/100 ({healthScore.status})</p>
+                  <p className="text-sm text-muted-foreground">
+                    {healthScore.alerts?.[0]?.message || 'Review budget utilization'}
+                  </p>
+                </div>
+              </div>
+              <Badge variant="outline">
+                Utilization: {healthScore.breakdown?.utilization?.rate || 0}%
+              </Badge>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Summary Cards */}
-      <SummaryCards summary={mockBudgetSummary} />
+      {isLoading ? (
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <Skeleton key={i} className="h-24 w-full" />
+          ))}
+        </div>
+      ) : (
+        <SummaryCards summary={budgetSummary} />
+      )}
       
       {/* Main Content */}
       <Card>
@@ -1372,26 +1640,40 @@ export default function BudgetAllocationPage() {
               
               {/* Tree Nodes */}
               <div className="divide-y">
-                {allocationTree.map((node) => (
-                  <TreeNode
-                    key={node.id}
-                    node={node}
-                    onToggle={toggleNode}
-                    onEdit={handleEdit}
-                    onDelete={handleDelete}
-                    onLockToggle={handleLockToggle}
-                    selectedId={selectedNode}
-                    onSelect={setSelectedNode}
-                  />
-                ))}
+                {isLoading ? (
+                  <div className="p-8 text-center">
+                    <Skeleton className="h-8 w-full mb-2" />
+                    <Skeleton className="h-8 w-full mb-2" />
+                    <Skeleton className="h-8 w-full" />
+                  </div>
+                ) : localTree.length === 0 ? (
+                  <div className="p-8 text-center text-muted-foreground">
+                    {selectedBudgetId
+                      ? 'No allocations yet. Click "Thêm phân bổ" to create one.'
+                      : 'Please select a budget to view allocations.'}
+                  </div>
+                ) : (
+                  localTree.map((node) => (
+                    <TreeNode
+                      key={node.id}
+                      node={node}
+                      onToggle={toggleNode}
+                      onEdit={handleEdit}
+                      onDelete={handleDelete}
+                      onLockToggle={handleLockToggle}
+                      selectedId={selectedNode}
+                      onSelect={setSelectedNode}
+                    />
+                  ))
+                )}
               </div>
             </div>
           )}
-          
+
           {/* Table View */}
           {viewMode === 'table' && (
             <TableView
-              data={allocationTree}
+              data={localTree}
               onEdit={handleEdit}
               onDelete={handleDelete}
               onLockToggle={handleLockToggle}
@@ -1400,7 +1682,7 @@ export default function BudgetAllocationPage() {
 
           {/* Flow View */}
           {viewMode === 'flow' && (
-            <FlowView data={allocationTree} summary={mockBudgetSummary} />
+            <FlowView data={localTree} summary={budgetSummary} />
           )}
         </CardContent>
       </Card>
@@ -1412,6 +1694,158 @@ export default function BudgetAllocationPage() {
         onOpenChange={setIsEditDialogOpen}
         onSave={handleSave}
       />
+
+      {/* Add Allocation Dialog */}
+      <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Thêm Phân Bổ Mới</DialogTitle>
+            <DialogDescription>
+              Tạo phân bổ mới cho ngân sách {selectedBudget?.code}
+            </DialogDescription>
+          </DialogHeader>
+          <AddAllocationForm
+            geoUnits={geoUnits || []}
+            existingAllocations={localTree}
+            parentOptions={localTree}
+            onSubmit={handleAddAllocation}
+            onCancel={() => setIsAddDialogOpen(false)}
+            isLoading={createAllocation.isPending}
+          />
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!deleteConfirmId} onOpenChange={(open) => !open && setDeleteConfirmId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Xác nhận xóa</AlertDialogTitle>
+            <AlertDialogDescription>
+              Bạn có chắc chắn muốn xóa phân bổ này? Hành động này không thể hoàn tác.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Hủy</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Xóa
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
+  );
+}
+
+// Add Allocation Form Component
+function AddAllocationForm({
+  geoUnits,
+  existingAllocations: _existingAllocations,
+  parentOptions,
+  onSubmit,
+  onCancel,
+  isLoading,
+}: {
+  geoUnits: any[];
+  existingAllocations: AllocationNode[];
+  parentOptions: AllocationNode[];
+  onSubmit: (geoUnitId: string, amount: number, parentId?: string) => void;
+  onCancel: () => void;
+  isLoading: boolean;
+}) {
+  const [selectedGeoUnit, setSelectedGeoUnit] = useState('');
+  const [selectedParent, setSelectedParent] = useState('__none__');
+  const [amount, setAmount] = useState('');
+
+  // Flatten geo units for select
+  const flattenGeoUnits = (units: any[], level = 0): any[] => {
+    const result: any[] = [];
+    for (const unit of units) {
+      result.push({ ...unit, depth: level });
+      if (unit.children) {
+        result.push(...flattenGeoUnits(unit.children, level + 1));
+      }
+    }
+    return result;
+  };
+
+  const flatGeoUnits = useMemo(() => flattenGeoUnits(geoUnits), [geoUnits]);
+
+  // Flatten parent options
+  const flattenParents = (nodes: AllocationNode[], level = 0): Array<AllocationNode & { depth: number }> => {
+    const result: Array<AllocationNode & { depth: number }> = [];
+    for (const node of nodes) {
+      result.push({ ...node, depth: level });
+      if (node.children) {
+        result.push(...flattenParents(node.children, level + 1));
+      }
+    }
+    return result;
+  };
+
+  const flatParents = useMemo(() => flattenParents(parentOptions), [parentOptions]);
+
+  const handleSubmit = () => {
+    if (!selectedGeoUnit || !amount) return;
+    onSubmit(selectedGeoUnit, parseFloat(amount), selectedParent === '__none__' ? undefined : selectedParent);
+  };
+
+  return (
+    <div className="space-y-4 py-4">
+      <div className="space-y-2">
+        <label className="text-sm font-medium">Khu vực địa lý</label>
+        <Select value={selectedGeoUnit} onValueChange={setSelectedGeoUnit}>
+          <SelectTrigger>
+            <SelectValue placeholder="Chọn khu vực..." />
+          </SelectTrigger>
+          <SelectContent>
+            {flatGeoUnits.map((unit) => (
+              <SelectItem key={unit.id} value={unit.id}>
+                {'  '.repeat(unit.depth)}{unit.name} ({unit.level})
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="space-y-2">
+        <label className="text-sm font-medium">Phân bổ cha (tùy chọn)</label>
+        <Select value={selectedParent} onValueChange={setSelectedParent}>
+          <SelectTrigger>
+            <SelectValue placeholder="Không có (root level)" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="__none__">Không có (root level)</SelectItem>
+            {flatParents.map((node) => (
+              <SelectItem key={node.id} value={node.id}>
+                {'  '.repeat(node.depth)}{node.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="space-y-2">
+        <label className="text-sm font-medium">Số tiền phân bổ (VND)</label>
+        <div className="relative">
+          <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            type="number"
+            className="pl-9"
+            placeholder="0"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+          />
+        </div>
+      </div>
+
+      <DialogFooter>
+        <Button variant="outline" onClick={onCancel}>
+          Hủy
+        </Button>
+        <Button onClick={handleSubmit} disabled={!selectedGeoUnit || !amount || isLoading}>
+          {isLoading ? 'Đang tạo...' : 'Tạo phân bổ'}
+        </Button>
+      </DialogFooter>
     </div>
   );
 }

@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils';
-import type { SidebarColors, SmartBadge, BadgeVariant } from '@/config/sidebarConfig';
+import type { SidebarColors, SmartBadge } from '@/config/sidebarConfig';
 import { getBadgeColors } from '@/config/sidebarConfig';
 
 // Legacy badge props (backwards compatibility)
@@ -58,7 +58,7 @@ export function SidebarBadge({ value, variant = 'default', colors }: LegacyBadge
 }
 
 // Smart Badge Component
-export function SmartSidebarBadge({ badge, colors, isDark = false }: SmartBadgeProps) {
+export function SmartSidebarBadge({ badge, colors: _colors, isDark = false }: SmartBadgeProps) {
   const badgeColors = getBadgeColors(badge.variant, isDark);
 
   // Dot badge - small circle indicator

@@ -20,6 +20,7 @@ export * from './useCheques';
 export * from './useGeographicUnits';
 export * from './useBudgetAllocations';
 export * from './useTargetAllocations';
+export * from './useFundActivities';
 
 // Planning hooks
 export * from './planning';

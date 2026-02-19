@@ -1,6 +1,7 @@
 /**
  * Budget Approval Page
- * Workflow phê duyệt ngân sách với multi-level approval
+ * Workflow phê duyệt ngân sách với multi-level approval (Aforza-style)
+ * Connected to real APIs
  */
 
 import { useState } from 'react';
@@ -15,14 +16,6 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-// Select components - available for future filter implementation
-// import {
-//   Select,
-//   SelectContent,
-//   SelectItem,
-//   SelectTrigger,
-//   SelectValue,
-// } from '@/components/ui/select';
 import {
   Dialog,
   DialogContent,
@@ -33,7 +26,7 @@ import {
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   CheckCircle,
   XCircle,
@@ -44,6 +37,10 @@ import {
   ThumbsUp,
   ThumbsDown,
   RotateCcw,
+  Send,
+  AlertCircle,
+  RefreshCw,
+  Loader2,
 } from 'lucide-react';
 import {
   Table,
@@ -54,177 +51,38 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { CurrencyDisplay } from '@/components/ui/currency-display';
+import { toast } from '@/hooks/useToast';
+import {
+  useBudgets,
+  useSubmitBudget,
+  useReviewBudget,
+  useApprovalHistory,
+} from '@/hooks/useBudgets';
 
 // Types
-interface ApprovalRequest {
+type ApprovalStatus = 'DRAFT' | 'SUBMITTED' | 'UNDER_REVIEW' | 'APPROVED' | 'REJECTED' | 'REVISION_NEEDED';
+type FundType = 'PROMOTIONAL' | 'TACTICAL' | 'FIXED_INVESTMENT' | 'TRADE_SPEND' | 'LISTING_FEE' | 'DISPLAY';
+
+interface Budget {
   id: string;
-  budgetCode: string;
-  budgetName: string;
-  requestType: 'NEW' | 'AMENDMENT' | 'REALLOCATION' | 'EXTENSION';
-  amount: number;
-  previousAmount?: number;
-  requestedBy: string;
-  requestedAt: string;
-  department: string;
+  code: string;
+  name: string;
+  description?: string;
+  fundType: FundType;
+  year: number;
+  quarter?: number;
+  totalAmount: number;
+  allocatedAmount: number;
+  spentAmount: number;
+  approvalStatus: ApprovalStatus;
+  approvalLevel: number;
   currentLevel: number;
-  totalLevels: number;
-  status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'RETURNED';
-  urgency: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  description: string;
-  approvalHistory: ApprovalStep[];
+  status: string;
+  createdBy?: string;
+  createdAt: string;
+  utilizationRate: number;
+  allocationRate: number;
 }
-
-interface ApprovalStep {
-  level: number;
-  approverName: string;
-  approverRole: string;
-  status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'RETURNED';
-  comment?: string;
-  timestamp?: string;
-}
-
-// Mock data
-const mockRequests: ApprovalRequest[] = [
-  {
-    id: '1',
-    budgetCode: 'BUD-2026-Q2',
-    budgetName: 'Q2/2026 Trade Budget',
-    requestType: 'NEW',
-    amount: 12500000000,
-    requestedBy: 'Minh Trần',
-    requestedAt: '2026-01-20T09:30:00',
-    department: 'Trade Marketing',
-    currentLevel: 2,
-    totalLevels: 3,
-    status: 'PENDING',
-    urgency: 'HIGH',
-    description: 'Budget allocation for Q2 2026 trade promotions across MT and GT channels.',
-    approvalHistory: [
-      {
-        level: 1,
-        approverName: 'Lan Phạm',
-        approverRole: 'TM Manager',
-        status: 'APPROVED',
-        comment: 'Approved. Numbers align with Q2 targets.',
-        timestamp: '2026-01-21T14:00:00',
-      },
-      {
-        level: 2,
-        approverName: 'Quỳnh Nguyễn',
-        approverRole: 'Trade Director',
-        status: 'PENDING',
-      },
-      {
-        level: 3,
-        approverName: 'Hùng Lê',
-        approverRole: 'CFO',
-        status: 'PENDING',
-      },
-    ],
-  },
-  {
-    id: '2',
-    budgetCode: 'BUD-2026-REAL-001',
-    budgetName: 'MT to GT Reallocation',
-    requestType: 'REALLOCATION',
-    amount: 500000000,
-    requestedBy: 'Hà Nguyễn',
-    requestedAt: '2026-01-22T11:00:00',
-    department: 'Sales',
-    currentLevel: 1,
-    totalLevels: 2,
-    status: 'PENDING',
-    urgency: 'MEDIUM',
-    description: 'Reallocate ₫500M from MT underspend to GT channel for Tet campaign.',
-    approvalHistory: [
-      {
-        level: 1,
-        approverName: 'Quỳnh Nguyễn',
-        approverRole: 'Trade Director',
-        status: 'PENDING',
-      },
-      {
-        level: 2,
-        approverName: 'Hùng Lê',
-        approverRole: 'CFO',
-        status: 'PENDING',
-      },
-    ],
-  },
-  {
-    id: '3',
-    budgetCode: 'BUD-2026-AMD-001',
-    budgetName: 'Q1 Budget Amendment',
-    requestType: 'AMENDMENT',
-    amount: 15000000000,
-    previousAmount: 12500000000,
-    requestedBy: 'Minh Trần',
-    requestedAt: '2026-01-18T16:00:00',
-    department: 'Trade Marketing',
-    currentLevel: 3,
-    totalLevels: 3,
-    status: 'PENDING',
-    urgency: 'CRITICAL',
-    description: 'Increase Q1 budget by ₫2.5B to support additional Tet promotions.',
-    approvalHistory: [
-      {
-        level: 1,
-        approverName: 'Lan Phạm',
-        approverRole: 'TM Manager',
-        status: 'APPROVED',
-        comment: 'Justified by Tet campaign expansion.',
-        timestamp: '2026-01-19T09:00:00',
-      },
-      {
-        level: 2,
-        approverName: 'Quỳnh Nguyễn',
-        approverRole: 'Trade Director',
-        status: 'APPROVED',
-        comment: 'Approved with condition to track ROI closely.',
-        timestamp: '2026-01-20T11:30:00',
-      },
-      {
-        level: 3,
-        approverName: 'Hùng Lê',
-        approverRole: 'CFO',
-        status: 'PENDING',
-      },
-    ],
-  },
-  {
-    id: '4',
-    budgetCode: 'BUD-2025-Q4-EXT',
-    budgetName: 'Q4/2025 Extension',
-    requestType: 'EXTENSION',
-    amount: 800000000,
-    requestedBy: 'Lan Phạm',
-    requestedAt: '2026-01-15T10:00:00',
-    department: 'Trade Marketing',
-    currentLevel: 2,
-    totalLevels: 2,
-    status: 'REJECTED',
-    urgency: 'LOW',
-    description: 'Extend Q4 2025 budget validity to cover delayed promotions.',
-    approvalHistory: [
-      {
-        level: 1,
-        approverName: 'Quỳnh Nguyễn',
-        approverRole: 'Trade Director',
-        status: 'APPROVED',
-        comment: 'Acceptable given supplier delays.',
-        timestamp: '2026-01-16T09:00:00',
-      },
-      {
-        level: 2,
-        approverName: 'Hùng Lê',
-        approverRole: 'CFO',
-        status: 'REJECTED',
-        comment: 'Q4 budget should close. Move to Q1 2026 instead.',
-        timestamp: '2026-01-17T14:00:00',
-      },
-    ],
-  },
-];
 
 const formatDate = (dateString: string): string => {
   return new Date(dateString).toLocaleDateString('vi-VN', {
@@ -236,14 +94,16 @@ const formatDate = (dateString: string): string => {
   });
 };
 
-const getStatusBadge = (status: ApprovalRequest['status']) => {
-  const config = {
-    PENDING: { label: 'Pending', variant: 'warning' as const, icon: Clock },
-    APPROVED: { label: 'Approved', variant: 'success' as const, icon: CheckCircle },
-    REJECTED: { label: 'Rejected', variant: 'destructive' as const, icon: XCircle },
-    RETURNED: { label: 'Returned', variant: 'outline' as const, icon: RotateCcw },
+const getApprovalStatusBadge = (status: ApprovalStatus) => {
+  const config: Record<ApprovalStatus, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' | 'warning' | 'success'; icon: typeof Clock }> = {
+    DRAFT: { label: 'Draft', variant: 'secondary', icon: Clock },
+    SUBMITTED: { label: 'Submitted', variant: 'warning', icon: Send },
+    UNDER_REVIEW: { label: 'Under Review', variant: 'warning', icon: Clock },
+    APPROVED: { label: 'Approved', variant: 'success', icon: CheckCircle },
+    REJECTED: { label: 'Rejected', variant: 'destructive', icon: XCircle },
+    REVISION_NEEDED: { label: 'Revision Needed', variant: 'outline', icon: RotateCcw },
   };
-  const { label, variant, icon: Icon } = config[status];
+  const { label, variant, icon: Icon } = config[status] || config.DRAFT;
   return (
     <Badge variant={variant} className="gap-1">
       <Icon className="h-3 w-3" />
@@ -252,68 +112,297 @@ const getStatusBadge = (status: ApprovalRequest['status']) => {
   );
 };
 
-const getUrgencyBadge = (urgency: ApprovalRequest['urgency']) => {
-  const config = {
-    LOW: { label: 'Low', className: 'bg-slate-500/15 text-slate-700 dark:text-slate-300 border-slate-500/20' },
-    MEDIUM: { label: 'Medium', className: 'bg-blue-500/15 text-blue-700 dark:text-blue-400 border-blue-500/20' },
-    HIGH: { label: 'High', className: 'bg-orange-500/15 text-orange-700 dark:text-orange-400 border-orange-500/20' },
-    CRITICAL: { label: 'Critical', className: 'bg-red-500/15 text-red-700 dark:text-red-400 border-red-500/20' },
+const getFundTypeBadge = (type: FundType) => {
+  const config: Record<FundType, { label: string; className: string }> = {
+    PROMOTIONAL: { label: 'Promotional', className: 'bg-blue-500/15 text-blue-700 dark:text-blue-400' },
+    TACTICAL: { label: 'Tactical', className: 'bg-purple-500/15 text-purple-700 dark:text-purple-400' },
+    FIXED_INVESTMENT: { label: 'Fixed Investment', className: 'bg-green-500/15 text-green-700 dark:text-green-400' },
+    TRADE_SPEND: { label: 'Trade Spend', className: 'bg-orange-500/15 text-orange-700 dark:text-orange-400' },
+    LISTING_FEE: { label: 'Listing Fee', className: 'bg-pink-500/15 text-pink-700 dark:text-pink-400' },
+    DISPLAY: { label: 'Display', className: 'bg-cyan-500/15 text-cyan-700 dark:text-cyan-400' },
   };
-  const { label, className } = config[urgency];
+  const { label, className } = config[type] || config.PROMOTIONAL;
   return <Badge className={className}>{label}</Badge>;
 };
 
-const getRequestTypeBadge = (type: ApprovalRequest['requestType']) => {
-  const config = {
-    NEW: { label: 'New Budget', variant: 'default' as const },
-    AMENDMENT: { label: 'Amendment', variant: 'secondary' as const },
-    REALLOCATION: { label: 'Reallocation', variant: 'outline' as const },
-    EXTENSION: { label: 'Extension', variant: 'outline' as const },
-  };
-  return <Badge variant={config[type].variant}>{config[type].label}</Badge>;
-};
+// Approval History Dialog Component
+function ApprovalHistoryDialog({
+  budgetId,
+  isOpen,
+  onClose,
+}: {
+  budgetId: string;
+  isOpen: boolean;
+  onClose: () => void;
+}) {
+  const { data: historyData, isLoading } = useApprovalHistory(budgetId);
+
+  if (!isOpen) return null;
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[700px]">
+        <DialogHeader>
+          <DialogTitle>Approval History</DialogTitle>
+          <DialogDescription>
+            {historyData?.budget?.code} - {historyData?.budget?.name}
+          </DialogDescription>
+        </DialogHeader>
+
+        {isLoading ? (
+          <div className="space-y-4">
+            <Skeleton className="h-20 w-full" />
+            <Skeleton className="h-20 w-full" />
+            <Skeleton className="h-20 w-full" />
+          </div>
+        ) : historyData ? (
+          <div className="space-y-4">
+            {/* Workflow Progress */}
+            <div className="p-4 rounded-lg border bg-muted/30">
+              <div className="flex items-center justify-between mb-3">
+                <span className="font-medium">Approval Progress</span>
+                <Badge variant="outline">{historyData.workflow.progress}% Complete</Badge>
+              </div>
+              <div className="flex items-center gap-2">
+                {historyData.workflow.levels.map((level: any, idx: number) => (
+                  <div key={idx} className="flex items-center gap-1">
+                    <div
+                      className={`h-8 w-8 rounded-full flex items-center justify-center text-sm font-medium ${
+                        level.status === 'APPROVED'
+                          ? 'bg-green-500 text-white'
+                          : level.status === 'UNDER_REVIEW'
+                          ? 'bg-yellow-500 text-white'
+                          : level.status === 'REJECTED'
+                          ? 'bg-red-500 text-white'
+                          : 'bg-muted text-muted-foreground'
+                      }`}
+                    >
+                      {level.level}
+                    </div>
+                    {idx < historyData.workflow.levels.length - 1 && (
+                      <div className={`h-1 w-8 ${level.status === 'APPROVED' ? 'bg-green-500' : 'bg-border'}`} />
+                    )}
+                  </div>
+                ))}
+              </div>
+              <div className="flex gap-4 mt-2 text-xs text-muted-foreground">
+                {historyData.workflow.levels.map((level: any, idx: number) => (
+                  <div key={idx} className="text-center" style={{ width: '40px' }}>
+                    {level.role.split(' ')[0]}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Timeline */}
+            <div>
+              <Label className="text-muted-foreground">Approval Timeline</Label>
+              <div className="mt-2 space-y-3 max-h-[300px] overflow-y-auto">
+                {historyData.timeline.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">No approval history yet.</p>
+                ) : (
+                  historyData.timeline.map((item: any, idx: number) => (
+                    <div
+                      key={idx}
+                      className={`flex items-start gap-3 p-3 rounded-lg border ${
+                        item.status === 'APPROVED'
+                          ? 'bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-900'
+                          : item.status === 'REJECTED'
+                          ? 'bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-900'
+                          : item.status === 'UNDER_REVIEW'
+                          ? 'bg-yellow-50 dark:bg-yellow-950 border-yellow-200 dark:border-yellow-900'
+                          : ''
+                      }`}
+                    >
+                      <div
+                        className={`mt-0.5 rounded-full p-1 ${
+                          item.status === 'APPROVED'
+                            ? 'bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600'
+                            : item.status === 'REJECTED'
+                            ? 'bg-red-100 dark:bg-red-900/50 text-red-600'
+                            : 'bg-amber-100 dark:bg-amber-900/50 text-amber-600'
+                        }`}
+                      >
+                        {item.status === 'APPROVED' ? (
+                          <CheckCircle className="h-4 w-4" />
+                        ) : item.status === 'REJECTED' ? (
+                          <XCircle className="h-4 w-4" />
+                        ) : (
+                          <Clock className="h-4 w-4" />
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <span className="font-medium">{item.reviewer || 'Pending'}</span>
+                            <span className="text-muted-foreground"> - {item.role}</span>
+                          </div>
+                          <Badge variant="outline">Level {item.level}</Badge>
+                        </div>
+                        {item.comments && (
+                          <p className="text-sm mt-1">{item.comments}</p>
+                        )}
+                        <div className="flex items-center gap-4 text-xs text-muted-foreground mt-1">
+                          <span>Submitted: {formatDate(item.submittedAt)}</span>
+                          {item.reviewedAt && (
+                            <span>Reviewed: {formatDate(item.reviewedAt)}</span>
+                          )}
+                          {item.duration !== null && (
+                            <span>Duration: {item.duration}h</span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+
+            {/* Summary Stats */}
+            <div className="grid grid-cols-4 gap-4 pt-4 border-t">
+              <div className="text-center">
+                <div className="text-2xl font-bold">{historyData.summary.totalSteps}</div>
+                <div className="text-xs text-muted-foreground">Total Steps</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-green-600">{historyData.summary.approved}</div>
+                <div className="text-xs text-muted-foreground">Approved</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-yellow-600">{historyData.summary.pending}</div>
+                <div className="text-xs text-muted-foreground">Pending</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-muted-foreground">
+                  {historyData.summary.avgReviewTimeHours ?? '-'}h
+                </div>
+                <div className="text-xs text-muted-foreground">Avg Review Time</div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="text-center py-8 text-muted-foreground">
+            <AlertCircle className="h-8 w-8 mx-auto mb-2" />
+            <p>No approval history available</p>
+          </div>
+        )}
+
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>
+            Close
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
 
 export default function BudgetApprovalPage() {
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedTab, setSelectedTab] = useState('pending');
-  const [selectedRequest, setSelectedRequest] = useState<ApprovalRequest | null>(null);
-  const [isDetailOpen, setIsDetailOpen] = useState(false);
-  const [isApproveDialogOpen, setIsApproveDialogOpen] = useState(false);
-  const [approvalComment, setApprovalComment] = useState('');
+  const [selectedTab, setSelectedTab] = useState<'pending' | 'approved' | 'rejected' | 'all'>('pending');
+  const [selectedBudget, setSelectedBudget] = useState<Budget | null>(null);
+  const [_isDetailOpen, _setIsDetailOpen] = useState(false);
+  const [isActionDialogOpen, setIsActionDialogOpen] = useState(false);
+  const [actionType, setActionType] = useState<'approve' | 'reject' | 'revision_needed' | 'submit'>('approve');
+  const [actionComment, setActionComment] = useState('');
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [historyBudgetId, setHistoryBudgetId] = useState('');
 
-  // Filter requests based on tab
-  const filteredRequests = mockRequests.filter((req) => {
-    const matchesSearch =
-      req.budgetName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      req.budgetCode.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesTab =
-      selectedTab === 'all' ||
-      (selectedTab === 'pending' && req.status === 'PENDING') ||
-      (selectedTab === 'approved' && req.status === 'APPROVED') ||
-      (selectedTab === 'rejected' && req.status === 'REJECTED');
-    return matchesSearch && matchesTab;
+  // Build filter based on tab
+  const getApprovalStatusFilter = () => {
+    switch (selectedTab) {
+      case 'pending':
+        return 'SUBMITTED,UNDER_REVIEW';
+      case 'approved':
+        return 'APPROVED';
+      case 'rejected':
+        return 'REJECTED,REVISION_NEEDED';
+      default:
+        return undefined;
+    }
+  };
+
+  // Fetch budgets
+  const { data, isLoading, refetch } = useBudgets({
+    approvalStatus: getApprovalStatusFilter(),
+    search: searchQuery || undefined,
+    pageSize: 50,
   });
 
-  // Stats
+  const budgets = (data?.budgets || []) as Budget[];
+
+  // Mutations
+  const submitMutation = useSubmitBudget();
+  const reviewMutation = useReviewBudget();
+
+  // Calculate stats
+  const allBudgetsQuery = useBudgets({ pageSize: 100 });
+  const allBudgets = (allBudgetsQuery.data?.budgets || []) as Budget[];
+
   const stats = {
-    pending: mockRequests.filter((r) => r.status === 'PENDING').length,
-    approved: mockRequests.filter((r) => r.status === 'APPROVED').length,
-    rejected: mockRequests.filter((r) => r.status === 'REJECTED').length,
-    totalAmount: mockRequests
-      .filter((r) => r.status === 'PENDING')
-      .reduce((sum, r) => sum + r.amount, 0),
+    pending: allBudgets.filter((b) => b.approvalStatus === 'SUBMITTED' || b.approvalStatus === 'UNDER_REVIEW').length,
+    approved: allBudgets.filter((b) => b.approvalStatus === 'APPROVED').length,
+    rejected: allBudgets.filter((b) => b.approvalStatus === 'REJECTED' || b.approvalStatus === 'REVISION_NEEDED').length,
+    totalPendingAmount: allBudgets
+      .filter((b) => b.approvalStatus === 'SUBMITTED' || b.approvalStatus === 'UNDER_REVIEW')
+      .reduce((sum, b) => sum + b.totalAmount, 0),
   };
 
-  const handleApprove = () => {
-    // Handle approval logic
-    setIsApproveDialogOpen(false);
-    setApprovalComment('');
+  // Handlers
+  const handleSubmitForApproval = async () => {
+    if (!selectedBudget) return;
+
+    try {
+      await submitMutation.mutateAsync(selectedBudget.id);
+      toast({ title: 'Success', description: 'Budget submitted for approval' });
+      setIsActionDialogOpen(false);
+      setActionComment('');
+      refetch();
+    } catch (error: any) {
+      toast({ title: 'Error', variant: 'destructive', description: error.response?.data?.error || 'Failed to submit budget' });
+    }
   };
 
-  const handleReject = () => {
-    // Handle rejection logic
-    setIsApproveDialogOpen(false);
-    setApprovalComment('');
+  const handleReview = async (action: 'approve' | 'reject' | 'revision_needed') => {
+    if (!selectedBudget) return;
+
+    if ((action === 'reject' || action === 'revision_needed') && !actionComment) {
+      toast({ title: 'Error', variant: 'destructive', description: 'Please provide a comment' });
+      return;
+    }
+
+    try {
+      await reviewMutation.mutateAsync({
+        budgetId: selectedBudget.id,
+        action,
+        comments: actionComment || undefined,
+      });
+      toast({
+        title: 'Success',
+        description: action === 'approve'
+          ? 'Budget approved'
+          : action === 'reject'
+          ? 'Budget rejected'
+          : 'Revision requested'
+      });
+      setIsActionDialogOpen(false);
+      setActionComment('');
+      refetch();
+    } catch (error: any) {
+      toast({ title: 'Error', variant: 'destructive', description: error.response?.data?.error || 'Failed to process review' });
+    }
+  };
+
+  const openActionDialog = (budget: Budget, type: 'approve' | 'reject' | 'revision_needed' | 'submit') => {
+    setSelectedBudget(budget);
+    setActionType(type);
+    setActionComment('');
+    setIsActionDialogOpen(true);
+  };
+
+  const openHistory = (budgetId: string) => {
+    setHistoryBudgetId(budgetId);
+    setIsHistoryOpen(true);
   };
 
   return (
@@ -323,9 +412,13 @@ export default function BudgetApprovalPage() {
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Budget Approval</h1>
           <p className="text-muted-foreground mt-1">
-            Workflow phê duyệt ngân sách với multi-level approval
+            Multi-level approval workflow (Aforza-style)
           </p>
         </div>
+        <Button variant="outline" size="sm" onClick={() => refetch()}>
+          <RefreshCw className="h-4 w-4 mr-2" />
+          Refresh
+        </Button>
       </div>
 
       {/* Summary Cards */}
@@ -337,7 +430,7 @@ export default function BudgetApprovalPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.pending}</div>
-            <p className="text-xs text-muted-foreground">requests waiting</p>
+            <p className="text-xs text-muted-foreground">budgets waiting</p>
           </CardContent>
         </Card>
 
@@ -347,30 +440,32 @@ export default function BudgetApprovalPage() {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold"><CurrencyDisplay amount={stats.totalAmount} size="lg" /></div>
+            <div className="text-2xl font-bold">
+              <CurrencyDisplay amount={stats.totalPendingAmount} size="lg" />
+            </div>
             <p className="text-xs text-muted-foreground">total value</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Approved (MTD)</CardTitle>
-            <CheckCircle className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+            <CardTitle className="text-sm font-medium">Approved</CardTitle>
+            <CheckCircle className="h-4 w-4 text-emerald-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{stats.approved}</div>
-            <p className="text-xs text-muted-foreground">this month</p>
+            <div className="text-2xl font-bold text-emerald-600">{stats.approved}</div>
+            <p className="text-xs text-muted-foreground">this period</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Rejected (MTD)</CardTitle>
-            <XCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
+            <CardTitle className="text-sm font-medium">Rejected</CardTitle>
+            <XCircle className="h-4 w-4 text-red-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-600 dark:text-red-400">{stats.rejected}</div>
-            <p className="text-xs text-muted-foreground">this month</p>
+            <div className="text-2xl font-bold text-red-600">{stats.rejected}</div>
+            <p className="text-xs text-muted-foreground">this period</p>
           </CardContent>
         </Card>
       </div>
@@ -388,7 +483,7 @@ export default function BudgetApprovalPage() {
         <CardContent>
           {/* Tabs & Search */}
           <div className="flex flex-col gap-4 md:flex-row md:items-center mb-4">
-            <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-full md:w-auto">
+            <Tabs value={selectedTab} onValueChange={(v) => setSelectedTab(v as typeof selectedTab)} className="w-full md:w-auto">
               <TabsList>
                 <TabsTrigger value="pending">
                   Pending ({stats.pending})
@@ -401,7 +496,7 @@ export default function BudgetApprovalPage() {
             <div className="relative flex-1 md:max-w-sm">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search requests..."
+                placeholder="Search budgets..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-8"
@@ -414,287 +509,254 @@ export default function BudgetApprovalPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Request</TableHead>
-                  <TableHead>Type</TableHead>
+                  <TableHead>Budget</TableHead>
+                  <TableHead>Fund Type</TableHead>
                   <TableHead className="text-right">Amount</TableHead>
-                  <TableHead>Requested By</TableHead>
+                  <TableHead>Period</TableHead>
                   <TableHead>Progress</TableHead>
-                  <TableHead>Urgency</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead className="w-[100px]"></TableHead>
+                  <TableHead className="w-[150px]">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredRequests.map((request) => (
-                  <TableRow key={request.id}>
-                    <TableCell>
-                      <div>
-                        <div className="font-medium">{request.budgetName}</div>
-                        <div className="text-sm text-muted-foreground">
-                          {request.budgetCode}
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>{getRequestTypeBadge(request.requestType)}</TableCell>
-                    <TableCell className="text-right">
-                      <div className="font-mono"><CurrencyDisplay amount={request.amount} size="sm" /></div>
-                      {request.previousAmount && (
-                        <div className="text-xs text-muted-foreground">
-                          from <CurrencyDisplay amount={request.previousAmount} size="sm" />
-                        </div>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Avatar className="h-6 w-6">
-                          <AvatarFallback className="text-xs">
-                            {request.requestedBy
-                              .split(' ')
-                              .map((n) => n[0])
-                              .join('')}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <div className="text-sm">{request.requestedBy}</div>
-                          <div className="text-xs text-muted-foreground">
-                            {request.department}
-                          </div>
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1">
-                        {request.approvalHistory.map((step, idx) => (
-                          <div
-                            key={idx}
-                            className={`h-2 w-6 rounded-full ${
-                              step.status === 'APPROVED'
-                                ? 'bg-green-500'
-                                : step.status === 'REJECTED'
-                                ? 'bg-red-500'
-                                : step.status === 'PENDING'
-                                ? 'bg-yellow-500'
-                                : 'bg-gray-300'
-                            }`}
-                            title={`${step.approverRole}: ${step.status}`}
-                          />
-                        ))}
-                        <span className="text-xs text-muted-foreground ml-1">
-                          {request.currentLevel}/{request.totalLevels}
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell>{getUrgencyBadge(request.urgency)}</TableCell>
-                    <TableCell>{getStatusBadge(request.status)}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => {
-                            setSelectedRequest(request);
-                            setIsDetailOpen(true);
-                          }}
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        {request.status === 'PENDING' && (
-                          <>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="text-emerald-600 dark:text-emerald-400"
-                              onClick={() => {
-                                setSelectedRequest(request);
-                                setIsApproveDialogOpen(true);
-                              }}
-                            >
-                              <ThumbsUp className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="text-red-600 dark:text-red-400"
-                              onClick={() => {
-                                setSelectedRequest(request);
-                                setIsApproveDialogOpen(true);
-                              }}
-                            >
-                              <ThumbsDown className="h-4 w-4" />
-                            </Button>
-                          </>
-                        )}
-                      </div>
+                {isLoading ? (
+                  Array.from({ length: 5 }).map((_, idx) => (
+                    <TableRow key={idx}>
+                      <TableCell><Skeleton className="h-10 w-[200px]" /></TableCell>
+                      <TableCell><Skeleton className="h-6 w-[100px]" /></TableCell>
+                      <TableCell><Skeleton className="h-6 w-[80px]" /></TableCell>
+                      <TableCell><Skeleton className="h-6 w-[60px]" /></TableCell>
+                      <TableCell><Skeleton className="h-6 w-[80px]" /></TableCell>
+                      <TableCell><Skeleton className="h-6 w-[80px]" /></TableCell>
+                      <TableCell><Skeleton className="h-6 w-[100px]" /></TableCell>
+                    </TableRow>
+                  ))
+                ) : budgets.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                      No budgets found
                     </TableCell>
                   </TableRow>
-                ))}
+                ) : (
+                  budgets.map((budget) => (
+                    <TableRow key={budget.id}>
+                      <TableCell>
+                        <div>
+                          <div className="font-medium">{budget.name}</div>
+                          <div className="text-sm text-muted-foreground">{budget.code}</div>
+                        </div>
+                      </TableCell>
+                      <TableCell>{getFundTypeBadge(budget.fundType)}</TableCell>
+                      <TableCell className="text-right">
+                        <div className="font-mono">
+                          <CurrencyDisplay amount={budget.totalAmount} size="sm" />
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        Q{budget.quarter || 'A'}/{budget.year}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1">
+                          {Array.from({ length: budget.approvalLevel }).map((_, idx) => (
+                            <div
+                              key={idx}
+                              className={`h-2 w-6 rounded-full ${
+                                idx < budget.currentLevel
+                                  ? budget.approvalStatus === 'REJECTED'
+                                    ? 'bg-red-500'
+                                    : 'bg-green-500'
+                                  : idx === budget.currentLevel && (budget.approvalStatus === 'SUBMITTED' || budget.approvalStatus === 'UNDER_REVIEW')
+                                  ? 'bg-yellow-500'
+                                  : 'bg-border'
+                              }`}
+                              title={`Level ${idx + 1}`}
+                            />
+                          ))}
+                          <span className="text-xs text-muted-foreground ml-1">
+                            {budget.currentLevel}/{budget.approvalLevel}
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell>{getApprovalStatusBadge(budget.approvalStatus)}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => openHistory(budget.id)}
+                            title="View History"
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+
+                          {budget.approvalStatus === 'DRAFT' && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="text-blue-600"
+                              onClick={() => openActionDialog(budget, 'submit')}
+                              title="Submit for Approval"
+                            >
+                              <Send className="h-4 w-4" />
+                            </Button>
+                          )}
+
+                          {(budget.approvalStatus === 'SUBMITTED' || budget.approvalStatus === 'UNDER_REVIEW') && (
+                            <>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="text-emerald-600"
+                                onClick={() => openActionDialog(budget, 'approve')}
+                                title="Approve"
+                              >
+                                <ThumbsUp className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="text-red-600"
+                                onClick={() => openActionDialog(budget, 'reject')}
+                                title="Reject"
+                              >
+                                <ThumbsDown className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="text-orange-600"
+                                onClick={() => openActionDialog(budget, 'revision_needed')}
+                                title="Request Revision"
+                              >
+                                <RotateCcw className="h-4 w-4" />
+                              </Button>
+                            </>
+                          )}
+
+                          {budget.approvalStatus === 'REVISION_NEEDED' && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="text-blue-600"
+                              onClick={() => openActionDialog(budget, 'submit')}
+                              title="Resubmit"
+                            >
+                              <Send className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
               </TableBody>
             </Table>
           </div>
         </CardContent>
       </Card>
 
-      {/* Detail Dialog */}
-      <Dialog open={isDetailOpen} onOpenChange={setIsDetailOpen}>
-        <DialogContent className="sm:max-w-[600px]">
+      {/* Action Dialog */}
+      <Dialog open={isActionDialogOpen} onOpenChange={setIsActionDialogOpen}>
+        <DialogContent>
           <DialogHeader>
-            <DialogTitle>Request Details</DialogTitle>
+            <DialogTitle>
+              {actionType === 'submit' && 'Submit for Approval'}
+              {actionType === 'approve' && 'Approve Budget'}
+              {actionType === 'reject' && 'Reject Budget'}
+              {actionType === 'revision_needed' && 'Request Revision'}
+            </DialogTitle>
             <DialogDescription>
-              {selectedRequest?.budgetCode} - {selectedRequest?.budgetName}
+              {selectedBudget?.code} - {selectedBudget?.name}
             </DialogDescription>
           </DialogHeader>
-          {selectedRequest && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label className="text-muted-foreground">Request Type</Label>
-                  <div className="mt-1">{getRequestTypeBadge(selectedRequest.requestType)}</div>
-                </div>
+
+          <div className="space-y-4 py-4">
+            {selectedBudget && (
+              <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
                   <Label className="text-muted-foreground">Amount</Label>
-                  <div className="mt-1 font-mono font-medium">
-                    <CurrencyDisplay amount={selectedRequest.amount} size="md" />
+                  <div className="font-mono font-medium">
+                    <CurrencyDisplay amount={selectedBudget.totalAmount} />
                   </div>
                 </div>
                 <div>
-                  <Label className="text-muted-foreground">Requested By</Label>
-                  <div className="mt-1">{selectedRequest.requestedBy}</div>
-                </div>
-                <div>
-                  <Label className="text-muted-foreground">Requested At</Label>
-                  <div className="mt-1">{formatDate(selectedRequest.requestedAt)}</div>
+                  <Label className="text-muted-foreground">Approval Level</Label>
+                  <div className="font-medium">
+                    Level {selectedBudget.currentLevel + 1} of {selectedBudget.approvalLevel}
+                  </div>
                 </div>
               </div>
-
-              <div>
-                <Label className="text-muted-foreground">Description</Label>
-                <p className="mt-1 text-sm">{selectedRequest.description}</p>
-              </div>
-
-              <div>
-                <Label className="text-muted-foreground">Approval Workflow</Label>
-                <div className="mt-2 space-y-3">
-                  {selectedRequest.approvalHistory.map((step, idx) => (
-                    <div
-                      key={idx}
-                      className={`flex items-start gap-3 p-3 rounded-lg border ${
-                        step.status === 'APPROVED'
-                          ? 'bg-green-50 dark:bg-green-950'
-                          : step.status === 'REJECTED'
-                          ? 'bg-red-50 dark:bg-red-950'
-                          : step.status === 'PENDING'
-                          ? 'bg-yellow-50 dark:bg-yellow-950'
-                          : ''
-                      }`}
-                    >
-                      <div
-                        className={`mt-0.5 rounded-full p-1 ${
-                          step.status === 'APPROVED'
-                            ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400'
-                            : step.status === 'REJECTED'
-                            ? 'bg-red-500/20 text-red-600 dark:text-red-400'
-                            : 'bg-amber-500/20 text-amber-600 dark:text-amber-400'
-                        }`}
-                      >
-                        {step.status === 'APPROVED' ? (
-                          <CheckCircle className="h-4 w-4" />
-                        ) : step.status === 'REJECTED' ? (
-                          <XCircle className="h-4 w-4" />
-                        ) : (
-                          <Clock className="h-4 w-4" />
-                        )}
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <span className="font-medium">{step.approverName}</span>
-                            <span className="text-muted-foreground"> - {step.approverRole}</span>
-                          </div>
-                          <Badge variant="outline">Level {step.level}</Badge>
-                        </div>
-                        {step.comment && (
-                          <p className="text-sm mt-1">{step.comment}</p>
-                        )}
-                        {step.timestamp && (
-                          <p className="text-xs text-muted-foreground mt-1">
-                            {formatDate(step.timestamp)}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDetailOpen(false)}>
-              Close
-            </Button>
-            {selectedRequest?.status === 'PENDING' && (
-              <>
-                <Button
-                  variant="destructive"
-                  onClick={() => {
-                    setIsDetailOpen(false);
-                    setIsApproveDialogOpen(true);
-                  }}
-                >
-                  <ThumbsDown className="mr-2 h-4 w-4" />
-                  Reject
-                </Button>
-                <Button
-                  onClick={() => {
-                    setIsDetailOpen(false);
-                    setIsApproveDialogOpen(true);
-                  }}
-                >
-                  <ThumbsUp className="mr-2 h-4 w-4" />
-                  Approve
-                </Button>
-              </>
             )}
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
-      {/* Approve/Reject Dialog */}
-      <Dialog open={isApproveDialogOpen} onOpenChange={setIsApproveDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Confirm Action</DialogTitle>
-            <DialogDescription>
-              Please provide a comment for your decision on {selectedRequest?.budgetName}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
             <div>
-              <Label htmlFor="comment">Comment (Required)</Label>
+              <Label htmlFor="comment">
+                Comment {(actionType === 'reject' || actionType === 'revision_needed') && '(Required)'}
+              </Label>
               <Textarea
                 id="comment"
-                placeholder="Enter your approval/rejection reason..."
-                value={approvalComment}
-                onChange={(e) => setApprovalComment(e.target.value)}
+                placeholder={
+                  actionType === 'approve' ? 'Optional approval comment...' :
+                  actionType === 'submit' ? 'Optional note for reviewers...' :
+                  'Please explain the reason...'
+                }
+                value={actionComment}
+                onChange={(e) => setActionComment(e.target.value)}
                 className="mt-2"
                 rows={4}
               />
             </div>
           </div>
+
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsApproveDialogOpen(false)}>
+            <Button variant="outline" onClick={() => setIsActionDialogOpen(false)}>
               Cancel
             </Button>
-            <Button variant="destructive" onClick={handleReject} disabled={!approvalComment}>
-              <ThumbsDown className="mr-2 h-4 w-4" />
-              Reject
-            </Button>
-            <Button onClick={handleApprove} disabled={!approvalComment}>
-              <ThumbsUp className="mr-2 h-4 w-4" />
-              Approve
-            </Button>
+
+            {actionType === 'submit' && (
+              <Button onClick={handleSubmitForApproval} disabled={submitMutation.isPending}>
+                {submitMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
+                Submit
+              </Button>
+            )}
+
+            {actionType === 'approve' && (
+              <Button onClick={() => handleReview('approve')} disabled={reviewMutation.isPending}>
+                {reviewMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ThumbsUp className="mr-2 h-4 w-4" />}
+                Approve
+              </Button>
+            )}
+
+            {actionType === 'reject' && (
+              <Button
+                variant="destructive"
+                onClick={() => handleReview('reject')}
+                disabled={reviewMutation.isPending || !actionComment}
+              >
+                {reviewMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ThumbsDown className="mr-2 h-4 w-4" />}
+                Reject
+              </Button>
+            )}
+
+            {actionType === 'revision_needed' && (
+              <Button
+                variant="outline"
+                onClick={() => handleReview('revision_needed')}
+                disabled={reviewMutation.isPending || !actionComment}
+              >
+                {reviewMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RotateCcw className="mr-2 h-4 w-4" />}
+                Request Revision
+              </Button>
+            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Approval History Dialog */}
+      <ApprovalHistoryDialog
+        budgetId={historyBudgetId}
+        isOpen={isHistoryOpen}
+        onClose={() => setIsHistoryOpen(false)}
+      />
     </div>
   );
 }

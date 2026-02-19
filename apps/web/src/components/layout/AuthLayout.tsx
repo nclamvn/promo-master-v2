@@ -18,9 +18,7 @@ export default function AuthLayout() {
       <div className="max-w-md w-full space-y-8">
         {/* Logo */}
         <div className="text-center">
-          <div className="mx-auto h-12 w-12 rounded-lg bg-primary flex items-center justify-center">
-            <span className="text-primary-foreground font-bold text-xl">PM</span>
-          </div>
+          <img src="/logo.png" alt="Promo Master" className="mx-auto h-16 w-16 object-contain" />
           <h2 className="mt-4 text-2xl font-bold text-foreground">PROMO MASTER</h2>
           <p className="mt-1 text-sm text-foreground-muted">Trade Promotion Management System</p>
         </div>

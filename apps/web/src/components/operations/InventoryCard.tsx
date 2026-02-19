@@ -123,9 +123,9 @@ export function InventorySummaryCard({
 }: InventorySummaryCardProps) {
   const variantStyles = {
     default: '',
-    success: 'border-green-500/30 bg-green-500/10 dark:bg-green-500/20',
-    warning: 'border-yellow-500/30 bg-yellow-500/10 dark:bg-yellow-500/20',
-    danger: 'border-red-500/30 bg-red-500/10 dark:bg-red-500/20',
+    success: 'border-emerald-200 bg-emerald-50 dark:border-emerald-800/30 dark:bg-emerald-950/30',
+    warning: 'border-amber-200 bg-amber-50 dark:border-amber-800/30 dark:bg-amber-950/30',
+    danger: 'border-red-200 bg-red-50 dark:border-red-800/30 dark:bg-red-950/30',
   };
 
   const iconColors = {

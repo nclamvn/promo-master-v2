@@ -32,6 +32,11 @@ import {
   Building2,
   Cog,
   Users,
+  Handshake,
+  Plus,
+  Zap,
+  Bell,
+  Radio,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -459,6 +464,45 @@ export const sidebarConfig: SidebarConfig = {
     },
 
     // ============================================
+    // 4B. HỢP ĐỒNG VOLUME (Pepsi V3) - Primary
+    // ============================================
+    {
+      id: 'volume-contracts',
+      title: 'HỢP ĐỒNG VOLUME',
+      titleEn: 'VOLUME CONTRACTS',
+      defaultExpanded: false,
+      variant: 'primary',
+      sectionBadge: { type: 'count', value: 5, variant: 'primary' },
+      items: [
+        {
+          id: 'contract-list',
+          title: 'Contract List',
+          titleVi: 'Danh sách Hợp đồng',
+          href: '/contracts',
+          icon: Handshake,
+          isNew: true,
+          smartBadge: { type: 'count', value: 5, variant: 'primary' },
+          tooltip: {
+            title: 'Volume Contracts',
+            description: 'Quản lý hợp đồng volume với key account',
+            features: [
+              { text: 'Contract tracking' },
+              { text: 'Milestone management' },
+              { text: 'Gap analysis' },
+            ],
+          },
+        },
+        {
+          id: 'contract-create',
+          title: 'New Contract',
+          titleVi: 'Tạo Hợp đồng mới',
+          href: '/contracts/create',
+          icon: Plus,
+        },
+      ],
+    },
+
+    // ============================================
     // 5. THỰC THI & GIÁM SÁT (BRD 3.4.1-3.4.5) - Primary
     // ============================================
     {
@@ -703,6 +747,39 @@ export const sidebarConfig: SidebarConfig = {
       variant: 'muted',
       items: [
         {
+          id: 'ai-suggestions',
+          title: 'AI Suggestions',
+          titleVi: 'Gợi ý AI',
+          href: '/ai/suggestions',
+          icon: Sparkles,
+          isNew: true,
+          sublabel: 'Pepsi V3',
+          smartBadge: { type: 'text', value: 'NEW', variant: 'success' },
+          tooltip: {
+            title: 'AI Promo Suggestions',
+            description: 'AI gợi ý promotion tối ưu dựa trên data',
+            features: [
+              { text: 'Smart recommendations' },
+              { text: 'ROI prediction' },
+              { text: 'One-click apply' },
+            ],
+          },
+        },
+        {
+          id: 'claims-ai',
+          title: 'Claims AI',
+          titleVi: 'Xử lý Claims AI',
+          href: '/ai/claims-ai',
+          icon: Zap,
+          isNew: true,
+          sublabel: 'Pepsi V3',
+          smartBadge: { type: 'text', value: 'AI', variant: 'premium' },
+          tooltip: {
+            title: 'AI Claims Processing',
+            description: 'Xử lý claims tự động bằng AI',
+          },
+        },
+        {
           id: 'ai-insights',
           title: 'AI Insights',
           titleVi: 'Nhận diện AI',
@@ -730,6 +807,48 @@ export const sidebarConfig: SidebarConfig = {
           isBeta: true,
           sublabel: 'US-39',
           smartBadge: { type: 'text', value: 'BETA', variant: 'warning' },
+        },
+      ],
+    },
+
+    // ============================================
+    // 9B. GIÁM SÁT REALTIME (Pepsi V3) - Muted
+    // ============================================
+    {
+      id: 'live-monitoring',
+      title: 'GIÁM SÁT REALTIME',
+      titleEn: 'LIVE MONITORING',
+      defaultExpanded: false,
+      defaultCollapsed: true,
+      variant: 'muted',
+      items: [
+        {
+          id: 'live-dashboard',
+          title: 'Live Dashboard',
+          titleVi: 'Dashboard Realtime',
+          href: '/monitoring/live',
+          icon: Radio,
+          isNew: true,
+          sublabel: 'Pepsi V3',
+          smartBadge: { type: 'pulse', variant: 'success' },
+          tooltip: {
+            title: 'Live Monitoring Dashboard',
+            description: 'Giám sát promotion và contract realtime',
+          },
+        },
+        {
+          id: 'alerts-management',
+          title: 'Alerts',
+          titleVi: 'Cảnh báo',
+          href: '/monitoring/alerts',
+          icon: Bell,
+          isNew: true,
+          sublabel: 'Pepsi V3',
+          smartBadge: { type: 'count', value: 3, variant: 'warning' },
+          tooltip: {
+            title: 'Alert Management',
+            description: 'Quản lý cảnh báo hệ thống',
+          },
         },
       ],
     },

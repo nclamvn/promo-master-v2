@@ -26,7 +26,8 @@ import {
   Clock,
   BarChart3,
 } from 'lucide-react';
-import { CurrencyDisplay, formatCurrencyCompact } from '@/components/ui/currency-display';
+import { CurrencyDisplay } from '@/components/ui/currency-display';
+import { safePercentage, safePercentageNumber } from '@/lib/utils';
 
 // Mock data for overview
 const budgetOverviewData = {
@@ -162,11 +163,11 @@ export default function BudgetOverviewPage() {
               <CurrencyDisplay amount={budgetOverviewData.allocatedBudget} size="lg" />
             </div>
             <Progress
-              value={(budgetOverviewData.allocatedBudget / budgetOverviewData.totalBudget) * 100}
+              value={safePercentageNumber(budgetOverviewData.allocatedBudget, budgetOverviewData.totalBudget)}
               className="mt-2"
             />
             <p className="text-xs text-muted-foreground mt-1">
-              {((budgetOverviewData.allocatedBudget / budgetOverviewData.totalBudget) * 100).toFixed(0)}% of total budget
+              {safePercentage(budgetOverviewData.allocatedBudget, budgetOverviewData.totalBudget, 0)}% of total budget
             </p>
           </CardContent>
         </Card>
@@ -181,7 +182,7 @@ export default function BudgetOverviewPage() {
               <CurrencyDisplay amount={budgetOverviewData.spentBudget} size="lg" />
             </div>
             <Progress
-              value={(budgetOverviewData.spentBudget / budgetOverviewData.allocatedBudget) * 100}
+              value={safePercentageNumber(budgetOverviewData.spentBudget, budgetOverviewData.allocatedBudget)}
               className="mt-2"
             />
             <p className="text-xs text-muted-foreground mt-1">

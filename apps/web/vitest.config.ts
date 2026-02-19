@@ -25,6 +25,7 @@ export default defineConfig({
         'src/types/**/*',
         'src/main.tsx',
         'src/vite-env.d.ts',
+        'src/mocks/**/*',
       ],
       // Start with lower thresholds and increase as more tests are added
       thresholds: {

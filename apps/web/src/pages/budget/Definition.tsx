@@ -68,6 +68,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { CurrencyDisplay } from '@/components/ui/currency-display';
+import { safePercentage, safePercentageNumber } from '@/lib/utils';
 
 // Types
 interface BudgetDefinition {
@@ -334,11 +335,11 @@ export default function BudgetDefinitionPage() {
           <CardContent>
             <div className="text-2xl font-bold"><CurrencyDisplay amount={summaryStats.totalAllocated} size="lg" /></div>
             <Progress
-              value={(summaryStats.totalAllocated / summaryStats.totalBudget) * 100}
+              value={safePercentageNumber(summaryStats.totalAllocated, summaryStats.totalBudget)}
               className="mt-2"
             />
             <p className="text-xs text-muted-foreground mt-1">
-              {((summaryStats.totalAllocated / summaryStats.totalBudget) * 100).toFixed(0)}% of total
+              {safePercentage(summaryStats.totalAllocated, summaryStats.totalBudget, 0)}% of total
             </p>
           </CardContent>
         </Card>
@@ -462,7 +463,7 @@ export default function BudgetDefinitionPage() {
                     <TableCell className="text-right">
                       <div className="font-mono"><CurrencyDisplay amount={budget.allocatedAmount} size="sm" /></div>
                       <Progress
-                        value={(budget.allocatedAmount / budget.totalAmount) * 100}
+                        value={safePercentageNumber(budget.allocatedAmount, budget.totalAmount)}
                         className="mt-1 h-1"
                       />
                     </TableCell>

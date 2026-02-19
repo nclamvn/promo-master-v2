@@ -56,7 +56,7 @@ export function RecommendationCard({
     <Card>
       <CardContent className={cn('pt-4', compact && 'pt-3 pb-3')}>
         <div className="flex items-start gap-3">
-          <div className="p-2 bg-primary/10 rounded-lg shrink-0">
+          <div className="p-2 bg-blue-100 dark:bg-blue-900/50 rounded-lg shrink-0">
             <Icon className="h-5 w-5 text-primary" />
           </div>
           <div className="flex-1 min-w-0">

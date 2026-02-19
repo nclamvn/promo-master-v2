@@ -49,6 +49,7 @@ import {
   XCircle,
 } from 'lucide-react';
 import { CurrencyDisplay, formatCurrencyCompact } from '@/components/ui/currency-display';
+import { safePercentageNumber } from '@/lib/utils';
 
 // Types
 interface DeploymentPromotion {
@@ -217,7 +218,7 @@ export default function PromotionDeploymentPage() {
   // Checklist stats
   const checklistCompleted = checklist.filter((c) => c.status === 'COMPLETED').length;
   const checklistTotal = checklist.filter((c) => c.required).length;
-  const checklistProgress = (checklistCompleted / checklistTotal) * 100;
+  const checklistProgress = safePercentageNumber(checklistCompleted, checklistTotal);
 
   const toggleChecklistItem = (id: string) => {
     setChecklist((prev) =>

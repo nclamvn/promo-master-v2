@@ -83,8 +83,11 @@
     "globals": "^16.5.0",
     "happy-dom": "^20.3.9",
     "jsdom": "^27.4.0",
+    "rollup-plugin-visualizer": "^6.0.5",
+    "terser": "^5.46.0",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.46.4",
+    "vite-plugin-compression2": "^2.4.0",
     "vitest": "^4.0.18"
   },
   "msw": {

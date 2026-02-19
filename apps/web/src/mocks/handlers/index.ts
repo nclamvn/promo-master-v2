@@ -842,12 +842,12 @@ export const handlers = [
     await delay(200);
     const url = new URL(request.url);
     const includeTree = url.searchParams.get('includeTree');
-    const allocation = mockBudgetAllocations.find(a => a.id === params.id);
+    const allocation = mockBudgetAllocations.find((a: any) => a.id === params.id);
     if (!allocation) {
       return HttpResponse.json({ success: false, error: { message: 'Budget allocation not found' } }, { status: 404 });
     }
     if (includeTree === 'true') {
-      const children = mockBudgetAllocations.filter(a => a.parentId === allocation.id);
+      const children = mockBudgetAllocations.filter((a: any) => a.parentId === allocation.id);
       return HttpResponse.json({ success: true, data: { ...allocation, children } });
     }
     return HttpResponse.json({ success: true, data: allocation });
@@ -880,7 +880,7 @@ export const handlers = [
   http.patch('/api/budget-allocations/:id', async ({ params, request }) => {
     await delay(300);
     const body = await request.json() as Record<string, unknown>;
-    const allocation = mockBudgetAllocations.find(a => a.id === params.id);
+    const allocation = mockBudgetAllocations.find((a: any) => a.id === params.id);
     if (!allocation) {
       return HttpResponse.json({ success: false, error: { message: 'Budget allocation not found' } }, { status: 404 });
     }
@@ -924,12 +924,12 @@ export const handlers = [
     await delay(200);
     const url = new URL(request.url);
     const includeTree = url.searchParams.get('includeTree');
-    const allocation = mockTargetAllocations.find(a => a.id === params.id);
+    const allocation = mockTargetAllocations.find((a: any) => a.id === params.id);
     if (!allocation) {
       return HttpResponse.json({ success: false, error: { message: 'Target allocation not found' } }, { status: 404 });
     }
     if (includeTree === 'true') {
-      const children = mockTargetAllocations.filter(a => a.parentId === allocation.id);
+      const children = mockTargetAllocations.filter((a: any) => a.parentId === allocation.id);
       return HttpResponse.json({ success: true, data: { ...allocation, children } });
     }
     return HttpResponse.json({ success: true, data: allocation });
@@ -962,7 +962,7 @@ export const handlers = [
   http.patch('/api/target-allocations/:id', async ({ params, request }) => {
     await delay(300);
     const body = await request.json() as Record<string, unknown>;
-    const allocation = mockTargetAllocations.find(a => a.id === params.id);
+    const allocation = mockTargetAllocations.find((a: any) => a.id === params.id);
     if (!allocation) {
       return HttpResponse.json({ success: false, error: { message: 'Target allocation not found' } }, { status: 404 });
     }
@@ -1901,6 +1901,48 @@ export const handlers = [
   // OPERATIONS - SELL TRACKING
   // ═══════════════════════════════════════════════════════════════════════════
 
+  http.get('/api/operations/sell-tracking/sell-in', async () => {
+    await delay(300);
+    return HttpResponse.json({
+      success: true,
+      totals: { quantity: 125000, value: 18750000000 },
+      analysis: { uniqueCustomers: 48, uniqueProducts: 156 },
+      trend: [
+        { period: '2026-01', quantity: 18500, value: 2775000000 },
+        { period: '2026-02', quantity: 21200, value: 3180000000 },
+        { period: '2025-12', quantity: 19800, value: 2970000000 },
+        { period: '2025-11', quantity: 17600, value: 2640000000 },
+      ],
+      data: [
+        { groupKey: '2026-02', groupName: 'Feb 2026', quantity: 21200, value: 3180000000, recordCount: 342, growthPercent: 14.6 },
+        { groupKey: '2026-01', groupName: 'Jan 2026', quantity: 18500, value: 2775000000, recordCount: 298, growthPercent: -6.6 },
+        { groupKey: '2025-12', groupName: 'Dec 2025', quantity: 19800, value: 2970000000, recordCount: 315, growthPercent: 12.5 },
+        { groupKey: '2025-11', groupName: 'Nov 2025', quantity: 17600, value: 2640000000, recordCount: 276, growthPercent: 5.4 },
+      ],
+    });
+  }),
+
+  http.get('/api/operations/sell-tracking/sell-out', async () => {
+    await delay(300);
+    return HttpResponse.json({
+      success: true,
+      totals: { quantity: 98000, value: 14700000000 },
+      analysis: { uniqueCustomers: 48, uniqueProducts: 142 },
+      trend: [
+        { period: '2026-01', quantity: 14200, value: 2130000000 },
+        { period: '2026-02', quantity: 16800, value: 2520000000 },
+        { period: '2025-12', quantity: 15400, value: 2310000000 },
+        { period: '2025-11', quantity: 13600, value: 2040000000 },
+      ],
+      data: [
+        { groupKey: '2026-02', groupName: 'Feb 2026', quantity: 16800, value: 2520000000, recordCount: 289, growthPercent: 18.3 },
+        { groupKey: '2026-01', groupName: 'Jan 2026', quantity: 14200, value: 2130000000, recordCount: 241, growthPercent: -7.8 },
+        { groupKey: '2025-12', groupName: 'Dec 2025', quantity: 15400, value: 2310000000, recordCount: 262, growthPercent: 13.2 },
+        { groupKey: '2025-11', groupName: 'Nov 2025', quantity: 13600, value: 2040000000, recordCount: 228, growthPercent: 4.1 },
+      ],
+    });
+  }),
+
   http.get('/api/operations/sell-tracking', async () => {
     await delay(300);
     const transformedData = mockSellData.map(item => ({
@@ -2580,6 +2622,557 @@ export const handlers = [
         { id: 'vc-2', command: 'Create new claim', action: 'CREATE_CLAIM', timestamp: '2026-01-25T09:30:00Z' },
       ]
     });
+  }),
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // CONTRACTS (Volume Contracts)
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  http.get('/api/contracts/dashboard', async () => {
+    await delay(300);
+    return HttpResponse.json({
+      success: true,
+      data: {
+        totalContracts: 12,
+        activeContracts: 8,
+        completedContracts: 3,
+        expiringThisMonth: 2,
+        totalVolume: 500000,
+        achievedVolume: 325000,
+        overallProgress: 65,
+        atRiskContracts: 1,
+      }
+    });
+  }),
+
+  http.get('/api/contracts', async ({ request }) => {
+    await delay(300);
+    const url = new URL(request.url);
+    const page = parseInt(url.searchParams.get('page') || '1');
+    const pageSize = parseInt(url.searchParams.get('limit') || url.searchParams.get('pageSize') || '10');
+    const mockContracts = [
+      { id: 'vc-1', code: 'VC-2026-001', name: 'Annual Volume Agreement - Metro', customerId: 'cust-001', customerName: 'Metro Cash & Carry', status: 'ACTIVE', type: 'ANNUAL', startDate: '2026-01-01', endDate: '2026-12-31', targetVolume: 100000, achievedVolume: 45000, progress: 45, riskLevel: 'LOW', totalValue: 500000000, createdAt: '2025-12-15T00:00:00Z', updatedAt: '2026-01-25T00:00:00Z' },
+      { id: 'vc-2', code: 'VC-2026-002', name: 'Q1 Growth Contract - Big C', customerId: 'cust-002', customerName: 'Big C Supercenter', status: 'ACTIVE', type: 'QUARTERLY', startDate: '2026-01-01', endDate: '2026-03-31', targetVolume: 50000, achievedVolume: 32000, progress: 64, riskLevel: 'LOW', totalValue: 250000000, createdAt: '2025-12-20T00:00:00Z', updatedAt: '2026-01-24T00:00:00Z' },
+      { id: 'vc-3', code: 'VC-2026-003', name: 'Premium Line Agreement - Vinmart', customerId: 'cust-003', customerName: 'Vinmart', status: 'ACTIVE', type: 'ANNUAL', startDate: '2026-01-01', endDate: '2026-12-31', targetVolume: 80000, achievedVolume: 18000, progress: 22.5, riskLevel: 'HIGH', totalValue: 400000000, createdAt: '2025-12-18T00:00:00Z', updatedAt: '2026-01-23T00:00:00Z' },
+      { id: 'vc-4', code: 'VC-2025-010', name: 'Q4 Commitment - Saigon Co.op', customerId: 'cust-004', customerName: 'Saigon Co.op', status: 'COMPLETED', type: 'QUARTERLY', startDate: '2025-10-01', endDate: '2025-12-31', targetVolume: 40000, achievedVolume: 42500, progress: 106.25, riskLevel: 'LOW', totalValue: 200000000, createdAt: '2025-09-15T00:00:00Z', updatedAt: '2026-01-02T00:00:00Z' },
+      { id: 'vc-5', code: 'VC-2026-004', name: 'New Product Launch - Lotte Mart', customerId: 'cust-005', customerName: 'Lotte Mart', status: 'DRAFT', type: 'QUARTERLY', startDate: '2026-02-01', endDate: '2026-04-30', targetVolume: 30000, achievedVolume: 0, progress: 0, riskLevel: 'MEDIUM', totalValue: 150000000, createdAt: '2026-01-20T00:00:00Z', updatedAt: '2026-01-25T00:00:00Z' },
+    ];
+    const search = url.searchParams.get('search')?.toLowerCase() || '';
+    const status = url.searchParams.get('status');
+    let filtered = [...mockContracts];
+    if (search) filtered = filtered.filter(c => c.name.toLowerCase().includes(search) || c.code.toLowerCase().includes(search));
+    if (status) filtered = filtered.filter(c => c.status === status);
+    const result = paginate(filtered, page, pageSize);
+    return HttpResponse.json({ success: true, data: result.data, pagination: result.pagination });
+  }),
+
+  http.get('/api/contracts/:id', async ({ params }) => {
+    await delay(200);
+    const contract = {
+      id: params.id,
+      code: 'VC-2026-001',
+      name: 'Annual Volume Agreement - Metro',
+      customerId: 'cust-001',
+      customerName: 'Metro Cash & Carry',
+      status: 'ACTIVE',
+      type: 'ANNUAL',
+      startDate: '2026-01-01',
+      endDate: '2026-12-31',
+      targetVolume: 100000,
+      achievedVolume: 45000,
+      progress: 45,
+      riskLevel: 'LOW',
+      totalValue: 500000000,
+      milestones: [
+        { id: 'ms-1', name: 'Q1 Target', targetVolume: 25000, achievedVolume: 25000, rebatePercent: 3, rebateAmount: 15000000, achieved: true, achievedAt: '2026-03-28T00:00:00Z' },
+        { id: 'ms-2', name: 'Q2 Target', targetVolume: 50000, achievedVolume: 20000, rebatePercent: 5, rebateAmount: 0, achieved: false, achievedAt: null },
+        { id: 'ms-3', name: 'Q3 Target', targetVolume: 75000, achievedVolume: 0, rebatePercent: 7, rebateAmount: 0, achieved: false, achievedAt: null },
+        { id: 'ms-4', name: 'Annual Target', targetVolume: 100000, achievedVolume: 0, rebatePercent: 10, rebateAmount: 0, achieved: false, achievedAt: null },
+      ],
+      monthlyProgress: [
+        { month: '2026-01', volume: 8500, value: 42500000 },
+        { month: '2026-02', volume: 9200, value: 46000000 },
+        { month: '2026-03', volume: 7300, value: 36500000 },
+        { month: '2026-04', volume: 10000, value: 50000000 },
+        { month: '2026-05', volume: 10000, value: 50000000 },
+      ],
+      createdAt: '2025-12-15T00:00:00Z',
+      updatedAt: '2026-01-25T00:00:00Z',
+    };
+    return HttpResponse.json({ success: true, data: contract });
+  }),
+
+  http.post('/api/contracts', async ({ request }) => {
+    await delay(500);
+    const body = await request.json() as Record<string, unknown>;
+    return HttpResponse.json({ success: true, data: { id: `vc-${Date.now()}`, ...body, status: 'DRAFT', progress: 0, achievedVolume: 0, createdAt: new Date().toISOString() } }, { status: 201 });
+  }),
+
+  http.put('/api/contracts/:id', async ({ params, request }) => {
+    await delay(300);
+    const body = await request.json() as Record<string, unknown>;
+    return HttpResponse.json({ success: true, data: { id: params.id, ...body, updatedAt: new Date().toISOString() } });
+  }),
+
+  http.delete('/api/contracts/:id', async () => {
+    await delay(300);
+    return HttpResponse.json({ success: true, message: 'Contract deleted' });
+  }),
+
+  http.get('/api/contracts/:id/progress', async () => {
+    await delay(200);
+    return HttpResponse.json({
+      success: true,
+      data: [
+        { month: '2026-01', volume: 8500, value: 42500000, target: 8333 },
+        { month: '2026-02', volume: 9200, value: 46000000, target: 8333 },
+        { month: '2026-03', volume: 7300, value: 36500000, target: 8333 },
+        { month: '2026-04', volume: 10000, value: 50000000, target: 8333 },
+        { month: '2026-05', volume: 10000, value: 50000000, target: 8333 },
+      ]
+    });
+  }),
+
+  http.post('/api/contracts/:id/progress', async ({ request }) => {
+    await delay(300);
+    const body = await request.json() as Record<string, unknown>;
+    return HttpResponse.json({ success: true, data: { id: `prog-${Date.now()}`, ...body, createdAt: new Date().toISOString() } });
+  }),
+
+  http.get('/api/contracts/:id/gap-analysis', async () => {
+    await delay(300);
+    return HttpResponse.json({
+      success: true,
+      data: {
+        targetVolume: 100000,
+        achievedVolume: 45000,
+        remainingVolume: 55000,
+        daysRemaining: 245,
+        requiredDailyRate: 224,
+        currentDailyRate: 375,
+        projectedFinalVolume: 112000,
+        onTrack: true,
+        riskFactors: [],
+        recommendations: ['Maintain current sales velocity', 'Consider seasonal promotions for Q3'],
+      }
+    });
+  }),
+
+  http.post('/api/contracts/:contractId/milestones/:milestoneId/achieve', async ({ params }) => {
+    await delay(500);
+    return HttpResponse.json({ success: true, data: { contractId: params.contractId, milestoneId: params.milestoneId, achieved: true, achievedAt: new Date().toISOString() } });
+  }),
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // CLAIMS-AI
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  http.get('/api/claims-ai/stats', async () => {
+    await delay(200);
+    return HttpResponse.json({
+      success: true,
+      data: {
+        totalPending: 15,
+        autoMatchRate: 78.5,
+        avgProcessingTime: 2.3,
+        processedToday: 12,
+        accuracy: 94.2,
+        totalProcessed: 245,
+        rejectionRate: 5.8,
+      }
+    });
+  }),
+
+  http.get('/api/claims-ai/pending', async ({ request }) => {
+    await delay(300);
+    const url = new URL(request.url);
+    const page = parseInt(url.searchParams.get('page') || '1');
+    const pageSize = parseInt(url.searchParams.get('limit') || '10');
+    const pendingClaims = [
+      { id: 'cai-1', claimCode: 'CLM-2026-015', customerName: 'Metro Cash & Carry', amount: 25000000, promotionCode: 'SUMMER-2026', matchConfidence: 95, suggestedAction: 'AUTO_APPROVE', createdAt: '2026-01-25T10:00:00Z' },
+      { id: 'cai-2', claimCode: 'CLM-2026-016', customerName: 'Big C Supercenter', amount: 18000000, promotionCode: 'FLASH-2026', matchConfidence: 72, suggestedAction: 'REVIEW', createdAt: '2026-01-25T09:30:00Z' },
+      { id: 'cai-3', claimCode: 'CLM-2026-017', customerName: 'Vinmart', amount: 32000000, promotionCode: 'REBATE-Q1', matchConfidence: 88, suggestedAction: 'AUTO_APPROVE', createdAt: '2026-01-25T08:00:00Z' },
+    ];
+    const result = paginate(pendingClaims, page, pageSize);
+    return HttpResponse.json({ success: true, data: result.data, pagination: result.pagination });
+  }),
+
+  http.get('/api/claims-ai/match/:claimId', async ({ params }) => {
+    await delay(300);
+    return HttpResponse.json({
+      success: true,
+      data: {
+        claimId: params.claimId,
+        matchedPromotion: { id: 'promo-1', code: 'SUMMER-2026', name: 'Summer Sale 2026' },
+        confidence: 95,
+        matchedFields: ['customer', 'product', 'period', 'amount'],
+        discrepancies: [],
+        suggestedAction: 'AUTO_APPROVE',
+      }
+    });
+  }),
+
+  http.post('/api/claims-ai/process', async () => {
+    await delay(500);
+    return HttpResponse.json({ success: true, data: { status: 'PROCESSED', processedAt: new Date().toISOString() } });
+  }),
+
+  http.post('/api/claims-ai/batch-process', async ({ request }) => {
+    await delay(1000);
+    const body = await request.json() as { claimIds?: string[] };
+    return HttpResponse.json({ success: true, data: { processed: body.claimIds?.length || 0, failed: 0 } });
+  }),
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // FUND ACTIVITIES
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  http.get('/api/fund-activities', async ({ request }) => {
+    await delay(300);
+    const url = new URL(request.url);
+    const page = parseInt(url.searchParams.get('page') || '1');
+    const pageSize = parseInt(url.searchParams.get('pageSize') || '10');
+    const mockActivities = [
+      { id: 'fa-1', budgetId: 'fund-1', activityType: 'promotion', activityName: 'Summer Trade Promo', activityCode: 'FA-001', allocatedAmount: 200000000, spentAmount: 150000000, revenueGenerated: 450000000, unitsImpacted: 15000, roi: 2.0, startDate: '2026-01-01', endDate: '2026-03-31', status: 'ACTIVE', createdAt: '2026-01-01T00:00:00Z', updatedAt: '2026-01-25T00:00:00Z' },
+      { id: 'fa-2', budgetId: 'fund-1', activityType: 'display', activityName: 'In-Store Display Q1', activityCode: 'FA-002', allocatedAmount: 80000000, spentAmount: 60000000, revenueGenerated: 180000000, unitsImpacted: 8000, roi: 2.0, startDate: '2026-01-15', endDate: '2026-02-28', status: 'COMPLETED', createdAt: '2026-01-10T00:00:00Z', updatedAt: '2026-01-20T00:00:00Z' },
+      { id: 'fa-3', budgetId: 'fund-2', activityType: 'sampling', activityName: 'Product Sampling Event', activityCode: 'FA-003', allocatedAmount: 50000000, spentAmount: 30000000, revenueGenerated: 120000000, unitsImpacted: 5000, roi: 1.8, startDate: '2026-02-01', endDate: '2026-02-15', status: 'ACTIVE', createdAt: '2026-01-15T00:00:00Z', updatedAt: '2026-01-22T00:00:00Z' },
+      { id: 'fa-4', budgetId: 'fund-2', activityType: 'event', activityName: 'Tet Holiday Event', activityCode: 'FA-004', allocatedAmount: 120000000, spentAmount: 0, revenueGenerated: 0, unitsImpacted: 0, roi: 0, startDate: '2026-02-15', endDate: '2026-03-15', status: 'PLANNED', createdAt: '2026-01-20T00:00:00Z', updatedAt: '2026-01-25T00:00:00Z' },
+    ];
+    const result = paginate(mockActivities, page, pageSize);
+    return HttpResponse.json({ success: true, data: result.data, metadata: result.pagination });
+  }),
+
+  http.get('/api/fund-activities/summary', async () => {
+    await delay(200);
+    return HttpResponse.json({
+      success: true,
+      data: {
+        overview: { totalActivities: 4, totalAllocated: 450000000, totalSpent: 240000000, totalRevenue: 750000000, utilizationRate: 53.3, overallRoi: 3.13, avgRoi: 1.95 },
+        byType: [
+          { type: 'promotion', label: 'Khuyến mãi', count: 1, totalAllocated: 200000000, totalSpent: 150000000, totalRevenue: 450000000, avgRoi: 2.0 },
+          { type: 'display', label: 'Trưng bày', count: 1, totalAllocated: 80000000, totalSpent: 60000000, totalRevenue: 180000000, avgRoi: 2.0 },
+          { type: 'sampling', label: 'Dùng thử', count: 1, totalAllocated: 50000000, totalSpent: 30000000, totalRevenue: 120000000, avgRoi: 1.8 },
+          { type: 'event', label: 'Sự kiện', count: 1, totalAllocated: 120000000, totalSpent: 0, totalRevenue: 0, avgRoi: 0 },
+        ],
+        byStatus: { PLANNED: 1, ACTIVE: 2, COMPLETED: 1, CANCELLED: 0 },
+        topPerformers: [{ id: 'fa-1', activityName: 'Summer Trade Promo', activityType: 'promotion', spent: 150000000, revenue: 450000000, roi: 2.0 }],
+        underperformers: [],
+      }
+    });
+  }),
+
+  http.get('/api/fund-activities/:id', async ({ params }) => {
+    await delay(200);
+    return HttpResponse.json({
+      success: true,
+      data: { id: params.id, budgetId: 'fund-1', activityType: 'promotion', activityName: 'Summer Trade Promo', activityCode: 'FA-001', allocatedAmount: 200000000, spentAmount: 150000000, revenueGenerated: 450000000, roi: 2.0, startDate: '2026-01-01', endDate: '2026-03-31', status: 'ACTIVE', createdAt: '2026-01-01T00:00:00Z', updatedAt: '2026-01-25T00:00:00Z' }
+    });
+  }),
+
+  http.post('/api/fund-activities', async ({ request }) => {
+    await delay(500);
+    const body = await request.json() as Record<string, unknown>;
+    return HttpResponse.json({ success: true, data: { id: `fa-${Date.now()}`, ...body, spentAmount: 0, revenueGenerated: 0, roi: 0, status: 'PLANNED', createdAt: new Date().toISOString() } }, { status: 201 });
+  }),
+
+  http.patch('/api/fund-activities/:id', async ({ params, request }) => {
+    await delay(300);
+    const body = await request.json() as Record<string, unknown>;
+    return HttpResponse.json({ success: true, data: { id: params.id, budgetId: 'fund-1', ...body, updatedAt: new Date().toISOString() } });
+  }),
+
+  http.delete('/api/fund-activities/:id', async () => {
+    await delay(300);
+    return HttpResponse.json({ success: true, message: 'Fund activity deleted' });
+  }),
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // POST-ANALYSIS
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  http.get('/api/post-analysis/summary', async () => {
+    await delay(200);
+    return HttpResponse.json({
+      success: true,
+      data: {
+        totalAnalyzed: 8,
+        avgROI: 2.4,
+        avgSalesLift: 15.3,
+        topPerformingType: 'DISCOUNT',
+        insights: ['Discount promotions showed 22% higher ROI than BOGO', 'Weekend promotions outperform weekday by 35%'],
+      }
+    });
+  }),
+
+  http.get('/api/post-analysis/learnings', async () => {
+    await delay(200);
+    return HttpResponse.json({
+      success: true,
+      data: [
+        { id: 'learn-1', category: 'PRICING', title: 'Optimal discount range', description: '15-20% discounts yield highest ROI for beverages', confidence: 0.89, applicableTo: ['DISCOUNT'], createdAt: '2026-01-20T00:00:00Z' },
+        { id: 'learn-2', category: 'TIMING', title: 'Best promotion duration', description: '2-week promotions outperform 1-week by 40%', confidence: 0.82, applicableTo: ['ALL'], createdAt: '2026-01-18T00:00:00Z' },
+        { id: 'learn-3', category: 'TARGETING', title: 'Customer segment impact', description: 'Modern trade channels show 2x redemption rate vs traditional', confidence: 0.91, applicableTo: ['REBATE', 'DISCOUNT'], createdAt: '2026-01-15T00:00:00Z' },
+      ]
+    });
+  }),
+
+  http.get('/api/post-analysis/:promotionId', async ({ params }) => {
+    await delay(300);
+    return HttpResponse.json({
+      success: true,
+      data: {
+        id: `analysis-${params.promotionId}`,
+        promotionId: params.promotionId,
+        roi: 2.8,
+        salesLift: 18.5,
+        incrementalRevenue: 280000000,
+        totalCost: 100000000,
+        redemptionRate: 72,
+        customerReach: 15000,
+        avgBasketIncrease: 12.5,
+        comparison: { vsBaseline: 18.5, vsPrevious: 8.2, vsCategory: 5.1 },
+        createdAt: '2026-01-20T00:00:00Z',
+      }
+    });
+  }),
+
+  http.post('/api/post-analysis/generate/:promotionId', async ({ params }) => {
+    await delay(1000);
+    return HttpResponse.json({ success: true, data: { id: `analysis-${params.promotionId}`, status: 'GENERATING', promotionId: params.promotionId } });
+  }),
+
+  http.post('/api/post-analysis/:id/apply-baseline', async () => {
+    await delay(500);
+    return HttpResponse.json({ success: true, data: { applied: true, updatedAt: new Date().toISOString() } });
+  }),
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // PROMO SUGGESTIONS
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  http.get('/api/promo-suggestions', async ({ request }) => {
+    await delay(300);
+    const url = new URL(request.url);
+    const page = parseInt(url.searchParams.get('page') || '1');
+    const pageSize = parseInt(url.searchParams.get('limit') || '10');
+    const suggestions = [
+      { id: 'sug-1', type: 'UPSELL', status: 'PENDING', title: 'Increase Metro discount to 18%', description: 'Based on historical data, increasing the discount to 18% could boost sales by 25%', confidence: 0.87, potentialImpact: { revenue: 150000000, roi: 3.2, salesLift: 25 }, customerId: 'cust-001', customerName: 'Metro Cash & Carry', contractId: 'vc-1', createdAt: '2026-01-25T10:00:00Z' },
+      { id: 'sug-2', type: 'TIMING', status: 'APPROVED', title: 'Extend Big C promotion by 1 week', description: 'Sales velocity suggests extending the promotion would capture remaining demand', confidence: 0.79, potentialImpact: { revenue: 80000000, roi: 2.1, salesLift: 15 }, customerId: 'cust-002', customerName: 'Big C Supercenter', contractId: 'vc-2', createdAt: '2026-01-24T09:00:00Z' },
+      { id: 'sug-3', type: 'NEW_PROMO', status: 'PENDING', title: 'Launch BOGO for Vinmart premium line', description: 'Premium line has low sell-through. A BOGO could accelerate movement.', confidence: 0.72, potentialImpact: { revenue: 200000000, roi: 1.8, salesLift: 35 }, customerId: 'cust-003', customerName: 'Vinmart', contractId: 'vc-3', createdAt: '2026-01-23T14:00:00Z' },
+    ];
+    const result = paginate(suggestions, page, pageSize);
+    return HttpResponse.json({ success: true, data: result.data, pagination: result.pagination });
+  }),
+
+  http.get('/api/promo-suggestions/contract/:contractId', async () => {
+    await delay(200);
+    return HttpResponse.json({
+      success: true,
+      data: [
+        { id: 'sug-1', type: 'UPSELL', status: 'PENDING', title: 'Increase discount to 18%', confidence: 0.87, potentialImpact: { revenue: 150000000, roi: 3.2 } },
+      ]
+    });
+  }),
+
+  http.get('/api/promo-suggestions/:id', async ({ params }) => {
+    await delay(200);
+    return HttpResponse.json({
+      success: true,
+      data: { id: params.id, type: 'UPSELL', status: 'PENDING', title: 'Increase Metro discount to 18%', description: 'Based on historical data, increasing the discount to 18% could boost sales by 25%', confidence: 0.87, potentialImpact: { revenue: 150000000, roi: 3.2, salesLift: 25 }, customerId: 'cust-001', customerName: 'Metro Cash & Carry', createdAt: '2026-01-25T10:00:00Z' }
+    });
+  }),
+
+  http.post('/api/promo-suggestions', async ({ request }) => {
+    await delay(500);
+    const body = await request.json() as Record<string, unknown>;
+    return HttpResponse.json({ success: true, data: { id: `sug-${Date.now()}`, ...body, status: 'PENDING', createdAt: new Date().toISOString() } }, { status: 201 });
+  }),
+
+  http.put('/api/promo-suggestions/:id/approve', async ({ params }) => {
+    await delay(300);
+    return HttpResponse.json({ success: true, data: { id: params.id, status: 'APPROVED', approvedAt: new Date().toISOString() } });
+  }),
+
+  http.put('/api/promo-suggestions/:id/reject', async ({ params }) => {
+    await delay(300);
+    return HttpResponse.json({ success: true, data: { id: params.id, status: 'REJECTED', rejectedAt: new Date().toISOString() } });
+  }),
+
+  http.post('/api/promo-suggestions/:id/apply', async ({ params }) => {
+    await delay(500);
+    return HttpResponse.json({ success: true, data: { id: params.id, status: 'APPLIED', appliedAt: new Date().toISOString() } });
+  }),
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // MONITORING (Live Dashboard)
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  http.get('/api/monitoring/dashboard', async () => {
+    await delay(200);
+    return HttpResponse.json({
+      success: true,
+      data: {
+        activePromotions: 18,
+        totalRedemptions: 4520,
+        todayRedemptions: 342,
+        currentSpend: 125000000,
+        budgetUtilization: 62.5,
+        alerts: 3,
+        topPromotion: { id: 'promo-1', name: 'Summer Sale 2026', redemptions: 1250 },
+      }
+    });
+  }),
+
+  http.get('/api/monitoring/live/:promotionId', async ({ params }) => {
+    await delay(200);
+    return HttpResponse.json({
+      success: true,
+      data: {
+        promotionId: params.promotionId,
+        currentRedemptions: 1250,
+        targetRedemptions: 2000,
+        currentSpend: 45000000,
+        budgetRemaining: 55000000,
+        redemptionRate: 62.5,
+        hourlyTrend: Array.from({ length: 24 }, (_, i) => ({ hour: i, redemptions: Math.floor(Math.random() * 100), spend: Math.floor(Math.random() * 5000000) })),
+        lastUpdated: new Date().toISOString(),
+      }
+    });
+  }),
+
+  http.get('/api/monitoring/stores/:promotionId', async () => {
+    await delay(300);
+    return HttpResponse.json({
+      success: true,
+      data: [
+        { storeId: 'store-1', storeName: 'Metro Q7', redemptions: 150, spend: 7500000, performance: 'ABOVE_TARGET' },
+        { storeId: 'store-2', storeName: 'Big C Tan Binh', redemptions: 120, spend: 6000000, performance: 'ON_TARGET' },
+        { storeId: 'store-3', storeName: 'Vinmart Phu My Hung', redemptions: 80, spend: 4000000, performance: 'BELOW_TARGET' },
+      ]
+    });
+  }),
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // BUDGET SUB-ENDPOINTS
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  http.get('/api/budgets/:id/approval-history', async ({ params }) => {
+    await delay(200);
+    return HttpResponse.json({
+      success: true,
+      data: {
+        budget: { id: params.id, code: 'BUD-2026-001', name: 'Q1 Marketing Budget', totalAmount: 500000000 },
+        workflow: { status: 'APPROVED', currentLevel: 3, requiredLevels: 3, progress: 100, levels: [{ level: 1, role: 'Manager', status: 'APPROVED' }, { level: 2, role: 'Director', status: 'APPROVED' }, { level: 3, role: 'VP', status: 'APPROVED' }] },
+        timeline: [
+          { id: 'ah-1', step: 1, level: 1, role: 'Manager', status: 'APPROVED', reviewer: 'John Doe', comments: 'Looks good', submittedAt: '2026-01-10T09:00:00Z', reviewedAt: '2026-01-11T10:00:00Z', duration: 25 },
+          { id: 'ah-2', step: 2, level: 2, role: 'Director', status: 'APPROVED', reviewer: 'Jane Smith', comments: 'Approved for Q1', submittedAt: '2026-01-11T10:00:00Z', reviewedAt: '2026-01-12T14:00:00Z', duration: 28 },
+          { id: 'ah-3', step: 3, level: 3, role: 'VP', status: 'APPROVED', reviewer: 'VP Finance', comments: null, submittedAt: '2026-01-12T14:00:00Z', reviewedAt: '2026-01-13T09:00:00Z', duration: 19 },
+        ],
+        summary: { totalSteps: 3, approved: 3, pending: 0, rejected: 0, avgReviewTimeHours: 24 },
+      }
+    });
+  }),
+
+  http.get('/api/budgets/:id/health-score', async () => {
+    await delay(200);
+    return HttpResponse.json({
+      success: true,
+      data: {
+        score: 78,
+        grade: 'B+',
+        factors: [
+          { name: 'Utilization Rate', score: 85, weight: 0.3 },
+          { name: 'ROI Performance', score: 72, weight: 0.25 },
+          { name: 'Spending Velocity', score: 80, weight: 0.2 },
+          { name: 'Activity Diversity', score: 70, weight: 0.15 },
+          { name: 'Compliance', score: 90, weight: 0.1 },
+        ],
+        trend: 'IMPROVING',
+        recommendations: ['Increase activity diversity', 'Monitor Q2 spending velocity'],
+      }
+    });
+  }),
+
+  http.get('/api/budgets/:id/comparison', async () => {
+    await delay(200);
+    return HttpResponse.json({
+      success: true,
+      data: {
+        current: { period: 'Q1 2026', totalAmount: 500000000, spent: 200000000, roi: 2.4, activities: 12 },
+        previous: { period: 'Q4 2025', totalAmount: 450000000, spent: 380000000, roi: 2.1, activities: 15 },
+        changes: { budgetChange: 11.1, spendingChange: -47.4, roiChange: 14.3, activityChange: -20 },
+      }
+    });
+  }),
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // TARGET SUB-ENDPOINTS
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  http.get('/api/targets/:id/progress', async () => {
+    await delay(200);
+    return HttpResponse.json({
+      success: true,
+      data: {
+        targetId: 'target-1',
+        totalTarget: 500000,
+        totalAchieved: 225000,
+        overallProgress: 45,
+        byLevel: [
+          { level: 'NATIONAL', target: 500000, achieved: 225000, progress: 45 },
+          { level: 'REGION', target: 500000, achieved: 225000, progress: 45 },
+          { level: 'AREA', target: 500000, achieved: 225000, progress: 45 },
+        ],
+      }
+    });
+  }),
+
+  http.get('/api/targets/:id/allocation', async () => {
+    await delay(200);
+    return HttpResponse.json({
+      success: true,
+      data: [
+        { id: 'alloc-1', geographicUnitId: 'geo-1', geographicUnitName: 'North Region', targetValue: 200000, achievedValue: 95000, progress: 47.5, status: 'ACTIVE' },
+        { id: 'alloc-2', geographicUnitId: 'geo-2', geographicUnitName: 'South Region', targetValue: 180000, achievedValue: 85000, progress: 47.2, status: 'ACTIVE' },
+        { id: 'alloc-3', geographicUnitId: 'geo-3', geographicUnitName: 'Central Region', targetValue: 120000, achievedValue: 45000, progress: 37.5, status: 'ACTIVE' },
+      ],
+      summary: { totalTarget: 500000, totalAllocated: 500000, totalAchieved: 225000, unallocated: 0, overallProgress: 45 },
+    });
+  }),
+
+  http.post('/api/targets/:id/allocation', async ({ request }) => {
+    await delay(300);
+    const body = await request.json() as Record<string, unknown>;
+    return HttpResponse.json({ success: true, data: { id: `alloc-${Date.now()}`, ...body, achievedValue: 0, progress: 0, status: 'ACTIVE', createdAt: new Date().toISOString() } }, { status: 201 });
+  }),
+
+  http.put('/api/targets/:id/allocation/:allocId', async ({ params, request }) => {
+    await delay(300);
+    const body = await request.json() as Record<string, unknown>;
+    return HttpResponse.json({ success: true, data: { id: params.allocId, targetId: params.id, ...body, updatedAt: new Date().toISOString() } });
+  }),
+
+  http.delete('/api/targets/:id/allocation/:allocId', async () => {
+    await delay(300);
+    return HttpResponse.json({ success: true, message: 'Allocation deleted' });
+  }),
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // OPERATIONS - INVENTORY SNAPSHOTS
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  http.get('/api/operations/inventory/snapshots', async ({ request }) => {
+    await delay(300);
+    const url = new URL(request.url);
+    const page = parseInt(url.searchParams.get('page') || '1');
+    const pageSize = parseInt(url.searchParams.get('pageSize') || '20');
+    const snapshots = [
+      { id: 'snap-1', warehouseId: 'wh-1', warehouseName: 'HCM Warehouse', productId: 'prod-001', productName: 'Pepsi 330ml', quantity: 15000, value: 75000000, snapshotDate: '2026-01-25', status: 'CURRENT' },
+      { id: 'snap-2', warehouseId: 'wh-1', warehouseName: 'HCM Warehouse', productId: 'prod-002', productName: 'Pepsi Max 330ml', quantity: 8500, value: 51000000, snapshotDate: '2026-01-25', status: 'CURRENT' },
+      { id: 'snap-3', warehouseId: 'wh-2', warehouseName: 'Hanoi Warehouse', productId: 'prod-001', productName: 'Pepsi 330ml', quantity: 12000, value: 60000000, snapshotDate: '2026-01-25', status: 'CURRENT' },
+    ];
+    const result = paginate(snapshots, page, pageSize);
+    return HttpResponse.json({ success: true, data: result.data, pagination: result.pagination });
   }),
 
 ];

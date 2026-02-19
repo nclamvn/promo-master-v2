@@ -21,14 +21,14 @@ import { format } from 'date-fns';
 
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { StatCard, StatCardCompact, StatCardGroup } from '@/components/ui/stat-card';
 import { PageHeader } from '@/components/shared/page-header';
-import { KPICard } from '@/components/charts/KPICard';
 import { AreaChart } from '@/components/charts/AreaChart';
 import { BarChart } from '@/components/charts/BarChart';
 import { PieChart } from '@/components/charts/PieChart';
 import { PageLoading } from '@/components/shared/LoadingSpinner';
 import { useDashboardStats, useSpendTrend, useStatusDistribution, useTopCustomers } from '@/hooks/useDashboard';
-import { formatRelativeTime } from '@/lib/utils';
+import { formatRelativeTime, safePercentageNumber } from '@/lib/utils';
 import { formatCurrencyCompact } from '@/components/ui/currency-display';
 import { cn } from '@/lib/utils';
 
@@ -133,9 +133,8 @@ export default function Dashboard() {
     : demoTopCustomers;
 
   // Calculate metrics
-  const utilizationPercent = (dashboardStats.utilizedBudget / dashboardStats.totalBudget * 100).toFixed(1);
+  const utilizationPercent = safePercentageNumber(dashboardStats.utilizedBudget, dashboardStats.totalBudget).toFixed(1);
   const remaining = dashboardStats.totalBudget - dashboardStats.utilizedBudget;
-  const sparklineData = spendTrend.map((d: any) => d.actual);
 
   if (statsLoading) {
     return <PageLoading />;
@@ -191,79 +190,70 @@ export default function Dashboard() {
       )}
 
       {/* KPI Strip - Primary Metrics */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <KPICard
+      <StatCardGroup cols={4}>
+        <StatCard
           title="Total Budget"
+          value=""
           amount={dashboardStats.totalBudget}
-          trend={{ value: 12, period: 'vs last year' }}
-          status="success"
+          trend={{ value: 12, label: 'vs last year' }}
           icon={DollarSign}
+          color="success"
         />
-        <KPICard
+        <StatCard
           title="Total Spend"
+          value=""
           amount={dashboardStats.utilizedBudget}
-          previousValue={`${utilizationPercent}% utilized`}
-          sparkline={sparklineData}
-          status={Number(utilizationPercent) > 80 ? 'warning' : 'success'}
+          subtitle={`${utilizationPercent}% utilized`}
           icon={TrendingUp}
+          color={Number(utilizationPercent) > 80 ? 'warning' : 'success'}
         />
-        <KPICard
+        <StatCard
           title="Active Promotions"
           value={dashboardStats.activePromotions}
-          trend={{ value: 8, period: 'this month' }}
-          status="success"
+          trend={{ value: 8, label: 'this month' }}
           icon={FileText}
+          color="primary"
         />
-        <KPICard
+        <StatCard
           title="Pending Claims"
           value={dashboardStats.pendingClaims}
-          previousValue={`${dashboardStats.totalClaims} total`}
-          status={dashboardStats.pendingClaims > 10 ? 'warning' : 'neutral'}
+          subtitle={`${dashboardStats.totalClaims} total`}
           icon={Clock}
+          color={dashboardStats.pendingClaims > 10 ? 'warning' : 'default'}
         />
-      </div>
+      </StatCardGroup>
 
       {/* Secondary Metrics Strip */}
       <div className="grid grid-cols-3 lg:grid-cols-6 gap-3">
-        <KPICard
+        <StatCardCompact
           title="Remaining Budget"
+          value=""
           amount={remaining}
-          compact
-          status="neutral"
         />
-        <KPICard
+        <StatCardCompact
           title="Avg. Claim Value"
+          value=""
           amount={850000000 / Math.max(dashboardStats.pendingClaims, 1)}
-          compact
-          status="neutral"
         />
-        <KPICard
+        <StatCardCompact
           title="Claims MTD"
-          value="156"
-          unit="claims"
-          compact
-          status="success"
+          value="156 claims"
+          color="success"
         />
-        <KPICard
+        <StatCardCompact
           title="Approval Rate"
-          value="94.2"
-          unit="%"
-          compact
-          status="success"
+          value="94.2%"
+          color="success"
         />
-        <KPICard
+        <StatCardCompact
           title="Avg. Processing"
-          value="2.4"
-          unit="days"
-          compact
-          status="success"
+          value="2.4 days"
+          color="success"
         />
-        <KPICard
+        <StatCardCompact
           title="ROI"
-          value="127"
-          unit="%"
-          compact
-          status="success"
+          value="127%"
+          color="success"
         />
       </div>
 

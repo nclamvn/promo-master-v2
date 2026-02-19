@@ -19,21 +19,20 @@ const queryClient = new QueryClient({
   },
 });
 
-// Enable MSW mocking (for demo - works in both dev and production)
-async function enableMocking() {
-  try {
-    const { worker } = await import('./mocks/browser');
-    await worker.start({
-      onUnhandledRequest: 'bypass', // Don't warn about unhandled requests
-    });
-    console.log('[MSW] Mocking enabled ✅');
-  } catch (error) {
-    console.warn('[MSW] Failed to enable mocking:', error);
-  }
-}
+// Only start MSW if explicitly enabled or if no real API URL is set in dev
+const shouldEnableMSW = import.meta.env.VITE_ENABLE_MSW === 'true'
+  || (!import.meta.env.VITE_API_URL && import.meta.env.DEV);
 
-// Start app with mocking
-enableMocking().then(() => {
+async function startApp() {
+  if (shouldEnableMSW) {
+    try {
+      const { worker } = await import('./mocks/browser');
+      await worker.start({ onUnhandledRequest: 'bypass' });
+    } catch {
+      // MSW failed to start, continue without it
+    }
+  }
+
   ReactDOM.createRoot(document.getElementById('root')!).render(
     <React.StrictMode>
       <QueryClientProvider client={queryClient}>
@@ -42,4 +41,6 @@ enableMocking().then(() => {
       </QueryClientProvider>
     </React.StrictMode>
   );
-});
+}
+
+startApp();

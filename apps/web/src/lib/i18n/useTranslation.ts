@@ -8,18 +8,6 @@ import { useCallback } from 'react';
 import { useUIStore } from '@/stores/uiStore';
 import { translations, type Language } from './translations';
 
-type NestedKeyOf<T> = T extends object
-  ? { [K in keyof T]: K extends string
-      ? T[K] extends { vi: string; en: string }
-        ? K
-        : T[K] extends object
-        ? `${K}.${NestedKeyOf<T[K]>}`
-        : never
-      : never
-    }[keyof T]
-  : never;
-
-type TranslationPath = NestedKeyOf<typeof translations>;
 
 export function useTranslation() {
   const { language, setLanguage, toggleLanguage } = useUIStore();

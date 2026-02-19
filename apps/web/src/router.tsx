@@ -157,6 +157,15 @@ const AIDashboard = lazy(() => import('@/pages/ai/AIDashboard'));
 const InsightsList = lazy(() => import('@/pages/ai/InsightsList'));
 const RecommendationsList = lazy(() => import('@/pages/ai/RecommendationsList'));
 
+// Pepsi V3 pages
+const ContractList = lazy(() => import('@/pages/contracts/ContractList'));
+const ContractDetail = lazy(() => import('@/pages/contracts/ContractDetail'));
+const ContractCreate = lazy(() => import('@/pages/contracts/ContractCreate'));
+const AISuggestions = lazy(() => import('@/pages/ai/Suggestions'));
+const ClaimsAI = lazy(() => import('@/pages/ai/ClaimsAI'));
+const LiveDashboard = lazy(() => import('@/pages/monitoring/LiveDashboard'));
+const AlertsPage = lazy(() => import('@/pages/monitoring/Alerts'));
+
 // Voice pages
 const VoiceCommandCenter = lazy(() => import('@/pages/voice/VoiceCommandCenter'));
 
@@ -512,6 +521,17 @@ export default function AppRouter() {
           <SuspenseWrapper><AuditLogsList /></SuspenseWrapper>
         } />
 
+        {/* Volume Contracts (Pepsi V3) */}
+        <Route path="/contracts" element={
+          <SuspenseWrapper><ContractList /></SuspenseWrapper>
+        } />
+        <Route path="/contracts/create" element={
+          <SuspenseWrapper><ContractCreate /></SuspenseWrapper>
+        } />
+        <Route path="/contracts/:id" element={
+          <SuspenseWrapper><ContractDetail /></SuspenseWrapper>
+        } />
+
         {/* AI */}
         <Route path="/ai" element={
           <SuspenseWrapper><AIDashboard /></SuspenseWrapper>
@@ -521,6 +541,20 @@ export default function AppRouter() {
         } />
         <Route path="/ai/recommendations" element={
           <SuspenseWrapper><RecommendationsList /></SuspenseWrapper>
+        } />
+        <Route path="/ai/suggestions" element={
+          <SuspenseWrapper><AISuggestions /></SuspenseWrapper>
+        } />
+        <Route path="/ai/claims-ai" element={
+          <SuspenseWrapper><ClaimsAI /></SuspenseWrapper>
+        } />
+
+        {/* Live Monitoring (Pepsi V3) */}
+        <Route path="/monitoring/live" element={
+          <SuspenseWrapper><LiveDashboard /></SuspenseWrapper>
+        } />
+        <Route path="/monitoring/alerts" element={
+          <SuspenseWrapper><AlertsPage /></SuspenseWrapper>
         } />
 
         {/* Voice */}

@@ -66,7 +66,7 @@ export default function IntegrationDashboard() {
 
       {/* Error Alert */}
       {hasErrors && (
-        <Card className="border-red-500/50 bg-red-500/10 dark:bg-red-500/20">
+        <Card className="border-red-200 dark:border-red-800/30 bg-red-50 dark:bg-red-950/30">
           <CardContent className="py-4">
             <div className="flex items-center gap-3">
               <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400" />
