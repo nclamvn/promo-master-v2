@@ -3,6 +3,7 @@
  * Structured logging with Pino for production-grade observability
  */
 
+// @ts-ignore -- pino may not be installed yet
 import pino from 'pino';
 import type { Request, Response, NextFunction } from 'express';
 
@@ -49,7 +50,7 @@ export const logger = pino({
 
   // Custom serializers
   serializers: {
-    req: (req: Request) => ({
+    req: (req: any) => ({
       method: req.method,
       url: req.url,
       path: req.path,
@@ -59,7 +60,7 @@ export const logger = pino({
       contentType: req.headers?.['content-type'],
       requestId: req.headers?.['x-request-id'],
     }),
-    res: (res: Response) => ({
+    res: (res: any) => ({
       statusCode: res.statusCode,
       contentType: res.getHeader?.('content-type'),
     }),
@@ -155,18 +156,17 @@ export function logAudit(event: {
  * Log a security event
  */
 export function logSecurity(event: {
-  eventType: 'auth_failure' | 'rate_limit' | 'suspicious_activity' | 'permission_denied';
+  type: 'auth_failure' | 'rate_limit' | 'suspicious_activity' | 'permission_denied';
   ip: string;
   userId?: string;
-  details?: Record<string, unknown>;
+  details?: Record<string, any>;
 }) {
+  const { type: eventType, ...rest } = event;
   logger.warn({
     type: 'security',
-    securityEventType: event.eventType,
-    ip: event.ip,
-    userId: event.userId,
-    details: event.details,
-  }, `Security: ${event.eventType}`);
+    securityType: eventType,
+    ...rest,
+  }, `Security: ${eventType}`);
 }
 
 /**

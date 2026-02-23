@@ -59,9 +59,8 @@ async function handleGet(req: VercelRequest, res: VercelResponse, id: string) {
       product: {
         select: {
           id: true,
-          code: true,
-          name: true,
           sku: true,
+          name: true,
           category: true,
           brand: true,
         },
@@ -170,7 +169,7 @@ async function handleUpdate(req: VercelRequest, res: VercelResponse, id: string)
     data: updateData,
     include: {
       customer: { select: { id: true, code: true, name: true } },
-      product: { select: { id: true, code: true, name: true, sku: true } },
+      product: { select: { id: true, sku: true, name: true } },
     },
   });
 

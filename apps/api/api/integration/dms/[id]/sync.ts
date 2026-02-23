@@ -4,7 +4,7 @@
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { prisma } from '@/_lib/prisma';
+import prisma from '../../../../_lib/prisma';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
@@ -20,7 +20,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     const { dataType = 'ALL', periodFrom, periodTo } = req.body;
 
-    const connection = await prisma.dMSConnection.findUnique({
+    const connection = await (prisma as any).dMSConnection.findUnique({
       where: { id },
       include: { distributor: true },
     });
@@ -43,7 +43,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const syncResult = await executeDMSSync(connection, dataType, periodFrom, periodTo);
 
     // Update connection last sync
-    await prisma.dMSConnection.update({
+    await (prisma as any).dMSConnection.update({
       where: { id },
       data: {
         lastSyncAt: new Date(),

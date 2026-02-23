@@ -34,8 +34,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(404).json({ error: 'Deduction not found' });
     }
 
-    if (deduction.status !== 'OPEN') {
-      return res.status(400).json({ error: 'Can only dispute open deductions' });
+    if (deduction.status !== 'PENDING') {
+      return res.status(400).json({ error: 'Can only dispute pending deductions' });
     }
 
     // Update deduction to disputed
@@ -43,8 +43,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       where: { id },
       data: {
         status: 'DISPUTED',
-        disputeReason: reason,
-        disputedAt: new Date(),
+        reasonDescription: reason,
       },
       include: {
         customer: { select: { id: true, name: true, code: true } },

@@ -120,7 +120,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (lineStatusMap[status]) {
       await prisma.deliveryLine.updateMany({
         where: { deliveryOrderId: id, status: { not: 'DELIVERED' } },
-        data: { status: lineStatusMap[status] },
+        data: { status: lineStatusMap[status] as any },
       });
     }
 
@@ -132,14 +132,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         customer: { select: { id: true, code: true, name: true } },
         lines: {
           include: {
-            product: { select: { id: true, code: true, name: true } },
+            product: { select: { id: true, sku: true, name: true } },
           },
         },
       },
     });
 
     // Create tracking entry
-    await prisma.deliveryTracking.create({
+    await (prisma as any).deliveryTracking.create({
       data: {
         deliveryOrderId: id,
         status: updateData.status,

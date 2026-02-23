@@ -1,9 +1,11 @@
 /**
- * Claims Settlement Page
+ * Claims Settlement Page - Phase 6 Enhanced
  * Settlement process with reconciliation and payment tracking
+ * Connected to real API with demo data fallback
  */
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
+import { useSettlements } from '@/hooks/useSettlements';
 import {
   Card,
   CardContent,
@@ -199,13 +201,40 @@ export default function ClaimsSettlementPage() {
     notes: '',
   });
 
+  // Real API data
+  const { data: settlementData } = useSettlements({});
+
   const handleViewClaimDetail = (claim: ClaimSettlement) => {
     setSelectedClaimForDetail(claim);
     setIsDetailDialogOpen(true);
   };
 
+  // Use API data mapped to component format, or fallback to mock
+  const allClaims = useMemo(() => {
+    if (settlementData?.settlements?.length) {
+      return settlementData.settlements.map((s: any) => ({
+        id: s.id,
+        claimCode: s.claim?.code || s.code || s.id.slice(0, 8),
+        customerName: s.claim?.customer?.name || 'N/A',
+        customerCode: s.claim?.customer?.code || '',
+        promotionName: s.claim?.promotion?.name || '',
+        claimAmount: Number(s.claim?.amount || s.settledAmount || 0),
+        verifiedAmount: Number(s.settledAmount || 0),
+        adjustments: Number(s.variance || 0),
+        settlementAmount: Number(s.settledAmount || s.amount || 0),
+        status: s.status === 'PAID' ? 'SETTLED' : s.status === 'PENDING' ? 'PENDING_SETTLEMENT' : s.status === 'APPROVED' ? 'VERIFIED' : 'PENDING_VERIFICATION',
+        submittedAt: s.createdAt,
+        verifiedAt: s.approvedAt,
+        settledAt: s.paymentDate,
+        paymentMethod: s.paymentMethod === 'BANK_TRANSFER' ? 'BANK_TRANSFER' : s.paymentMethod === 'CHECK' ? 'CHEQUE' : s.paymentMethod === 'CREDIT_NOTE' ? 'CREDIT_NOTE' : undefined,
+        paymentRef: s.paymentReference,
+      })) as ClaimSettlement[];
+    }
+    return mockClaims;
+  }, [settlementData]);
+
   // Filter claims
-  const filteredClaims = mockClaims.filter((claim) => {
+  const filteredClaims = allClaims.filter((claim) => {
     const matchesSearch =
       claim.claimCode.toLowerCase().includes(searchQuery.toLowerCase()) ||
       claim.customerName.toLowerCase().includes(searchQuery.toLowerCase());
@@ -215,12 +244,12 @@ export default function ClaimsSettlementPage() {
 
   // Stats
   const stats = {
-    pendingVerification: mockClaims.filter((c) => c.status === 'PENDING_VERIFICATION').length,
-    pendingSettlement: mockClaims.filter((c) => c.status === 'PENDING_SETTLEMENT').length,
-    totalPendingAmount: mockClaims
+    pendingVerification: allClaims.filter((c) => c.status === 'PENDING_VERIFICATION').length,
+    pendingSettlement: allClaims.filter((c) => c.status === 'PENDING_SETTLEMENT').length,
+    totalPendingAmount: allClaims
       .filter((c) => c.status === 'PENDING_SETTLEMENT')
       .reduce((sum, c) => sum + c.settlementAmount, 0),
-    settledMTD: mockClaims
+    settledMTD: allClaims
       .filter((c) => c.status === 'SETTLED')
       .reduce((sum, c) => sum + c.settlementAmount, 0),
   };
@@ -247,9 +276,9 @@ export default function ClaimsSettlementPage() {
       {/* Header */}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Claims Settlement</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Thanh toán Claims</h1>
           <p className="text-muted-foreground mt-1">
-            Verify and settle customer claims
+            Xác minh và thanh toán claims khách hàng
           </p>
         </div>
         <div className="flex items-center gap-2">

@@ -4,7 +4,7 @@
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { prisma } from '@/_lib/prisma';
+import prisma from '../../../../_lib/prisma';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
@@ -29,24 +29,28 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
     }
 
-    const config = connection.config as Record<string, unknown>;
+    const config = (connection as any).config as Record<string, unknown>;
     const startTime = Date.now();
 
     // Test connection based on type
     let testResult: { success: boolean; message?: string; error?: string };
 
     try {
-      switch (connection.type) {
-        case 'SAP':
+      switch (connection.erpType as string) {
+        case 'SAP_S4HANA':
+        case 'SAP_ECC':
           testResult = await testSAPConnection(config);
           break;
-        case 'ORACLE':
+        case 'ORACLE_EBS':
+        case 'ORACLE_CLOUD':
           testResult = await testOracleConnection(config);
           break;
-        case 'DYNAMICS':
+        case 'DYNAMICS_365':
+        case 'DYNAMICS_NAV':
           testResult = await testDynamicsConnection(config);
           break;
-        case 'CUSTOM':
+        case 'GENERIC_REST':
+        case 'GENERIC_SOAP':
         default:
           testResult = await testRESTConnection(config);
           break;

@@ -4,7 +4,8 @@
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import prisma from '@/_lib/prisma';
+import prisma from '../../../_lib/prisma';
+import { getUserFromRequest } from '../../../_lib/auth';
 
 interface ScenarioParameters {
   promotionType: string;
@@ -69,6 +70,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(405).json({ error: `Method ${req.method} Not Allowed` });
   }
 
+  const user = getUserFromRequest(req);
+  if (!user) return res.status(401).json({ error: 'Unauthorized' });
+
   const { id } = req.query;
 
   if (!id || typeof id !== 'string') {
@@ -95,13 +99,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // Get parameters and assumptions
     const params = scenario.parameters as unknown as ScenarioParameters;
-    const assumptions = (scenario.assumptions || {}) as ScenarioAssumptions;
+    const assumptions = (scenario.assumptions as unknown as ScenarioAssumptions) || {} as ScenarioAssumptions;
 
     // Apply baseline data if available
     let baselineSalesPerDay = assumptions.baselineSalesPerDay || 10000;
     if (scenario.baseline) {
       // Use baseline value if available
-      const baselineValue = scenario.baseline.baselineValue?.toNumber();
+      const baselineValue = scenario.baseline.baselineVolume?.toNumber();
       if (baselineValue) {
         baselineSalesPerDay = baselineValue / 30; // Convert monthly to daily
       }
@@ -125,6 +129,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         parameters: params as any,
         results: results as any,
         notes: req.body.notes || null,
+        createdById: user.userId,
       },
     });
 
@@ -138,7 +143,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       },
       include: {
         baseline: {
-          select: { id: true, code: true, name: true },
+          select: { id: true, category: true, brand: true },
         },
         createdBy: {
           select: { id: true, name: true, email: true },

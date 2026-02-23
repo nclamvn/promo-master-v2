@@ -4,7 +4,8 @@
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import prisma from '@/_lib/prisma';
+import { Prisma } from '@prisma/client';
+import prisma from '../../_lib/prisma';
 
 interface CompareRequest {
   scenarioIds: string[];
@@ -55,11 +56,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       where: {
         id: { in: scenarioIds },
         status: 'COMPLETED',
-        results: { not: null },
+        results: { not: Prisma.JsonNull },
       },
       include: {
         baseline: {
-          select: { id: true, code: true, name: true },
+          select: { id: true, category: true, brand: true },
         },
         createdBy: {
           select: { id: true, name: true },

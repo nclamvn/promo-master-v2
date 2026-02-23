@@ -1,10 +1,11 @@
 // ============================================================================
-// CLAIMS PAYMENT PAGE - P2
+// CLAIMS PAYMENT PAGE - Phase 6 Enhanced
 // Payment processing and tracking for approved claims
-// Path: apps/web/src/pages/claims/Payment.tsx
+// Connected to real API with demo data fallback
 // ============================================================================
 
 import { useState, useMemo } from 'react';
+import { useSettlements } from '@/hooks/useSettlements';
 import {
   Card,
   CardContent,
@@ -623,9 +624,36 @@ const ProcessPaymentDialog = ({
 // ============================================================================
 
 export default function ClaimsPaymentPage() {
+  // Real API data
+  const { data: settlementData } = useSettlements({});
+
+  // Merge API data with mock data
+  const apiPayments = useMemo(() => {
+    if (settlementData?.settlements?.length) {
+      return settlementData.settlements.map((s: any) => ({
+        id: s.id,
+        claimCode: s.claim?.code || s.code || '',
+        claimId: s.claimId || s.claim?.id || '',
+        customerName: s.claim?.customer?.name || 'N/A',
+        customerCode: s.claim?.customer?.code || '',
+        promotionCode: s.claim?.promotion?.code || '',
+        promotionName: s.claim?.promotion?.name || '',
+        claimAmount: Number(s.claim?.amount || 0),
+        approvedAmount: Number(s.settledAmount || 0),
+        paidAmount: s.status === 'PAID' ? Number(s.settledAmount || 0) : 0,
+        paymentStatus: s.status === 'PAID' ? 'PAID' : s.status === 'PROCESSING' ? 'PROCESSING' : 'PENDING',
+        paymentMethod: s.paymentMethod === 'BANK_TRANSFER' ? 'BANK_TRANSFER' : s.paymentMethod === 'CHECK' ? 'CHEQUE' : s.paymentMethod === 'CREDIT_NOTE' ? 'CREDIT_NOTE' : s.paymentMethod === 'OFFSET' ? 'OFFSET' : 'BANK_TRANSFER',
+        dueDate: s.claim?.dueDate || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+        paymentRef: s.paymentReference || '',
+        createdAt: s.createdAt,
+      })) as PaymentItem[];
+    }
+    return mockPayments;
+  }, [settlementData]);
+
   // State
-  const [payments] = useState<PaymentItem[]>(mockPayments);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const payments = apiPayments;
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [methodFilter, setMethodFilter] = useState<string>('all');

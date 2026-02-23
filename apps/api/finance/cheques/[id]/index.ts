@@ -6,7 +6,7 @@
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { prisma } from '@/_lib/prisma';
+import prisma from '../../../_lib/prisma';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   const { id } = req.query;
@@ -33,10 +33,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 }
 
 async function handleGet(id: string, res: VercelResponse) {
-  const cheque = await prisma.cheque.findUnique({
+  const cheque = await prisma.chequebookEntry.findUnique({
     where: { id },
     include: {
-      customer: {
+      payee: {
         select: { id: true, code: true, name: true, channel: true },
       },
       claim: {
@@ -62,7 +62,7 @@ async function handleGet(id: string, res: VercelResponse) {
 }
 
 async function handleUpdate(id: string, req: VercelRequest, res: VercelResponse) {
-  const cheque = await prisma.cheque.findUnique({
+  const cheque = await prisma.chequebookEntry.findUnique({
     where: { id },
     select: { status: true },
   });
@@ -71,7 +71,7 @@ async function handleUpdate(id: string, req: VercelRequest, res: VercelResponse)
     return res.status(404).json({ error: 'Cheque not found' });
   }
 
-  const { action, clearDate, voidReason, notes } = req.body;
+  const { action, clearDate, voidReason } = req.body;
 
   // Handle different actions
   switch (action) {
@@ -82,15 +82,14 @@ async function handleUpdate(id: string, req: VercelRequest, res: VercelResponse)
         });
       }
 
-      const cleared = await prisma.cheque.update({
+      const cleared = await prisma.chequebookEntry.update({
         where: { id },
         data: {
           status: 'CLEARED',
           clearedAt: clearDate ? new Date(clearDate) : new Date(),
-          notes: notes || undefined,
         },
         include: {
-          customer: { select: { id: true, code: true, name: true } },
+          payee: { select: { id: true, code: true, name: true } },
           claim: { select: { id: true, code: true } },
         },
       });
@@ -121,16 +120,15 @@ async function handleUpdate(id: string, req: VercelRequest, res: VercelResponse)
         });
       }
 
-      const voided = await prisma.cheque.update({
+      const voided = await prisma.chequebookEntry.update({
         where: { id },
         data: {
           status: 'VOIDED',
           voidedAt: new Date(),
           voidReason,
-          notes: notes || undefined,
         },
         include: {
-          customer: { select: { id: true, code: true, name: true } },
+          payee: { select: { id: true, code: true, name: true } },
           claim: { select: { id: true, code: true } },
         },
       });
@@ -149,14 +147,14 @@ async function handleUpdate(id: string, req: VercelRequest, res: VercelResponse)
         });
       }
 
-      const stale = await prisma.cheque.update({
+      const stale = await prisma.chequebookEntry.update({
         where: { id },
         data: {
-          status: 'STALE',
-          notes: notes || 'Marked as stale',
+          status: 'STALE' as any,
+          memo: 'Marked as stale',
         },
         include: {
-          customer: { select: { id: true, code: true, name: true } },
+          payee: { select: { id: true, code: true, name: true } },
           claim: { select: { id: true, code: true } },
         },
       });
@@ -176,22 +174,18 @@ async function handleUpdate(id: string, req: VercelRequest, res: VercelResponse)
         });
       }
 
-      const { chequeDate, amount, payee, memo, bankAccount, bankName } = req.body;
+      const { issueDate, amount, memo, bankAccount } = req.body;
 
-      const updated = await prisma.cheque.update({
+      const updated = await prisma.chequebookEntry.update({
         where: { id },
         data: {
-          chequeDate: chequeDate ? new Date(chequeDate) : undefined,
+          issueDate: issueDate ? new Date(issueDate) : undefined,
           amount: amount ? parseFloat(amount) : undefined,
-          payee,
           memo,
           bankAccount,
-          bankName,
-          notes,
-          updatedAt: new Date(),
         },
         include: {
-          customer: { select: { id: true, code: true, name: true } },
+          payee: { select: { id: true, code: true, name: true } },
           claim: { select: { id: true, code: true } },
         },
       });
@@ -202,7 +196,7 @@ async function handleUpdate(id: string, req: VercelRequest, res: VercelResponse)
 }
 
 async function handleDelete(id: string, res: VercelResponse) {
-  const cheque = await prisma.cheque.findUnique({
+  const cheque = await prisma.chequebookEntry.findUnique({
     where: { id },
     select: { status: true },
   });
@@ -217,7 +211,7 @@ async function handleDelete(id: string, res: VercelResponse) {
     });
   }
 
-  await prisma.cheque.delete({ where: { id } });
+  await prisma.chequebookEntry.delete({ where: { id } });
 
   return res.status(200).json({ success: true, message: 'Cheque deleted' });
 }

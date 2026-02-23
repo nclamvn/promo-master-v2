@@ -109,7 +109,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         customer: customerMap.get(r.customerId),
       }));
     } else if (groupBy === 'location') {
-      groupedData = await prisma.inventorySnapshot.groupBy({
+      groupedData = await (prisma.inventorySnapshot.groupBy as any)({
         by: ['location'],
         where,
         _sum: { quantity: true, value: true },

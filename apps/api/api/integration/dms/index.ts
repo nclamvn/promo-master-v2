@@ -2,12 +2,14 @@
  * DMS Integration API - List & Create
  * GET /api/integration/dms - List DMS connections
  * POST /api/integration/dms - Create new DMS connection
+ * Sprint 0 Fix 3: ADMIN ONLY
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { prisma } from '@/_lib/prisma';
+import prisma from '../../../_lib/prisma';
+import { adminOnly, type AuthenticatedRequest } from '../../../_lib/auth';
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+export default adminOnly(async (req: AuthenticatedRequest, res: VercelResponse) => {
   try {
     switch (req.method) {
       case 'GET':
@@ -21,7 +23,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     console.error('DMS API error:', error);
     return res.status(500).json({ success: false, error: 'Internal server error' });
   }
-}
+});
 
 async function handleGet(req: VercelRequest, res: VercelResponse) {
   const { type, status, search } = req.query;
@@ -38,7 +40,7 @@ async function handleGet(req: VercelRequest, res: VercelResponse) {
     where.name = { contains: search, mode: 'insensitive' };
   }
 
-  const connections = await prisma.dMSConnection.findMany({
+  const connections = await (prisma as any).dMSConnection.findMany({
     where,
     include: {
       distributor: {
@@ -53,9 +55,9 @@ async function handleGet(req: VercelRequest, res: VercelResponse) {
 
   // Calculate summary
   const total = connections.length;
-  const active = connections.filter((c) => c.status === 'ACTIVE').length;
+  const active = connections.filter((c: any) => c.status === 'ACTIVE').length;
   const pendingSync = connections.filter(
-    (c) => c.status === 'ACTIVE' && (!c.lastSyncAt || daysSince(c.lastSyncAt) > 1)
+    (c: any) => c.status === 'ACTIVE' && (!c.lastSyncAt || daysSince(c.lastSyncAt) > 1)
   ).length;
 
   return res.status(200).json({
@@ -101,7 +103,7 @@ async function handlePost(req: VercelRequest, res: VercelResponse) {
   }
 
   // Check for duplicate
-  const existing = await prisma.dMSConnection.findFirst({
+  const existing = await (prisma as any).dMSConnection.findFirst({
     where: {
       OR: [{ name }, { distributorId }],
     },
@@ -115,7 +117,7 @@ async function handlePost(req: VercelRequest, res: VercelResponse) {
   }
 
   // Create connection
-  const connection = await prisma.dMSConnection.create({
+  const connection = await (prisma as any).dMSConnection.create({
     data: {
       name,
       type,

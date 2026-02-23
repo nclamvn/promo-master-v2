@@ -217,7 +217,7 @@ export default function TargetList() {
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Total Targets</CardTitle>
+            <CardTitle className="text-sm font-medium">Tổng mục tiêu</CardTitle>
             <TargetIcon className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -226,7 +226,7 @@ export default function TargetList() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Achieved</CardTitle>
+            <CardTitle className="text-sm font-medium">Đã đạt</CardTitle>
             <TrendingUp className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
@@ -238,7 +238,7 @@ export default function TargetList() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Avg Achievement</CardTitle>
+            <CardTitle className="text-sm font-medium">Tỷ lệ TB</CardTitle>
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>

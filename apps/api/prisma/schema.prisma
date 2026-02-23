@@ -30,12 +30,77 @@ enum PromotionStatus {
 }
 
 enum ClaimStatus {
-  PENDING
+  DRAFT
+  SUBMITTED
+  VALIDATING
+  VALIDATION_FAILED
+  PENDING_MATCH
   MATCHED
+  UNDER_REVIEW
   APPROVED
-  DISPUTED
-  SETTLED
+  PARTIALLY_APPROVED
   REJECTED
+  SETTLED
+  PARTIALLY_SETTLED
+  CANCELLED
+  // Backward compat
+  PENDING
+  DISPUTED
+}
+
+// Phase 6: Claims & Settlement enums
+enum ClaimType {
+  REBATE
+  DISCOUNT
+  PROMOTION
+  LISTING_FEE
+  DISPLAY
+  COOP_ADVERTISING
+  DAMAGE
+  SHORTAGE
+  PRICE_PROTECTION
+  OTHER
+}
+
+enum ClaimSource {
+  MANUAL
+  CUSTOMER_PORTAL
+  EDI
+  DEDUCTION
+  PROMOTION_AUTO
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  SKIPPED
+}
+
+enum PaymentMethod {
+  BANK_TRANSFER
+  CHECK
+  CASH
+  OFFSET
+  CREDIT_NOTE
+}
+
+enum SettlementStatus {
+  PENDING
+  APPROVED
+  PROCESSING
+  PAID
+  FAILED
+  CANCELLED
+}
+
+enum BatchStatus {
+  DRAFT
+  PENDING_APPROVAL
+  APPROVED
+  PROCESSING
+  COMPLETED
+  FAILED
 }
 
 enum FundType {
@@ -484,17 +549,19 @@ model Promotion {
   // Deduction Management
   deductions          Deduction[]
   // Clash Detection
-  clashesAsA          PromotionClash[]    @relation("ClashPromotionA")
-  clashesAsB          PromotionClash[]    @relation("ClashPromotionB")
+  clashesAsA          PromotionClash[]       @relation("ClashPromotionA")
+  clashesAsB          PromotionClash[]       @relation("ClashPromotionB")
   // Migration Week 1 additions
-  deliveryOrders      DeliveryOrder[]     @relation("DeliveryPromotion")
+  deliveryOrders      DeliveryOrder[]        @relation("DeliveryPromotion")
   // Module 7: Sell Tracking
-  sellIns             SellIn[]            @relation("PromotionSellIns")
-  sellOuts            SellOut[]           @relation("PromotionSellOuts")
+  sellIns             SellIn[]               @relation("PromotionSellIns")
+  sellOuts            SellOut[]              @relation("PromotionSellOuts")
   // Module 9: Delivery Profile
-  promotionDeliveries PromotionDelivery[] @relation("PromotionDeliveries")
+  promotionDeliveries PromotionDelivery[]    @relation("PromotionDeliveries")
   // Pepsi V3: Post-Promotion Analysis
   postAnalysis        PostPromotionAnalysis?
+  // Phase 6: Claims Matching
+  claimMatches        ClaimPromotionMatch[]
 
   @@index([customerId])
   @@index([fundId])
@@ -543,12 +610,39 @@ model Claim {
   id          String      @id @default(cuid())
   code        String
   amount      Decimal     @db.Decimal(15, 2)
-  status      ClaimStatus @default(PENDING)
+  status      ClaimStatus @default(DRAFT)
   claimDate   DateTime
   description String?
   documents   Json?
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
+
+  // Phase 6: Enhanced fields
+  companyId        String?
+  type             ClaimType?
+  source           ClaimSource?
+  claimedAmount    Decimal?     @db.Decimal(18, 2)
+  validatedAmount  Decimal?     @db.Decimal(18, 2)
+  approvedAmount   Decimal?     @db.Decimal(18, 2)
+  settledAmount    Decimal?     @db.Decimal(18, 2)
+  claimPeriodStart DateTime?
+  claimPeriodEnd   DateTime?
+  dueDate          DateTime?
+  priority         Int          @default(0)
+  validationScore  Float?
+  validationNotes  String?
+  validationErrors Json?
+  invoiceNumber    String?
+  invoiceDate      DateTime?
+  invoiceAmount    Decimal?     @db.Decimal(18, 2)
+  submittedBy      String?
+  submittedAt      DateTime?
+  approvedBy       String?
+  approvedAt       DateTime?
+  internalNotes    String?
+  customerNotes    String?
+  rejectionReason  String?
+  createdBy        String?
 
   customerId   String
   customer     Customer   @relation(fields: [customerId], references: [id])
@@ -557,7 +651,14 @@ model Claim {
   reviewedById String?
   reviewedBy   User?      @relation("ReviewedBy", fields: [reviewedById], references: [id])
 
-  settlement   Settlement?
+  // Phase 6: New relations
+  lineItems        ClaimLineItem[]
+  claimDocuments   ClaimDocument[]
+  approvals        ClaimApproval[]
+  auditLogs        ClaimAuditLog[]
+  settlements      Settlement[]
+  promotionMatches ClaimPromotionMatch[]
+
   transactions Transaction[]
   pops         POP[]
   // Deduction Management
@@ -572,19 +673,156 @@ model Claim {
   @@index([status])
   @@index([status, claimDate])
   @@index([customerId, status])
+  @@index([companyId])
 }
 
 model Settlement {
   id            String   @id @default(cuid())
+  code          String?  @unique
   settledAmount Decimal  @db.Decimal(15, 2)
+  amount        Decimal? @db.Decimal(18, 2)
   variance      Decimal? @db.Decimal(15, 2)
   notes         String?
   settledAt     DateTime @default(now())
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  claimId String @unique
+  // Phase 6: Enhanced fields
+  status           SettlementStatus @default(PENDING)
+  paymentMethod    PaymentMethod?
+  paymentReference String?
+  paymentDate      DateTime?
+  bankName         String?
+  bankAccount      String?
+  bankBranch       String?
+  currency         String           @default("VND")
+  postedToGL       Boolean          @default(false)
+  postedAt         DateTime?
+  glJournalId      String?
+  createdBy        String?
+  approvedBy       String?
+  approvedAt       DateTime?
+
+  batchId String?
+  batch   SettlementBatch? @relation(fields: [batchId], references: [id])
+
+  claimId String
   claim   Claim  @relation(fields: [claimId], references: [id])
+
+  @@index([claimId])
+  @@index([batchId])
+  @@index([status])
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PHASE 6: CLAIMS & SETTLEMENT NEW MODELS
+// ═══════════════════════════════════════════════════════════════
+
+model ClaimLineItem {
+  id          String   @id @default(cuid())
+  claimId     String
+  claim       Claim    @relation(fields: [claimId], references: [id], onDelete: Cascade)
+  productId   String?
+  productName String?
+  productSku  String?
+  quantity    Int?
+  unitPrice   Decimal? @db.Decimal(18, 2)
+  amount      Decimal  @db.Decimal(18, 2)
+  description String?
+  createdAt   DateTime @default(now())
+
+  @@index([claimId])
+}
+
+model ClaimDocument {
+  id           String   @id @default(cuid())
+  claimId      String
+  claim        Claim    @relation(fields: [claimId], references: [id], onDelete: Cascade)
+  fileName     String
+  fileType     String
+  fileSize     Int
+  filePath     String
+  documentType String // INVOICE, POP, CONTRACT, SUPPORTING
+  uploadedBy   String?
+  uploadedAt   DateTime @default(now())
+
+  @@index([claimId])
+}
+
+model ClaimApproval {
+  id             String         @id @default(cuid())
+  claimId        String
+  claim          Claim          @relation(fields: [claimId], references: [id], onDelete: Cascade)
+  level          Int            @default(1)
+  status         ApprovalStatus @default(PENDING)
+  approverId     String?
+  approvedAmount Decimal?       @db.Decimal(18, 2)
+  comments       String?
+  decidedAt      DateTime?
+  createdAt      DateTime       @default(now())
+
+  @@index([claimId])
+  @@index([approverId])
+}
+
+model ClaimAuditLog {
+  id         String   @id @default(cuid())
+  claimId    String
+  claim      Claim    @relation(fields: [claimId], references: [id], onDelete: Cascade)
+  action     String // CREATED, SUBMITTED, VALIDATED, MATCHED, APPROVED, REJECTED, SETTLED
+  fromStatus String?
+  toStatus   String?
+  userId     String?
+  userName   String?
+  details    Json?
+  notes      String?
+  createdAt  DateTime @default(now())
+
+  @@index([claimId])
+  @@index([createdAt])
+}
+
+model ClaimPromotionMatch {
+  id              String    @id @default(cuid())
+  claimId         String
+  claim           Claim     @relation(fields: [claimId], references: [id], onDelete: Cascade)
+  promotionId     String
+  promotion       Promotion @relation(fields: [promotionId], references: [id])
+  confidenceScore Float
+  matchReason     String
+  matchFactors    Json?
+  expectedAmount  Decimal   @db.Decimal(18, 2)
+  variance        Decimal   @db.Decimal(18, 2)
+  variancePercent Float
+  isAccepted      Boolean   @default(false)
+  acceptedBy      String?
+  acceptedAt      DateTime?
+  createdAt       DateTime  @default(now())
+
+  @@index([claimId])
+  @@index([promotionId])
+}
+
+model SettlementBatch {
+  id          String      @id @default(cuid())
+  code        String      @unique
+  companyId   String
+  batchDate   DateTime
+  status      BatchStatus @default(DRAFT)
+  totalAmount Decimal     @default(0) @db.Decimal(18, 2)
+  itemCount   Int         @default(0)
+  notes       String?
+  createdBy   String?
+  approvedBy  String?
+  approvedAt  DateTime?
+  processedAt DateTime?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  settlements Settlement[]
+
+  @@index([companyId])
+  @@index([status])
 }
 
 model Transaction {
@@ -2366,11 +2604,11 @@ model TriggeredAlert {
   acknowledgeNote  String?
 
   // Pepsi V3: Extended alert fields
-  entityType String?         // PROMOTION, BUDGET, CLAIM, CONTRACT, STORE
+  entityType String? // PROMOTION, BUDGET, CLAIM, CONTRACT, STORE
   entityId   String?
   title      String?
   severity   AlertSeverity?
-  status     String?         // ACTIVE, ACKNOWLEDGED, RESOLVED
+  status     String? // ACTIVE, ACKNOWLEDGED, RESOLVED
   resolvedAt DateTime?
 
   createdAt DateTime @default(now())
@@ -3673,10 +3911,10 @@ model VolumeContract {
   startDate DateTime
   endDate   DateTime
 
-  targetVolume   Decimal @db.Decimal(18, 2)
-  currentVolume  Decimal @default(0) @db.Decimal(18, 2)
+  targetVolume   Decimal   @db.Decimal(18, 2)
+  currentVolume  Decimal   @default(0) @db.Decimal(18, 2)
   bonusType      BonusType @default(PERCENTAGE)
-  bonusValue     Decimal @db.Decimal(18, 2)
+  bonusValue     Decimal   @db.Decimal(18, 2)
   bonusCondition Json?
 
   channel    PepsiChannel?
@@ -3703,18 +3941,18 @@ model VolumeContract {
 }
 
 model VolumeContractMilestone {
-  id         String @id @default(cuid())
+  id         String         @id @default(cuid())
   contractId String
   contract   VolumeContract @relation(fields: [contractId], references: [id], onDelete: Cascade)
 
-  name          String   // Q1, H1, 9M, FY
-  targetVolume  Decimal  @db.Decimal(18, 2)
-  achievedVolume Decimal @default(0) @db.Decimal(18, 2)
-  deadline      DateTime
-  achievedDate  DateTime?
+  name           String // Q1, H1, 9M, FY
+  targetVolume   Decimal   @db.Decimal(18, 2)
+  achievedVolume Decimal   @default(0) @db.Decimal(18, 2)
+  deadline       DateTime
+  achievedDate   DateTime?
 
-  bonusAmount   Decimal? @db.Decimal(18, 2)
-  isAchieved    Boolean  @default(false)
+  bonusAmount Decimal? @db.Decimal(18, 2)
+  isAchieved  Boolean  @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -3725,15 +3963,15 @@ model VolumeContractMilestone {
 }
 
 model VolumeContractProgress {
-  id         String @id @default(cuid())
+  id         String         @id @default(cuid())
   contractId String
   contract   VolumeContract @relation(fields: [contractId], references: [id], onDelete: Cascade)
 
-  month     Int
-  year      Int
-  volume    Decimal @db.Decimal(18, 2)
-  revenue   Decimal @default(0) @db.Decimal(18, 2)
-  target    Decimal @default(0) @db.Decimal(18, 2)
+  month   Int
+  year    Int
+  volume  Decimal @db.Decimal(18, 2)
+  revenue Decimal @default(0) @db.Decimal(18, 2)
+  target  Decimal @default(0) @db.Decimal(18, 2)
 
   cumVolume  Decimal @default(0) @db.Decimal(18, 2)
   cumTarget  Decimal @default(0) @db.Decimal(18, 2)
@@ -3752,31 +3990,31 @@ model PromoSuggestion {
   id        String @id @default(cuid())
   companyId String
 
-  customerId  String?
-  customer    Customer? @relation(fields: [customerId], references: [id])
-  contractId  String?
+  customerId String?
+  customer   Customer? @relation(fields: [customerId], references: [id])
+  contractId String?
 
-  type       PromoSuggestionType
-  status     PromoSuggestionStatus @default(PENDING)
-  priority   Int                   @default(5) // 1-10
+  type     PromoSuggestionType
+  status   PromoSuggestionStatus @default(PENDING)
+  priority Int                   @default(5) // 1-10
 
   title       String
   description String
   rationale   String?
 
-  suggestedConfig Json?  // promotion config, reallocation details, etc.
-  impactEstimate  Json?  // { revenue, volume, roi, cost }
-  confidence      Float  @default(0.5) // 0-1
+  suggestedConfig Json? // promotion config, reallocation details, etc.
+  impactEstimate  Json? // { revenue, volume, roi, cost }
+  confidence      Float @default(0.5) // 0-1
 
-  dataInputs    Json?   // source data used for suggestion
-  modelVersion  String?
+  dataInputs   Json? // source data used for suggestion
+  modelVersion String?
 
-  reviewedBy    String?
-  reviewedAt    DateTime?
-  reviewNotes   String?
-  appliedAt     DateTime?
-  promotionId   String?  // resulting promotion if applied
-  expiresAt     DateTime?
+  reviewedBy  String?
+  reviewedAt  DateTime?
+  reviewNotes String?
+  appliedAt   DateTime?
+  promotionId String? // resulting promotion if applied
+  expiresAt   DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -3794,24 +4032,24 @@ model ClaimAIMatch {
   claimId String @unique
   claim   Claim  @relation(fields: [claimId], references: [id])
 
-  recommendation  ClaimRecommendation
-  confidence      Float   @default(0.5)
-  matchScore      Float   @default(0)
+  recommendation ClaimRecommendation
+  confidence     Float               @default(0.5)
+  matchScore     Float               @default(0)
 
   matchedPromotionId String?
   matchedAmount      Decimal? @db.Decimal(18, 2)
   variance           Decimal? @db.Decimal(18, 2)
   variancePercent    Float?
 
-  flags          String[]  @default([])
-  riskFactors    Json?
-  reasoning      String?
-  modelVersion   String?
+  flags        String[] @default([])
+  riskFactors  Json?
+  reasoning    String?
+  modelVersion String?
 
-  processedAt    DateTime  @default(now())
-  reviewedBy     String?
-  reviewedAt     DateTime?
-  finalDecision  String?
+  processedAt   DateTime  @default(now())
+  reviewedBy    String?
+  reviewedAt    DateTime?
+  finalDecision String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -3823,20 +4061,20 @@ model ClaimAIMatch {
 }
 
 model PostPromotionAnalysis {
-  id          String @id @default(cuid())
-  companyId   String
+  id        String @id @default(cuid())
+  companyId String
 
   promotionId String    @unique
   promotion   Promotion @relation(fields: [promotionId], references: [id])
 
   result       AnalysisResult
-  overallScore Float @default(0) // 0-100
+  overallScore Float          @default(0) // 0-100
 
   // Financial metrics
-  totalSpend      Decimal @db.Decimal(18, 2)
+  totalSpend         Decimal @db.Decimal(18, 2)
   incrementalRevenue Decimal @default(0) @db.Decimal(18, 2)
-  roi             Float   @default(0)
-  costPerUnit     Decimal @default(0) @db.Decimal(18, 2)
+  roi                Float   @default(0)
+  costPerUnit        Decimal @default(0) @db.Decimal(18, 2)
 
   // Volume metrics
   baselineVolume    Decimal @default(0) @db.Decimal(18, 2)
@@ -3845,15 +4083,15 @@ model PostPromotionAnalysis {
   upliftPercent     Float   @default(0)
 
   // Execution metrics
-  executionScore    Float @default(0)
-  storeCompliance   Float @default(0)
-  onTimeDelivery    Float @default(0)
+  executionScore  Float @default(0)
+  storeCompliance Float @default(0)
+  onTimeDelivery  Float @default(0)
 
   // Insights
-  keyFindings    Json?   // array of findings
-  recommendations Json?  // array of recommendations
-  lessonsLearned  Json?  // array of lessons
-  baselineUpdate  Json?  // suggested baseline adjustments
+  keyFindings     Json? // array of findings
+  recommendations Json? // array of recommendations
+  lessonsLearned  Json? // array of lessons
+  baselineUpdate  Json? // suggested baseline adjustments
 
   generatedAt DateTime @default(now())
   createdAt   DateTime @default(now())
@@ -3869,17 +4107,17 @@ model PepsiProduct {
   id        String @id @default(cuid())
   companyId String
 
-  sku       String
-  name      String
-  nameVi    String?
-  category  PepsiCategory
-  brand     String
-  packType  PepsiPackType
-  packSize  String?       // "330ml", "1.5L", etc.
-  unitsPerCase Int        @default(24)
+  sku          String
+  name         String
+  nameVi       String?
+  category     PepsiCategory
+  brand        String
+  packType     PepsiPackType
+  packSize     String? // "330ml", "1.5L", etc.
+  unitsPerCase Int           @default(24)
 
-  basePrice    Decimal @db.Decimal(18, 2)
-  costPrice    Decimal @default(0) @db.Decimal(18, 2)
+  basePrice Decimal @db.Decimal(18, 2)
+  costPrice Decimal @default(0) @db.Decimal(18, 2)
 
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
@@ -3899,20 +4137,20 @@ model PepsiStore {
   customerId String
   customer   Customer @relation(fields: [customerId], references: [id])
 
-  code       String
-  name       String
-  address    String?
-  district   String?
-  city       String?
-  region     PepsiRegion?
-  channel    PepsiChannel?
+  code     String
+  name     String
+  address  String?
+  district String?
+  city     String?
+  region   PepsiRegion?
+  channel  PepsiChannel?
 
-  tier       CustomerTier @default(SILVER)
+  tier CustomerTier @default(SILVER)
 
   monthlyTarget Decimal @default(0) @db.Decimal(18, 2)
   monthlyActual Decimal @default(0) @db.Decimal(18, 2)
 
-  isActive  Boolean  @default(true)
+  isActive  Boolean @default(true)
   latitude  Float?
   longitude Float?
 
@@ -3925,4 +4163,22 @@ model PepsiStore {
   @@index([region])
   @@index([channel])
   @@map("pepsi_stores")
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Sprint 0 Fix 8: TOKEN BLACKLIST
+// ═══════════════════════════════════════════════════════════════
+
+model TokenBlacklist {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique
+  userId    String
+  reason    String // 'logout', 'password_change', 'admin_revoke', 'security_incident'
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([tokenHash])
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("token_blacklist")
 }

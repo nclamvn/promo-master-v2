@@ -1,32 +1,35 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node';
+import type { VercelResponse } from '@vercel/node';
 import prisma from '../_lib/prisma';
-import { getUserFromRequest } from '../_lib/auth';
+import { kamPlus, type AuthenticatedRequest } from '../_lib/auth';
 
 /**
  * GET /fund-activities/summary
  * Get summary statistics for fund activities
  * Can filter by budgetId to get budget-specific ROI analysis
+ * Sprint 0+1: RBAC + Standard errors
  */
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (req.method === 'OPTIONS') {
-    res.status(200).end();
-    return;
-  }
+function getTypeLabel(type: string): string {
+  const labels: Record<string, string> = {
+    promotion: 'Khuyến mãi',
+    display: 'Trưng bày',
+    sampling: 'Dùng thử',
+    event: 'Sự kiện',
+    listing_fee: 'Phí listing',
+  };
+  return labels[type] || type;
+}
 
+export default kamPlus(async (req: AuthenticatedRequest, res: VercelResponse) => {
   if (req.method !== 'GET') {
-    return res.status(405).json({ error: 'Method not allowed' });
+    return res.status(405).json({ success: false, error: { code: 'METHOD_NOT_ALLOWED', message: 'Method not allowed' } });
   }
-
-  const user = getUserFromRequest(req);
-  if (!user) return res.status(401).json({ error: 'Unauthorized' });
 
   try {
     const { budgetId } = req.query;
     const where: Record<string, unknown> = {};
     if (budgetId) where.budgetId = budgetId;
 
-    // Get all activities matching filter
     const activities = await prisma.fundActivity.findMany({
       where,
       include: {
@@ -36,7 +39,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       },
     });
 
-    // Calculate summaries
     const byType: Record<
       string,
       {
@@ -69,7 +71,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         : 0;
       const roi = activity.roi ? Number(activity.roi) : 0;
 
-      // Overall totals
       totalAllocated += allocated;
       totalSpent += spent;
       totalRevenue += revenue;
@@ -78,7 +79,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         roiCount++;
       }
 
-      // By type
       const type = activity.activityType;
       if (!byType[type]) {
         byType[type] = {
@@ -94,11 +94,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       byType[type].totalSpent += spent;
       byType[type].totalRevenue += revenue;
 
-      // By status
       byStatus[activity.status]++;
     }
 
-    // Calculate average ROI per type
     for (const type of Object.keys(byType)) {
       const typeActivities = activities.filter(
         (a) => a.activityType === type && a.roi
@@ -110,7 +108,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
     }
 
-    // Get top performing activities
     const topPerformers = activities
       .filter((a) => a.roi && Number(a.roi) > 0)
       .sort((a, b) => Number(b.roi || 0) - Number(a.roi || 0))
@@ -124,7 +121,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         roi: Number(a.roi || 0),
       }));
 
-    // Get underperformers
     const underperformers = activities
       .filter((a) => a.status === 'COMPLETED' && Number(a.spentAmount) > 0)
       .sort((a, b) => Number(a.roi || 0) - Number(b.roi || 0))
@@ -139,6 +135,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }));
 
     return res.status(200).json({
+      success: true,
       data: {
         overview: {
           totalActivities: activities.length,
@@ -161,17 +158,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     });
   } catch (error) {
     console.error('Fund activity summary error:', error);
-    return res.status(500).json({ error: 'Internal server error' });
+    return res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Internal server error' } });
   }
-}
-
-function getTypeLabel(type: string): string {
-  const labels: Record<string, string> = {
-    promotion: 'Khuyến mãi',
-    display: 'Trưng bày',
-    sampling: 'Dùng thử',
-    event: 'Sự kiện',
-    listing_fee: 'Phí listing',
-  };
-  return labels[type] || type;
-}
+});

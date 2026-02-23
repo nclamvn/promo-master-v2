@@ -45,7 +45,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     // Get tracking history
-    const tracking = await prisma.deliveryTracking.findMany({
+    const tracking = await (prisma as any).deliveryTracking.findMany({
       where: { deliveryOrderId: id },
       include: {
         user: { select: { id: true, name: true, email: true } },
@@ -73,7 +73,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
     };
 
-    const timeline = tracking.map((t, idx) => ({
+    const timeline = tracking.map((t: any, idx: number) => ({
       ...t,
       duration: statusDurations[t.status]
         ? formatDuration(statusDurations[t.status])

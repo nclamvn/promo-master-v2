@@ -68,24 +68,24 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         return res.status(404).json({ error: 'Deduction not found' });
       }
 
-      if (existing.status !== 'OPEN') {
+      if (existing.status !== 'PENDING') {
         return res.status(400).json({ error: 'Can only update open deductions' });
       }
 
-      const { amount, reason, invoiceNumber, invoiceDate } = req.body;
+      const { amount, reasonDescription, sourceDocument, sourceDate } = req.body;
       const updateData: Record<string, unknown> = {};
 
       if (amount !== undefined) {
         updateData.amount = parseFloat(amount);
       }
-      if (reason !== undefined) {
-        updateData.reason = reason;
+      if (reasonDescription !== undefined) {
+        updateData.reasonDescription = reasonDescription;
       }
-      if (invoiceNumber !== undefined) {
-        updateData.invoiceNumber = invoiceNumber;
+      if (sourceDocument !== undefined) {
+        updateData.sourceDocument = sourceDocument;
       }
-      if (invoiceDate !== undefined) {
-        updateData.invoiceDate = new Date(invoiceDate);
+      if (sourceDate !== undefined) {
+        updateData.sourceDate = new Date(sourceDate);
       }
 
       const updated = await prisma.deduction.update({
@@ -112,7 +112,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         return res.status(404).json({ error: 'Deduction not found' });
       }
 
-      if (existing.status !== 'OPEN') {
+      if (existing.status !== 'PENDING') {
         return res.status(400).json({ error: 'Can only delete open deductions' });
       }
 

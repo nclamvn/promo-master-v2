@@ -107,12 +107,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         if (remainderAmount > 0) {
           await tx.deduction.create({
             data: {
-              code: `${deduction.code}-WO`,
+              deductionNumber: `${deduction.deductionNumber}-WO`,
+              companyId: deduction.companyId,
               customerId: deduction.customerId,
-              invoiceNumber: `${deduction.invoiceNumber}-PARTIAL`,
-              invoiceDate: deduction.invoiceDate,
+              source: deduction.source,
+              sourceDocument: deduction.sourceDocument ? `${deduction.sourceDocument}-PARTIAL` : null,
+              sourceDate: deduction.sourceDate,
+              deductionDate: deduction.deductionDate,
+              receivedDate: deduction.receivedDate,
               amount: new Decimal(remainderAmount),
-              reason: `Partial write-off from ${deduction.code}. ${notes || ''}`.trim(),
+              reasonDescription: `Partial write-off from ${deduction.deductionNumber}. ${notes || ''}`.trim(),
               status: 'WRITTEN_OFF',
               resolvedAt: new Date(),
             },

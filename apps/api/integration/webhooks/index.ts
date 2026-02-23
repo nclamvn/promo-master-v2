@@ -1,41 +1,34 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node';
-import prisma from '@/_lib/prisma';
-import { getUserFromRequest } from '../../_lib/auth';
+import type { VercelResponse } from '@vercel/node';
+import prisma from '../../_lib/prisma';
+import { adminOnly, parsePagination, type AuthenticatedRequest } from '../../_lib/auth';
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (req.method === 'OPTIONS') {
-    res.status(200).end();
-    return;
-  }
-
-  const user = getUserFromRequest(req);
-  if (!user) return res.status(401).json({ error: 'Unauthorized' });
+// Sprint 0 Fix 3: ADMIN ONLY + Fix 5: Pagination cap
+export default adminOnly(async (req: AuthenticatedRequest, res: VercelResponse) => {
 
   try {
     if (req.method === 'GET') {
-      const { page = '1', limit = '20', isActive } = req.query as Record<string, string>;
-      const skip = (parseInt(page) - 1) * parseInt(limit);
-      const take = parseInt(limit);
+      const { isActive } = req.query as Record<string, string>;
+      const { skip, limit: take } = parsePagination(req.query as Record<string, unknown>);
 
       const where: Record<string, unknown> = {};
       if (isActive !== undefined) where.isActive = isActive === 'true';
 
       const [webhooks, total] = await Promise.all([
-        prisma.webhook.findMany({
+        prisma.webhookSubscription.findMany({
           where,
           skip,
           take,
           orderBy: { createdAt: 'desc' },
           include: {
-            _count: { select: { logs: true } },
+            _count: { select: { deliveries: true } },
           },
         }),
-        prisma.webhook.count({ where }),
+        prisma.webhookSubscription.count({ where }),
       ]);
 
       return res.status(200).json({
         data: webhooks,
-        pagination: { page: parseInt(page), limit: take, total, totalPages: Math.ceil(total / take) },
+        pagination: { limit: take, total, totalPages: Math.ceil(total / take) },
       });
     }
 
@@ -46,15 +39,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         return res.status(400).json({ error: 'Missing required fields: name, url, events (array)' });
       }
 
-      const webhook = await prisma.webhook.create({
+      const webhook = await prisma.webhookSubscription.create({
         data: {
           name,
           url,
-          secret: secret || null,
+          secret: secret || '',
           events,
-          headers: headers || null,
-          retryCount: retryCount ? parseInt(retryCount) : 3,
-          createdById: user.userId,
+          customHeaders: headers || null,
+          maxRetries: retryCount ? parseInt(retryCount) : 3,
+          createdById: req.auth.userId,
+          companyId: req.auth.companyId || 'system',
         },
       });
 
@@ -66,4 +60,4 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     console.error('Webhooks error:', error);
     return res.status(500).json({ error: 'Internal server error' });
   }
-}
+});

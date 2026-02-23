@@ -4,7 +4,7 @@
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { prisma } from '@/_lib/prisma';
+import prisma from '../../../_lib/prisma';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
@@ -27,9 +27,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(404).json({ error: 'Template not found' });
     }
 
-    if (!template.isActive) {
-      return res.status(400).json({ error: 'Template is not active' });
+    if (!template.isPublic) {
+      return res.status(400).json({ error: 'Template is not public' });
     }
+
+    // Extract template data from the template JSON field
+    const templateData = template.template as any || {};
 
     const {
       name,
@@ -82,26 +85,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const count = await prisma.promotion.count();
     const promotionCode = `PROMO-${String(count + 1).padStart(6, '0')}`;
 
-    // Merge template mechanics with overrides
-    const templateMechanics = template.mechanics as any || {};
-    const finalMechanics = { ...templateMechanics, ...overrides };
-
     // Create promotion from template
-    const result = await prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async (tx: any) => {
       // Create promotion
       const promotion = await tx.promotion.create({
         data: {
           code: promotionCode,
           name,
-          type: template.type,
           status: 'DRAFT',
           startDate: start,
           endDate: end,
-          budget: budget ? parseFloat(budget) : template.defaultBudget || 0,
-          customerId: customerId || null,
-          fundId: fundId || null,
-          mechanics: finalMechanics,
-          eligibility: template.eligibility || {},
+          budget: budget ? parseFloat(budget) : templateData.defaultBudget || 0,
+          customerId: customerId,
+          fundId: fundId,
           templateId: id,
           description: `Created from template: ${template.name}`,
         },
@@ -110,9 +106,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             select: { id: true, code: true, name: true },
           },
           fund: {
-            select: { id: true, code: true, name: true },
-          },
-          template: {
             select: { id: true, code: true, name: true },
           },
         },
@@ -130,7 +123,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(201).json({
       success: true,
       data: result,
-      message: `Promotion ${promotionCode} created from template ${template.code}`,
+      message: `Promotion ${promotionCode} created from template ${template.name}`,
     });
   } catch (error: any) {
     console.error('Apply template error:', error);

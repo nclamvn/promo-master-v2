@@ -1,24 +1,16 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node';
-import prisma from '@/_lib/prisma';
-import { getUserFromRequest } from '../_lib/auth';
+import type { VercelResponse } from '@vercel/node';
+import prisma from '../_lib/prisma';
+import { kamPlus, parsePagination, type AuthenticatedRequest } from '../_lib/auth';
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (req.method === 'OPTIONS') {
-    res.status(200).end();
-    return;
-  }
-
-  const user = getUserFromRequest(req);
-  if (!user) return res.status(401).json({ error: 'Unauthorized' });
-
+// Sprint 0: RBAC (kamPlus), Pagination cap, Budget over-allocation check
+export default kamPlus(async (req: AuthenticatedRequest, res: VercelResponse) => {
   try {
     if (req.method === 'GET') {
-      const { page = '1', limit = '20', status, customerId, search } = req.query as Record<string, string>;
-      const skip = (parseInt(page) - 1) * parseInt(limit);
-      const take = parseInt(limit);
+      const { status, customerId, search } = req.query as Record<string, string>;
+      const { skip, limit, page } = parsePagination(req.query as Record<string, unknown>);
 
       const where: Record<string, unknown> = {
-        fund: { company: { users: { some: { id: user.userId } } } },
+        fund: { company: { users: { some: { id: req.auth.userId } } } },
       };
 
       if (status) where.status = status;
@@ -34,7 +26,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         prisma.promotion.findMany({
           where,
           skip,
-          take,
+          take: limit,
           orderBy: { createdAt: 'desc' },
           include: {
             customer: { select: { id: true, name: true, channel: true } },
@@ -46,8 +38,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       ]);
 
       return res.status(200).json({
+        success: true,
         data: promotions,
-        pagination: { page: parseInt(page), limit: take, total, totalPages: Math.ceil(total / take) },
+        pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
       });
     }
 
@@ -55,29 +48,77 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const { code, name, description, customerId, fundId, startDate, endDate, budget } = req.body;
 
       if (!code || !name || !customerId || !fundId || !startDate || !endDate || !budget) {
-        return res.status(400).json({ error: 'Missing required fields' });
+        return res.status(400).json({
+          success: false,
+          error: { code: 'VALIDATION_ERROR', message: 'Missing required fields' },
+        });
       }
 
-      const promotion = await prisma.promotion.create({
-        data: {
-          code,
-          name,
-          description: description || null,
-          customerId,
-          fundId,
-          createdById: user.userId,
-          startDate: new Date(startDate),
-          endDate: new Date(endDate),
-          budget: parseFloat(budget),
-        },
+      const budgetAmount = parseFloat(budget);
+
+      // Sprint 0 Fix 7: Budget over-allocation check
+      if (fundId && budgetAmount > 0) {
+        const fund = await prisma.fund.findUnique({
+          where: { id: fundId },
+          select: { id: true, totalBudget: true, committed: true, available: true },
+        });
+
+        if (!fund) {
+          return res.status(400).json({
+            success: false,
+            error: { code: 'FUND_NOT_FOUND', message: 'Fund not found' },
+          });
+        }
+
+        const available = Number(fund.available);
+        if (budgetAmount > available) {
+          return res.status(400).json({
+            success: false,
+            error: {
+              code: 'INSUFFICIENT_FUND',
+              message: `Insufficient fund balance. Available: ${available.toLocaleString()}₫, Requested: ${budgetAmount.toLocaleString()}₫`,
+              details: { available, requested: budgetAmount },
+            },
+          });
+        }
+      }
+
+      // Create promotion and update fund in a transaction
+      const promotion = await prisma.$transaction(async (tx) => {
+        const created = await tx.promotion.create({
+          data: {
+            code,
+            name,
+            description: description || null,
+            customerId,
+            fundId,
+            createdById: req.auth.userId,
+            startDate: new Date(startDate),
+            endDate: new Date(endDate),
+            budget: budgetAmount,
+          },
+        });
+
+        // Update fund committed/available amounts
+        if (fundId && budgetAmount > 0) {
+          await tx.fund.update({
+            where: { id: fundId },
+            data: {
+              committed: { increment: budgetAmount },
+              available: { decrement: budgetAmount },
+            },
+          });
+        }
+
+        return created;
       });
 
-      return res.status(201).json({ data: promotion });
+      return res.status(201).json({ success: true, data: promotion });
     }
 
-    return res.status(405).json({ error: 'Method not allowed' });
+    return res.status(405).json({ success: false, error: 'Method not allowed' });
   } catch (error) {
     console.error('Promotions error:', error);
-    return res.status(500).json({ error: 'Internal server error' });
+    return res.status(500).json({ success: false, error: 'Internal server error' });
   }
-}
+});

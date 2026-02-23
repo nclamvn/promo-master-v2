@@ -56,7 +56,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const count = item._count || 0;
 
         switch (item.status) {
-          case 'OPEN':
+          case 'PENDING':
             summary.totalOpen = count;
             summary.openAmount = amount;
             break;
@@ -83,10 +83,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     if (req.method === 'POST') {
-      const { code, customerId, invoiceNumber, invoiceDate, amount, reason } = req.body;
+      const { deductionNumber, companyId, customerId, sourceDocument, sourceDate, amount, reasonDescription, deductionDate, receivedDate, source = 'MANUAL' } = req.body;
 
-      if (!customerId || !invoiceNumber || !invoiceDate || amount === undefined) {
-        return res.status(400).json({ error: 'Missing required fields: customerId, invoiceNumber, invoiceDate, amount' });
+      if (!customerId || !companyId || amount === undefined) {
+        return res.status(400).json({ error: 'Missing required fields: customerId, companyId, amount' });
       }
 
       // Check if customer exists
@@ -95,25 +95,32 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         return res.status(404).json({ error: 'Customer not found' });
       }
 
-      // Generate code if not provided
-      const deductionCode = code || `DED-${Date.now().toString(36).toUpperCase()}`;
+      // Generate deduction number if not provided
+      const dedNumber = deductionNumber || `DED-${Date.now().toString(36).toUpperCase()}`;
 
-      // Check for duplicate invoice number for same customer
-      const existing = await prisma.deduction.findFirst({
-        where: { customerId, invoiceNumber },
-      });
-      if (existing) {
-        return res.status(400).json({ error: 'Deduction with this invoice number already exists for this customer' });
+      // Check for duplicate source document for same customer
+      if (sourceDocument) {
+        const existing = await prisma.deduction.findFirst({
+          where: { customerId, sourceDocument },
+        });
+        if (existing) {
+          return res.status(400).json({ error: 'Deduction with this source document already exists for this customer' });
+        }
       }
 
+      const now = new Date();
       const deduction = await prisma.deduction.create({
         data: {
-          code: deductionCode,
+          deductionNumber: dedNumber,
+          companyId,
           customerId,
-          invoiceNumber,
-          invoiceDate: new Date(invoiceDate),
+          source,
+          sourceDocument: sourceDocument || null,
+          sourceDate: sourceDate ? new Date(sourceDate) : null,
+          deductionDate: deductionDate ? new Date(deductionDate) : now,
+          receivedDate: receivedDate ? new Date(receivedDate) : now,
           amount: parseFloat(amount),
-          reason: reason || null,
+          reasonDescription: reasonDescription || null,
         },
         include: {
           customer: { select: { id: true, name: true, code: true } },

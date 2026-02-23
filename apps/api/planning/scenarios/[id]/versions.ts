@@ -144,7 +144,7 @@ async function handleRestoreVersion(
     },
     include: {
       baseline: {
-        select: { id: true, code: true, name: true },
+        select: { id: true, category: true, brand: true },
       },
       createdBy: {
         select: { id: true, name: true, email: true },

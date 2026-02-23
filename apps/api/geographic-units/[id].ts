@@ -1,19 +1,18 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node';
-import prisma from '@/_lib/prisma';
-import { getUserFromRequest } from '../_lib/auth';
+import type { VercelResponse } from '@vercel/node';
+import prisma from '../_lib/prisma';
+import { kamPlus, type AuthenticatedRequest } from '../_lib/auth';
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (req.method === 'OPTIONS') {
-    res.status(200).end();
-    return;
-  }
-
-  const user = getUserFromRequest(req);
-  if (!user) return res.status(401).json({ error: 'Unauthorized' });
-
+/**
+ * /geographic-units/:id
+ * GET - Get single geographic unit
+ * PUT/PATCH - Update geographic unit
+ * DELETE - Delete geographic unit
+ * Sprint 0+1: RBAC + Standard errors
+ */
+export default kamPlus(async (req: AuthenticatedRequest, res: VercelResponse) => {
   const { id } = req.query;
   if (!id || typeof id !== 'string') {
-    return res.status(400).json({ error: 'ID không hợp lệ' });
+    return res.status(400).json({ success: false, error: { code: 'VALIDATION_ERROR', message: 'Missing or invalid id' } });
   }
 
   try {
@@ -48,10 +47,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
 
       if (!unit) {
-        return res.status(404).json({ error: 'Không tìm thấy đơn vị địa lý' });
+        return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Geographic unit not found' } });
       }
 
-      return res.status(200).json({ data: unit });
+      return res.status(200).json({ success: true, data: unit });
     }
 
     if (req.method === 'PUT' || req.method === 'PATCH') {
@@ -59,18 +58,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
       const existing = await prisma.geographicUnit.findUnique({ where: { id } });
       if (!existing) {
-        return res.status(404).json({ error: 'Không tìm thấy đơn vị địa lý' });
+        return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Geographic unit not found' } });
       }
 
-      // Validate parent if changing
       if (parentId && parentId !== existing.parentId) {
         const parent = await prisma.geographicUnit.findUnique({ where: { id: parentId } });
         if (!parent) {
-          return res.status(400).json({ error: 'Đơn vị địa lý cha không tồn tại' });
+          return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Parent geographic unit not found' } });
         }
-        // Prevent circular reference
         if (parentId === id) {
-          return res.status(400).json({ error: 'Không thể đặt chính nó làm cha' });
+          return res.status(400).json({ success: false, error: { code: 'VALIDATION_ERROR', message: 'Cannot set self as parent' } });
         }
       }
 
@@ -90,7 +87,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         },
       });
 
-      return res.status(200).json({ data: updated });
+      return res.status(200).json({ success: true, data: updated });
     }
 
     if (req.method === 'DELETE') {
@@ -100,25 +97,23 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
 
       if (!existing) {
-        return res.status(404).json({ error: 'Không tìm thấy đơn vị địa lý' });
+        return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Geographic unit not found' } });
       }
 
-      // Check for dependencies
       if (existing._count.children > 0) {
-        return res.status(400).json({ error: 'Không thể xóa vì có đơn vị con' });
+        return res.status(400).json({ success: false, error: { code: 'VALIDATION_ERROR', message: 'Cannot delete: has child units' } });
       }
       if (existing._count.budgetAllocations > 0 || existing._count.targetAllocations > 0) {
-        return res.status(400).json({ error: 'Không thể xóa vì có dữ liệu phân bổ liên quan' });
+        return res.status(400).json({ success: false, error: { code: 'VALIDATION_ERROR', message: 'Cannot delete: has linked allocations' } });
       }
 
       await prisma.geographicUnit.delete({ where: { id } });
-
-      return res.status(200).json({ message: 'Đã xóa đơn vị địa lý' });
+      return res.status(200).json({ success: true });
     }
 
-    return res.status(405).json({ error: 'Method not allowed' });
+    return res.status(405).json({ success: false, error: { code: 'METHOD_NOT_ALLOWED', message: 'Method not allowed' } });
   } catch (error) {
     console.error('Geographic Unit error:', error);
-    return res.status(500).json({ error: 'Lỗi hệ thống' });
+    return res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Internal server error' } });
   }
-}
+});

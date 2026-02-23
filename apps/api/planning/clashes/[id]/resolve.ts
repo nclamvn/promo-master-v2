@@ -91,8 +91,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       where: { id },
       data: {
         status: 'RESOLVED',
-        resolution,
-        notes: notes || null,
+        resolutionNote: resolution,
+        description: notes || null,
         resolvedAt: new Date(),
         resolvedById: user.userId,
       },

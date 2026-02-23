@@ -185,3 +185,20 @@ export function useResolveDeduction() {
     },
   });
 }
+
+// Phase 6: Convert deduction to claim
+export function useConvertDeduction() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const response = await api.post(`/finance/deductions/${id}/convert`);
+      return response.data;
+    },
+    onSuccess: (_, id) => {
+      queryClient.invalidateQueries({ queryKey: deductionKeys.detail(id) });
+      queryClient.invalidateQueries({ queryKey: deductionKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: ['claims'] });
+    },
+  });
+}

@@ -152,7 +152,7 @@ export function Sidebar({ isMobileOpen = false, onMobileClose }: SidebarProps) {
   const sidebarCollapsed = !sidebarOpen;
 
   const { brand, sections, footer } = sidebarConfig;
-  const BrandIcon = brand.icon;
+  // brand.icon is used in collapsed/expanded modes below
 
   const sidebarContent = (
     <>

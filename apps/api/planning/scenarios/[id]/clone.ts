@@ -4,7 +4,8 @@
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import prisma from '@/_lib/prisma';
+import { Prisma } from '@prisma/client';
+import prisma from '../../../_lib/prisma';
 import { getUserFromRequest } from '../../../_lib/auth';
 
 interface CloneRequest {
@@ -38,7 +39,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       where: { id },
       include: {
         baseline: {
-          select: { id: true, code: true, name: true },
+          select: { id: true, category: true, brand: true },
         },
       },
     });
@@ -61,12 +62,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         parameters: original.parameters as any,
         assumptions: original.assumptions as any,
         status: 'DRAFT',
-        results: null, // Don't copy results - new scenario needs to run
+        results: Prisma.JsonNull, // Don't copy results - new scenario needs to run
         createdById: user.userId,
       },
       include: {
         baseline: {
-          select: { id: true, code: true, name: true },
+          select: { id: true, category: true, brand: true },
         },
         createdBy: {
           select: { id: true, name: true, email: true },

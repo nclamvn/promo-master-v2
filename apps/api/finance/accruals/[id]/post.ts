@@ -47,26 +47,46 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(404).json({ error: 'Accrual not found' });
     }
 
-    if (accrual.status !== 'PENDING' && accrual.status !== 'CALCULATED') {
+    if (accrual.status !== 'PENDING') {
       return res.status(400).json({ error: 'Accrual is already posted or reversed' });
     }
 
     // Create GL Journal entry and update accrual in transaction
-    const result = await prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async (tx: any) => {
       // Create GL Journal entry
       const journal = await tx.gLJournal.create({
         data: {
-          entryNumber: generateEntryNumber(),
-          entryDate: new Date(),
-          description: `Accrual for ${accrual.promotion.code} - ${accrual.promotion.name} (${accrual.period})`,
-          debitAccount: glAccountDebit,
-          creditAccount: glAccountCredit,
-          amount: accrual.amount,
-          sourceType: 'ACCRUAL',
-          sourceId: accrual.id,
+          journalNumber: generateEntryNumber(),
+          journalDate: new Date(),
+          description: `Accrual for ${accrual.promotion.code} - ${accrual.promotion.name}`,
+          companyId: accrual.companyId,
+          fiscalPeriodId: accrual.fiscalPeriodId,
+          source: 'ACCRUAL',
+          sourceRef: accrual.id,
+          totalDebit: accrual.amount,
+          totalCredit: accrual.amount,
           status: 'POSTED',
           postedAt: new Date(),
           postedById: user.userId,
+          createdById: user.userId,
+          lines: {
+            create: [
+              {
+                lineNumber: 1,
+                accountCode: glAccountDebit,
+                accountName: 'Accrual Debit',
+                debitAmount: accrual.amount,
+                creditAmount: 0,
+              },
+              {
+                lineNumber: 2,
+                accountCode: glAccountCredit,
+                accountName: 'Accrual Credit',
+                debitAmount: 0,
+                creditAmount: accrual.amount,
+              },
+            ],
+          },
         },
       });
 
@@ -75,7 +95,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         where: { id },
         data: {
           status: 'POSTED',
-          postedToGL: true,
+          postedAt: new Date(),
+          postedById: user.userId,
           glJournalId: journal.id,
         },
         include: {
@@ -96,7 +117,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         },
         journal: {
           ...result.journal,
-          amount: Number(result.journal.amount),
+          totalDebit: Number(result.journal.totalDebit),
+          totalCredit: Number(result.journal.totalCredit),
         },
       },
       message: 'Accrual posted to GL successfully',

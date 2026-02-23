@@ -4,7 +4,7 @@
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { prisma } from '@/_lib/prisma';
+import prisma from '../../../_lib/prisma';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'GET') {
@@ -22,35 +22,35 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // API Keys stats
     const apiKeys = await prisma.aPIKey.findMany({
       select: {
-        isActive: true,
+        status: true,
         expiresAt: true,
-        usageCount: true,
+        totalRequests: true,
         lastUsedAt: true,
       },
     });
 
-    const activeKeys = apiKeys.filter((k) => k.isActive).length;
+    const activeKeys = apiKeys.filter((k: any) => k.status === 'ACTIVE').length;
     const expiringSoon = apiKeys.filter(
-      (k) => k.isActive && k.expiresAt && new Date(k.expiresAt) <= sevenDaysLater && new Date(k.expiresAt) > now
+      (k: any) => k.status === 'ACTIVE' && k.expiresAt && new Date(k.expiresAt) <= sevenDaysLater && new Date(k.expiresAt) > now
     ).length;
-    const totalAPIUsage = apiKeys.reduce((sum, k) => sum + k.usageCount, 0);
+    const totalAPIUsage = apiKeys.reduce((sum: any, k: any) => sum + Number(k.totalRequests), 0);
 
     // Audit logs stats
     const [todayLogins, todayActions, recentSensitiveActions] = await Promise.all([
-      prisma.auditLog.count({
+      prisma.immutableAuditLog.count({
         where: {
-          action: 'login',
+          action: 'LOGIN',
           timestamp: { gte: today },
         },
       }),
-      prisma.auditLog.count({
+      prisma.immutableAuditLog.count({
         where: {
           timestamp: { gte: today },
         },
       }),
-      prisma.auditLog.findMany({
+      prisma.immutableAuditLog.findMany({
         where: {
-          action: { in: ['delete', 'revoke', 'approve', 'reject'] },
+          action: { in: ['DELETE', 'APPROVE', 'REJECT'] },
           timestamp: { gte: sevenDaysAgo },
         },
         include: {
@@ -64,7 +64,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     ]);
 
     // Actions by type (last 7 days)
-    const actionsByType = await prisma.auditLog.groupBy({
+    const actionsByType = await prisma.immutableAuditLog.groupBy({
       by: ['action'],
       where: {
         timestamp: { gte: sevenDaysAgo },
@@ -78,11 +78,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     });
 
     // Entity types modified (last 7 days)
-    const entityTypes = await prisma.auditLog.groupBy({
+    const entityTypes = await prisma.immutableAuditLog.groupBy({
       by: ['entityType'],
       where: {
         timestamp: { gte: sevenDaysAgo },
-        action: { in: ['create', 'update', 'delete'] },
+        action: { in: ['CREATE', 'UPDATE', 'DELETE'] },
       },
       _count: true,
       orderBy: {
@@ -104,7 +104,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         audit: {
           todayLogins,
           todayActions,
-          recentSensitiveActions: recentSensitiveActions.map((a) => ({
+          recentSensitiveActions: recentSensitiveActions.map((a: any) => ({
             id: a.id,
             action: a.action,
             entityType: a.entityType,
@@ -112,11 +112,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             user: a.user?.name || 'System',
             timestamp: a.timestamp,
           })),
-          actionsByType: actionsByType.map((a) => ({
+          actionsByType: actionsByType.map((a: any) => ({
             action: a.action,
             count: a._count,
           })),
-          entityTypes: entityTypes.map((e) => ({
+          entityTypes: entityTypes.map((e: any) => ({
             entityType: e.entityType,
             count: e._count,
           })),

@@ -5,7 +5,7 @@
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { prisma } from '@/_lib/prisma';
+import prisma from '../../../_lib/prisma';
 import crypto from 'crypto';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -39,7 +39,7 @@ async function handleGet(req: VercelRequest, res: VercelResponse) {
     ];
   }
 
-  const endpoints = await prisma.webhookEndpoint.findMany({
+  const endpoints = await (prisma as any).webhookEndpoint.findMany({
     where,
     include: {
       createdBy: {
@@ -56,7 +56,7 @@ async function handleGet(req: VercelRequest, res: VercelResponse) {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  const todayDeliveries = await prisma.webhookDelivery.groupBy({
+  const todayDeliveries = await (prisma as any).webhookDelivery.groupBy({
     by: ['status'],
     where: {
       createdAt: { gte: today },
@@ -64,18 +64,18 @@ async function handleGet(req: VercelRequest, res: VercelResponse) {
     _count: true,
   });
 
-  const deliveredToday = todayDeliveries.find((d) => d.status === 'DELIVERED')?._count || 0;
-  const failedToday = todayDeliveries.find((d) => d.status === 'FAILED')?._count || 0;
+  const deliveredToday = todayDeliveries.find((d: any) => d.status === 'DELIVERED')?._count || 0;
+  const failedToday = todayDeliveries.find((d: any) => d.status === 'FAILED')?._count || 0;
 
   return res.status(200).json({
     success: true,
-    data: endpoints.map((e) => ({
+    data: endpoints.map((e: any) => ({
       ...e,
       secret: undefined, // Hide secret
     })),
     summary: {
       total: endpoints.length,
-      active: endpoints.filter((e) => e.isActive).length,
+      active: endpoints.filter((e: any) => e.isActive).length,
       deliveredToday,
       failedToday,
     },
@@ -128,7 +128,7 @@ async function handlePost(req: VercelRequest, res: VercelResponse) {
   }
 
   // Check for duplicate
-  const existing = await prisma.webhookEndpoint.findFirst({
+  const existing = await (prisma as any).webhookEndpoint.findFirst({
     where: { url },
   });
 
@@ -143,7 +143,7 @@ async function handlePost(req: VercelRequest, res: VercelResponse) {
   const secret = crypto.randomBytes(32).toString('hex');
 
   // Create endpoint
-  const endpoint = await prisma.webhookEndpoint.create({
+  const endpoint = await (prisma as any).webhookEndpoint.create({
     data: {
       name,
       url,

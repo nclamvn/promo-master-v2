@@ -54,7 +54,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             : false,
         product:
           includeProduct === 'true'
-            ? { select: { id: true, code: true, name: true, sku: true, category: true, brand: true } }
+            ? { select: { id: true, sku: true, name: true, category: true, brand: true } }
             : false,
       },
     });
@@ -106,15 +106,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const avgDailyOut = record.sellOutQty / 30;
       const daysOfStock = avgDailyOut > 0 ? Math.round(record.stockQty / avgDailyOut) : 0;
 
-      const customer = record.customer as {
+      const customer = (record as any).customer as {
         code?: string;
         name?: string;
         channel?: string;
       } | null;
-      const product = record.product as {
-        code?: string;
-        name?: string;
+      const product = (record as any).product as {
         sku?: string;
+        name?: string;
         category?: string;
         brand?: string;
       } | null;
@@ -124,7 +123,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         customer?.code || '',
         escapeCsvField(customer?.name || ''),
         customer?.channel || '',
-        product?.code || '',
+        product?.sku || '',
         escapeCsvField(product?.name || ''),
         product?.sku || '',
         product?.category || '',

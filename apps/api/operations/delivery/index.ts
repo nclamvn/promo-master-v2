@@ -86,7 +86,6 @@ async function handleList(req: VercelRequest, res: VercelResponse) {
       include: {
         customer: { select: { id: true, code: true, name: true } },
         promotion: { select: { id: true, code: true, name: true } },
-        createdBy: { select: { id: true, name: true } },
         _count: { select: { lines: true } },
       },
     }),
@@ -242,10 +241,9 @@ async function handleCreate(
       promotion: { select: { id: true, code: true, name: true } },
       lines: {
         include: {
-          product: { select: { id: true, code: true, name: true } },
+          product: { select: { id: true, sku: true, name: true } },
         },
       },
-      createdBy: { select: { id: true, name: true } },
     },
   });
 

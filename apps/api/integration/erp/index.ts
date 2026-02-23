@@ -1,15 +1,8 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { getUserFromRequest } from '../../_lib/auth';
+import type { VercelResponse } from '@vercel/node';
+import { adminOnly, type AuthenticatedRequest } from '../../_lib/auth';
 
-// ERP Integration placeholder - to be implemented based on specific ERP system
-export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (req.method === 'OPTIONS') {
-    res.status(200).end();
-    return;
-  }
-
-  const user = getUserFromRequest(req);
-  if (!user) return res.status(401).json({ error: 'Unauthorized' });
+// ERP Integration placeholder - Sprint 0 Fix 3: ADMIN ONLY
+export default adminOnly(async (req: AuthenticatedRequest, res: VercelResponse) => {
 
   try {
     if (req.method === 'GET') {
@@ -69,4 +62,4 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     console.error('ERP integration error:', error);
     return res.status(500).json({ error: 'Internal server error' });
   }
-}
+});

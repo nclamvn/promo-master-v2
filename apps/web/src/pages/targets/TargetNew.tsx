@@ -49,14 +49,14 @@ export default function TargetNew() {
         targetValue: Number(formData.targetValue),
       });
       toast({
-        title: 'Success',
-        description: 'Target created successfully',
+        title: 'Thành công',
+        description: 'Đã tạo mục tiêu mới',
       });
       navigate('/targets');
     } catch {
       toast({
-        title: 'Error',
-        description: 'Failed to create target',
+        title: 'Lỗi',
+        description: 'Không thể tạo mục tiêu',
         variant: 'destructive',
       });
     }
@@ -72,21 +72,21 @@ export default function TargetNew() {
           </Link>
         </Button>
         <div>
-          <h1 className="text-2xl font-bold">New Target</h1>
-          <p className="text-muted-foreground">Create a new sales target</p>
+          <h1 className="text-2xl font-bold">Tạo mục tiêu mới</h1>
+          <p className="text-muted-foreground">Tạo mục tiêu bán hàng mới</p>
         </div>
       </div>
 
       {/* Form */}
       <Card className="max-w-2xl">
         <CardHeader>
-          <CardTitle>Target Details</CardTitle>
+          <CardTitle>Thông tin mục tiêu</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="code">Target Code *</Label>
+                <Label htmlFor="code">Mã mục tiêu *</Label>
                 <Input
                   id="code"
                   value={formData.code}
@@ -96,7 +96,7 @@ export default function TargetNew() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="year">Year *</Label>
+                <Label htmlFor="year">Năm *</Label>
                 <Select
                   value={String(formData.year)}
                   onValueChange={(value) => setFormData({ ...formData, year: Number(value) })}
@@ -115,7 +115,7 @@ export default function TargetNew() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="name">Target Name *</Label>
+              <Label htmlFor="name">Tên mục tiêu *</Label>
               <Input
                 id="name"
                 value={formData.name}
@@ -127,13 +127,13 @@ export default function TargetNew() {
 
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="targetType">Target Type *</Label>
+                <Label htmlFor="targetType">Loại mục tiêu *</Label>
                 <Select
                   value={formData.targetType}
                   onValueChange={(value) => setFormData({ ...formData, targetType: value })}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select type" />
+                    <SelectValue placeholder="Chọn loại" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="REVENUE">Revenue</SelectItem>
@@ -144,7 +144,7 @@ export default function TargetNew() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="targetValue">Target Value *</Label>
+                <Label htmlFor="targetValue">Giá trị mục tiêu *</Label>
                 <Input
                   id="targetValue"
                   type="number"
@@ -158,7 +158,7 @@ export default function TargetNew() {
 
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="periodType">Period Type *</Label>
+                <Label htmlFor="periodType">Kỳ *</Label>
                 <Select
                   value={formData.periodType}
                   onValueChange={(value) => setFormData({ ...formData, periodType: value as 'month' | 'quarter' | 'year' })}
@@ -167,21 +167,21 @@ export default function TargetNew() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="month">Monthly</SelectItem>
-                    <SelectItem value="quarter">Quarterly</SelectItem>
-                    <SelectItem value="year">Yearly</SelectItem>
+                    <SelectItem value="month">Theo tháng</SelectItem>
+                    <SelectItem value="quarter">Theo quý</SelectItem>
+                    <SelectItem value="year">Theo năm</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               {formData.periodType === 'month' && (
                 <div className="space-y-2">
-                  <Label htmlFor="month">Month *</Label>
+                  <Label htmlFor="month">Tháng *</Label>
                   <Select
                     value={formData.month}
                     onValueChange={(value) => setFormData({ ...formData, month: value })}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select month" />
+                      <SelectValue placeholder="Chọn tháng" />
                     </SelectTrigger>
                     <SelectContent>
                       {[...Array(12)].map((_, i) => (
@@ -195,13 +195,13 @@ export default function TargetNew() {
               )}
               {formData.periodType === 'quarter' && (
                 <div className="space-y-2">
-                  <Label htmlFor="quarter">Quarter *</Label>
+                  <Label htmlFor="quarter">Quý *</Label>
                   <Select
                     value={formData.quarter}
                     onValueChange={(value) => setFormData({ ...formData, quarter: value })}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select quarter" />
+                      <SelectValue placeholder="Chọn quý" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="1">Q1</SelectItem>
@@ -216,10 +216,10 @@ export default function TargetNew() {
 
             <div className="flex gap-2 pt-4">
               <Button type="submit" disabled={createTarget.isPending}>
-                {createTarget.isPending ? 'Creating...' : 'Create Target'}
+                {createTarget.isPending ? 'Đang tạo...' : 'Tạo mục tiêu'}
               </Button>
               <Button type="button" variant="outline" asChild>
-                <Link to="/targets">Cancel</Link>
+                <Link to="/targets">Hủy</Link>
               </Button>
             </div>
           </form>

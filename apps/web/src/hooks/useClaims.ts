@@ -1,5 +1,5 @@
 /**
- * Claims React Query Hooks
+ * Claims React Query Hooks (Phase 6 Enhanced)
  */
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -13,6 +13,8 @@ export const claimKeys = {
   list: (filters: object) => [...claimKeys.lists(), filters] as const,
   details: () => [...claimKeys.all, 'detail'] as const,
   detail: (id: string) => [...claimKeys.details(), id] as const,
+  matches: (id: string) => [...claimKeys.all, 'matches', id] as const,
+  auditLog: (id: string) => [...claimKeys.all, 'audit-log', id] as const,
 };
 
 // Types
@@ -23,14 +25,37 @@ interface ListParams {
   promotionId?: string;
   customerId?: string;
   search?: string;
+  type?: string;
+  source?: string;
+  dateFrom?: string;
+  dateTo?: string;
 }
 
 interface CreateClaimInput {
-  promotionId: string;
+  code?: string;
+  promotionId?: string;
+  customerId?: string;
   claimDate: string;
-  claimAmount: number;
+  amount?: number;
+  claimAmount?: number;
   description?: string;
+  type?: string;
+  source?: string;
   invoiceNumber?: string;
+  claimPeriodStart?: string;
+  claimPeriodEnd?: string;
+  dueDate?: string;
+  priority?: number;
+  customerNotes?: string;
+  lineItems?: Array<{
+    productId?: string;
+    productName?: string;
+    productSku?: string;
+    quantity?: number;
+    unitPrice?: number;
+    amount: number;
+    description?: string;
+  }>;
   evidenceUrls?: string[];
 }
 
@@ -44,7 +69,7 @@ export function useClaims(params: ListParams = {}) {
     },
     select: (response) => ({
       claims: response.data || [],
-      metadata: response.metadata,
+      metadata: response.pagination || response.metadata,
     }),
   });
 }
@@ -79,7 +104,7 @@ export function useUpdateClaim() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, data }: { id: string; data: Partial<CreateClaimInput> }) => {
+    mutationFn: async ({ id, data }: { id: string; data: Partial<CreateClaimInput> & { updatedAt?: string } }) => {
       const response = await api.patch(`/claims/${id}`, data);
       return response.data;
     },
@@ -123,8 +148,8 @@ export function useApproveClaim() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, approvedAmount }: { id: string; approvedAmount: number }) => {
-      const response = await api.post(`/claims/${id}/approve`, { approvedAmount });
+    mutationFn: async ({ id, approvedAmount, comments }: { id: string; approvedAmount: number; comments?: string }) => {
+      const response = await api.post(`/claims/${id}/approve`, { approvedAmount, comments });
       return response.data;
     },
     onSuccess: (_, { id }) => {
@@ -144,6 +169,47 @@ export function useRejectClaim() {
     },
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: claimKeys.detail(id) });
+      queryClient.invalidateQueries({ queryKey: claimKeys.lists() });
+    },
+  });
+}
+
+// Phase 6: New hooks
+export function useClaimMatches(claimId: string) {
+  return useQuery({
+    queryKey: claimKeys.matches(claimId),
+    queryFn: async () => {
+      const response = await api.get(`/claims/${claimId}/matches`);
+      return response.data;
+    },
+    enabled: !!claimId,
+    select: (response) => response.data || [],
+  });
+}
+
+export function useClaimAuditLog(claimId: string) {
+  return useQuery({
+    queryKey: claimKeys.auditLog(claimId),
+    queryFn: async () => {
+      const response = await api.get(`/claims/${claimId}/audit-log`);
+      return response.data;
+    },
+    enabled: !!claimId,
+    select: (response) => response.data || [],
+  });
+}
+
+export function useRunAIMatching() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (claimId: string) => {
+      const response = await api.post(`/claims/${claimId}/match`);
+      return response.data;
+    },
+    onSuccess: (_, claimId) => {
+      queryClient.invalidateQueries({ queryKey: claimKeys.detail(claimId) });
+      queryClient.invalidateQueries({ queryKey: claimKeys.matches(claimId) });
       queryClient.invalidateQueries({ queryKey: claimKeys.lists() });
     },
   });

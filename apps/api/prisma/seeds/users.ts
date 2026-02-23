@@ -13,9 +13,6 @@ export async function seedUsers() {
     create: {
       code: 'DEMO',
       name: 'Demo Company',
-      nameEn: 'Demo Company',
-      taxId: '0123456789',
-      isActive: true,
     },
   });
 
@@ -39,7 +36,7 @@ export async function seedUsers() {
       email: 'manager@promomaster.com',
       name: 'Manager User',
       password: managerPassword,
-      role: 'TRADE_MARKETING_MANAGER' as const,
+      role: 'MANAGER' as const,
       companyId: company.id,
     },
     {

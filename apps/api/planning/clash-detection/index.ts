@@ -1,14 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import prisma from '@/_lib/prisma';
+import prisma from '../../_lib/prisma';
 import { getUserFromRequest } from '../../_lib/auth';
-
-interface ClashData {
-  promotionId: string;
-  clashWithId: string;
-  clashType: string;
-  severity: string;
-  description: string;
-}
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method === 'OPTIONS') {
@@ -28,24 +20,24 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const where: Record<string, unknown> = {};
       if (severity) where.severity = severity;
       if (promotionId) {
-        where.OR = [{ promotionId }, { clashWithId: promotionId }];
+        where.OR = [{ promotionAId: promotionId }, { promotionBId: promotionId }];
       }
       if (resolved !== undefined) {
         where.resolvedAt = resolved === 'true' ? { not: null } : null;
       }
 
       const [clashes, total] = await Promise.all([
-        prisma.clashDetection.findMany({
+        prisma.promotionClash.findMany({
           where,
           skip,
           take,
           orderBy: { createdAt: 'desc' },
           include: {
-            promotion: { select: { id: true, code: true, name: true } },
-            clashWith: { select: { id: true, code: true, name: true } },
+            promotionA: { select: { id: true, code: true, name: true } },
+            promotionB: { select: { id: true, code: true, name: true } },
           },
         }),
-        prisma.clashDetection.count({ where }),
+        prisma.promotionClash.count({ where }),
       ]);
 
       return res.status(200).json({
@@ -65,8 +57,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const promotion = await prisma.promotion.findUnique({
         where: { id: promotionId },
         include: {
-          customers: { select: { customerId: true } },
-          products: { select: { productId: true } },
+          customer: { select: { id: true } },
         },
       });
 
@@ -82,49 +73,37 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           endDate: { gte: promotion.startDate },
         },
         include: {
-          customers: { select: { customerId: true } },
-          products: { select: { productId: true } },
+          customer: { select: { id: true } },
         },
       });
 
-      const clashes: ClashData[] = [];
+      const clashes: any[] = [];
       for (const other of overlapping) {
-        const customerOverlap = promotion.customers.some(c =>
-          other.customers.some(oc => oc.customerId === c.customerId)
-        );
-        const productOverlap = promotion.products.some(p =>
-          other.products.some(op => op.productId === p.productId)
-        );
+        const customerOverlap = promotion.customerId && other.customerId && promotion.customerId === other.customerId;
 
-        if (customerOverlap || productOverlap) {
+        if (customerOverlap) {
           clashes.push({
-            promotionId,
-            clashWithId: other.id,
-            clashType: customerOverlap && productOverlap ? 'PRODUCT_OVERLAP' : customerOverlap ? 'CUSTOMER_OVERLAP' : 'DATE_OVERLAP',
-            severity: customerOverlap && productOverlap ? 'HIGH' : 'MEDIUM',
-            description: `Overlaps with ${other.code} on ${customerOverlap ? 'customers' : ''} ${productOverlap ? 'products' : ''}`.trim(),
+            promotionAId: promotionId,
+            promotionBId: other.id,
+            companyId: user.companyId || '',
+            clashType: 'CUSTOMER_OVERLAP',
+            severity: 'MEDIUM',
+            description: `Overlaps with ${other.code} on customers`,
+            status: 'DETECTED',
+            detectedAt: new Date(),
           });
         }
       }
 
-      // Upsert clashes
-      const results = await Promise.all(
-        clashes.map(clash =>
-          prisma.clashDetection.upsert({
-            where: {
-              promotionId_clashWithId_clashType: {
-                promotionId: clash.promotionId,
-                clashWithId: clash.clashWithId,
-                clashType: clash.clashType as 'DATE_OVERLAP' | 'CUSTOMER_OVERLAP' | 'PRODUCT_OVERLAP' | 'BUDGET_CONFLICT' | 'MECHANIC_CONFLICT',
-              },
-            },
-            update: { severity: clash.severity as 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL', description: clash.description },
-            create: clash as Parameters<typeof prisma.clashDetection.create>[0]['data'],
-          })
-        )
-      );
+      // Create clashes
+      if (clashes.length > 0) {
+        await prisma.promotionClash.createMany({
+          data: clashes,
+          skipDuplicates: true,
+        });
+      }
 
-      return res.status(200).json({ data: results, count: results.length });
+      return res.status(200).json({ data: clashes, count: clashes.length });
     }
 
     return res.status(405).json({ error: 'Method not allowed' });

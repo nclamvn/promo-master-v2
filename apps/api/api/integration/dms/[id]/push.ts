@@ -4,7 +4,7 @@
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { prisma } from '@/_lib/prisma';
+import prisma from '../../../../_lib/prisma';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
@@ -27,7 +27,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
     }
 
-    const connection = await prisma.dMSConnection.findUnique({
+    const connection = await (prisma as any).dMSConnection.findUnique({
       where: { id },
       include: { distributor: true },
     });
@@ -93,15 +93,8 @@ async function pushPromotions(
   const promotions = await prisma.promotion.findMany({
     where: {
       ...(ids && { id: { in: ids } }),
-      status: 'ACTIVE',
-      customers: {
-        some: { id: connection.distributorId },
-      },
-    },
-    include: {
-      products: {
-        select: { id: true, code: true, name: true },
-      },
+      status: 'EXECUTING',
+      customerId: connection.distributorId,
     },
   });
 
@@ -135,19 +128,19 @@ async function pushProducts(
     },
     select: {
       id: true,
-      code: true,
+      sku: true,
       name: true,
       price: true,
-      category: { select: { name: true } },
+      category: true,
     },
   });
 
   // Simulate pushing to DMS
   for (const product of products) {
     try {
-      console.log(`Pushing product ${product.code} to DMS ${connection.id}`);
+      console.log(`Pushing product ${product.sku} to DMS ${connection.id}`);
     } catch (error) {
-      errors.push(`Product ${product.code}: ${error instanceof Error ? error.message : 'Push failed'}`);
+      errors.push(`Product ${product.sku}: ${error instanceof Error ? error.message : 'Push failed'}`);
     }
   }
 
@@ -172,7 +165,7 @@ async function pushPriceList(
     },
     select: {
       id: true,
-      code: true,
+      sku: true,
       name: true,
       price: true,
     },
@@ -181,9 +174,9 @@ async function pushPriceList(
   // Simulate pushing to DMS
   for (const price of prices) {
     try {
-      console.log(`Pushing price for ${price.code} to DMS ${connection.id}`);
+      console.log(`Pushing price for ${price.sku} to DMS ${connection.id}`);
     } catch (error) {
-      errors.push(`Price ${price.code}: ${error instanceof Error ? error.message : 'Push failed'}`);
+      errors.push(`Price ${price.sku}: ${error instanceof Error ? error.message : 'Push failed'}`);
     }
   }
 

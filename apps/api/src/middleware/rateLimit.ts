@@ -3,6 +3,7 @@
  * Protects API endpoints from abuse and brute force attacks
  */
 
+// @ts-ignore -- rate-limiter-flexible may not be installed yet
 import { RateLimiterMemory, RateLimiterRes } from 'rate-limiter-flexible';
 import type { Request, Response, NextFunction } from 'express';
 

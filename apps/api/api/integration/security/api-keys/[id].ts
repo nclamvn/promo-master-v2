@@ -5,7 +5,7 @@
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { prisma } from '@/_lib/prisma';
+import prisma from '../../../../_lib/prisma';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   const { id } = req.query;
@@ -67,7 +67,7 @@ async function handleDelete(id: string, req: VercelRequest, res: VercelResponse)
     });
   }
 
-  if (!apiKey.isActive) {
+  if (apiKey.status === 'REVOKED') {
     return res.status(400).json({
       success: false,
       error: 'API key is already revoked',
@@ -77,18 +77,22 @@ async function handleDelete(id: string, req: VercelRequest, res: VercelResponse)
   // Revoke key (soft delete)
   await prisma.aPIKey.update({
     where: { id },
-    data: { isActive: false },
+    data: { status: 'REVOKED', revokedAt: new Date(), revokedById: req.body?.userId || null },
   });
 
   // Create audit log
-  await prisma.auditLog.create({
+  await prisma.immutableAuditLog.create({
     data: {
-      userId: req.body?.userId || null,
-      action: 'revoke',
+      userId: req.body?.userId || 'system',
+      action: 'DELETE',
       entityType: 'APIKey',
       entityId: id,
-      oldValue: { name: apiKey.name, isActive: true },
-      newValue: { isActive: false },
+      description: `Revoked API key: ${apiKey.name}`,
+      oldValues: { name: apiKey.name, status: apiKey.status },
+      newValues: { status: 'REVOKED' },
+      companyId: apiKey.companyId,
+      sequenceNumber: Date.now(),
+      entryHash: apiKey.keyHash,
     },
   });
 

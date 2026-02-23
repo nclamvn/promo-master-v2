@@ -1,21 +1,19 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node';
-import prisma from '@/_lib/prisma';
-import { getUserFromRequest } from '../_lib/auth';
+import type { VercelResponse } from '@vercel/node';
+import prisma from '../_lib/prisma';
+import { kamPlus, type AuthenticatedRequest } from '../_lib/auth';
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (req.method === 'OPTIONS') {
-    res.status(200).end();
-    return;
-  }
+/**
+ * /geographic-units
+ * GET - List/tree geographic units (KAM+)
+ * POST - Create new geographic unit (KAM+)
+ * Sprint 0+1: RBAC + Standard errors
+ */
 
-  const user = getUserFromRequest(req);
-  if (!user) return res.status(401).json({ error: 'Unauthorized' });
-
+export default kamPlus(async (req: AuthenticatedRequest, res: VercelResponse) => {
   try {
     if (req.method === 'GET') {
       const { level, parentId, tree, search } = req.query as Record<string, string>;
 
-      // If tree=true, return hierarchical structure
       if (tree === 'true') {
         const rootUnits = await prisma.geographicUnit.findMany({
           where: { parentId: null, isActive: true },
@@ -46,10 +44,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           },
         });
 
-        return res.status(200).json({ data: rootUnits });
+        return res.status(200).json({ success: true, data: rootUnits });
       }
 
-      // Regular list query
       const where: Record<string, unknown> = { isActive: true };
 
       if (level) where.level = level;
@@ -71,33 +68,42 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         },
       });
 
-      return res.status(200).json({ data: units });
+      return res.status(200).json({ success: true, data: units });
     }
 
     if (req.method === 'POST') {
       const { code, name, nameEn, level, parentId, latitude, longitude, sortOrder } = req.body;
 
       if (!code || !name || !level) {
-        return res.status(400).json({ error: 'Thiếu trường bắt buộc: code, name, level' });
+        return res.status(400).json({
+          success: false,
+          error: { code: 'VALIDATION_ERROR', message: 'Missing required fields: code, name, level' },
+        });
       }
 
-      // Validate level
       const validLevels = ['COUNTRY', 'REGION', 'PROVINCE', 'DISTRICT', 'DEALER'];
       if (!validLevels.includes(level)) {
-        return res.status(400).json({ error: 'Cấp địa lý không hợp lệ' });
+        return res.status(400).json({
+          success: false,
+          error: { code: 'VALIDATION_ERROR', message: 'Invalid geographic level' },
+        });
       }
 
-      // Check for duplicate code
       const existing = await prisma.geographicUnit.findUnique({ where: { code } });
       if (existing) {
-        return res.status(400).json({ error: 'Mã đơn vị địa lý đã tồn tại' });
+        return res.status(409).json({
+          success: false,
+          error: { code: 'DUPLICATE_ENTRY', message: 'Geographic unit code already exists' },
+        });
       }
 
-      // Validate parent if provided
       if (parentId) {
         const parent = await prisma.geographicUnit.findUnique({ where: { id: parentId } });
         if (!parent) {
-          return res.status(400).json({ error: 'Đơn vị địa lý cha không tồn tại' });
+          return res.status(404).json({
+            success: false,
+            error: { code: 'NOT_FOUND', message: 'Parent geographic unit not found' },
+          });
         }
       }
 
@@ -117,12 +123,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         },
       });
 
-      return res.status(201).json({ data: unit });
+      return res.status(201).json({ success: true, data: unit });
     }
 
-    return res.status(405).json({ error: 'Method not allowed' });
+    return res.status(405).json({ success: false, error: { code: 'METHOD_NOT_ALLOWED', message: 'Method not allowed' } });
   } catch (error) {
     console.error('Geographic Units error:', error);
-    return res.status(500).json({ error: 'Lỗi hệ thống' });
+    return res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Internal server error' } });
   }
-}
+});

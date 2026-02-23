@@ -37,8 +37,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(404).json({ error: 'Deduction not found' });
     }
 
-    if (deduction.status !== 'OPEN') {
-      return res.status(400).json({ error: 'Deduction is not open for matching' });
+    if (deduction.status !== 'PENDING') {
+      return res.status(400).json({ error: 'Deduction is not pending for matching' });
     }
 
     // Get the claim
@@ -85,7 +85,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       // Update claim status to PAID
       await tx.claim.update({
         where: { id: claimId },
-        data: { status: 'PAID' },
+        data: { status: 'SETTLED' },
       });
 
       return updatedDeduction;

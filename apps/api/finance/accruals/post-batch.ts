@@ -37,7 +37,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const accruals = await prisma.accrualEntry.findMany({
       where: {
         id: { in: accrualIds },
-        status: { in: ['PENDING', 'CALCULATED'] },
+        status: 'PENDING',
       },
       include: {
         promotion: { select: { code: true, name: true } },
@@ -49,7 +49,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     if (accruals.length !== accrualIds.length) {
-      const foundIds = accruals.map(a => a.id);
+      const foundIds = accruals.map((a: any) => a.id);
       const invalidIds = accrualIds.filter((id: string) => !foundIds.includes(id));
       return res.status(400).json({
         error: 'Some accruals are invalid or already posted',
@@ -58,24 +58,44 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     // Post all accruals in transaction
-    const results = await prisma.$transaction(async (tx) => {
+    const results = await prisma.$transaction(async (tx: any) => {
       const posted = [];
 
       for (const accrual of accruals) {
         // Create GL Journal entry
         const journal = await tx.gLJournal.create({
           data: {
-            entryNumber: generateEntryNumber(),
-            entryDate: new Date(),
-            description: `Accrual for ${accrual.promotion.code} - ${accrual.promotion.name} (${accrual.period})`,
-            debitAccount: glAccountDebit,
-            creditAccount: glAccountCredit,
-            amount: accrual.amount,
-            sourceType: 'ACCRUAL',
-            sourceId: accrual.id,
+            journalNumber: generateEntryNumber(),
+            journalDate: new Date(),
+            description: `Accrual for ${accrual.promotion.code} - ${accrual.promotion.name}`,
+            companyId: accrual.companyId,
+            fiscalPeriodId: accrual.fiscalPeriodId,
+            source: 'ACCRUAL',
+            sourceRef: accrual.id,
+            totalDebit: accrual.amount,
+            totalCredit: accrual.amount,
             status: 'POSTED',
             postedAt: new Date(),
             postedById: user.userId,
+            createdById: user.userId,
+            lines: {
+              create: [
+                {
+                  lineNumber: 1,
+                  accountCode: glAccountDebit,
+                  accountName: 'Accrual Debit',
+                  debitAmount: accrual.amount,
+                  creditAmount: 0,
+                },
+                {
+                  lineNumber: 2,
+                  accountCode: glAccountCredit,
+                  accountName: 'Accrual Credit',
+                  debitAmount: 0,
+                  creditAmount: accrual.amount,
+                },
+              ],
+            },
           },
         });
 
@@ -84,7 +104,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           where: { id: accrual.id },
           data: {
             status: 'POSTED',
-            postedToGL: true,
+            postedAt: new Date(),
+            postedById: user.userId,
             glJournalId: journal.id,
           },
         });
@@ -92,7 +113,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         posted.push({
           accrualId: updated.id,
           journalId: journal.id,
-          journalNumber: journal.entryNumber,
+          journalNumber: journal.journalNumber,
           amount: Number(accrual.amount),
         });
       }

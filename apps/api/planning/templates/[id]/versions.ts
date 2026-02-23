@@ -4,7 +4,7 @@
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { prisma } from '@/_lib/prisma';
+import prisma from '../../../_lib/prisma';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'GET') {
@@ -22,7 +22,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // Verify template exists
     const template = await prisma.promotionTemplate.findUnique({
       where: { id },
-      select: { id: true, code: true, name: true },
+      select: { id: true, name: true },
     });
 
     if (!template) {
@@ -33,11 +33,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const versions = await prisma.templateVersion.findMany({
       where: { templateId: id },
       orderBy: { version: 'desc' },
-      include: {
-        createdBy: {
-          select: { id: true, name: true, email: true },
-        },
-      },
     });
 
     return res.status(200).json({

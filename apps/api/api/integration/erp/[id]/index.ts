@@ -6,7 +6,7 @@
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { prisma } from '@/_lib/prisma';
+import prisma from '../../../../_lib/prisma';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   const { id } = req.query;
@@ -54,31 +54,31 @@ async function handleGet(id: string, res: VercelResponse) {
   }
 
   // Get recent sync logs
-  const recentLogs = await prisma.eRPSyncLog.findMany({
+  const recentLogs = await (prisma as any).eRPSyncLog.findMany({
     where: { connectionId: id },
     orderBy: { startedAt: 'desc' },
     take: 10,
   });
 
   // Calculate stats
-  const allLogs = await prisma.eRPSyncLog.findMany({
+  const allLogs = await (prisma as any).eRPSyncLog.findMany({
     where: { connectionId: id },
     select: { status: true, duration: true },
   });
 
   const totalSyncs = allLogs.length;
   const successfulSyncs = allLogs.filter(
-    (l) => l.status === 'COMPLETED' || l.status === 'COMPLETED_WITH_ERRORS'
+    (l: any) => l.status === 'COMPLETED' || l.status === 'COMPLETED_WITH_ERRORS'
   ).length;
   const successRate = totalSyncs > 0 ? (successfulSyncs / totalSyncs) * 100 : 0;
   const avgDuration =
-    allLogs.filter((l) => l.duration).reduce((sum, l) => sum + (l.duration || 0), 0) /
-      (allLogs.filter((l) => l.duration).length || 1);
+    allLogs.filter((l: any) => l.duration).reduce((sum: any, l: any) => sum + (l.duration || 0), 0) /
+      (allLogs.filter((l: any) => l.duration).length || 1);
 
   const lastErrors = recentLogs
-    .filter((l) => l.status === 'FAILED' && l.errors)
+    .filter((l: any) => l.status === 'FAILED' && l.errors)
     .slice(0, 5)
-    .flatMap((l) => (l.errors as string[]) || []);
+    .flatMap((l: any) => (l.errors as string[]) || []);
 
   return res.status(200).json({
     success: true,
@@ -126,8 +126,6 @@ async function handlePut(id: string, req: VercelRequest, res: VercelResponse) {
     where: { id },
     data: {
       ...(name && { name }),
-      ...(config && { config: { ...((connection.config as object) || {}), ...config } }),
-      ...(syncSchedule !== undefined && { syncSchedule }),
       ...(status && { status }),
     },
   });
@@ -142,7 +140,7 @@ async function handlePut(id: string, req: VercelRequest, res: VercelResponse) {
 async function handleDelete(id: string, res: VercelResponse) {
   const connection = await prisma.eRPConnection.findUnique({
     where: { id },
-    include: { _count: { select: { syncLogs: true } } },
+    include: { _count: { select: { syncJobs: true } } },
   });
 
   if (!connection) {
@@ -153,8 +151,8 @@ async function handleDelete(id: string, res: VercelResponse) {
   }
 
   // Delete related data first
-  await prisma.eRPMapping.deleteMany({ where: { connectionId: id } });
-  await prisma.eRPSyncLog.deleteMany({ where: { connectionId: id } });
+  await (prisma as any).eRPMapping.deleteMany({ where: { connectionId: id } });
+  await (prisma as any).eRPSyncLog.deleteMany({ where: { connectionId: id } });
 
   // Delete connection
   await prisma.eRPConnection.delete({ where: { id } });

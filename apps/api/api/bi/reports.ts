@@ -2,9 +2,11 @@
  * BI Reports API
  * GET /api/bi/reports - List reports
  * POST /api/bi/reports - Create report
+ * Sprint 0 Fix 3: MANAGER+ only
  */
 
-import type { VercelRequest, VercelResponse } from '@vercel/node';
+import type { VercelResponse } from '@vercel/node';
+import { managerPlus, type AuthenticatedRequest } from '../../_lib/auth';
 
 const mockReports = [
   {
@@ -58,7 +60,7 @@ const mockReports = [
   },
 ];
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+export default managerPlus(async (req: AuthenticatedRequest, res: VercelResponse) => {
   if (req.method === 'GET') {
     const { type, search, page = '1', pageSize = '20' } = req.query;
 
@@ -125,4 +127,4 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   return res.status(405).json({ success: false, error: 'Method not allowed' });
-}
+});

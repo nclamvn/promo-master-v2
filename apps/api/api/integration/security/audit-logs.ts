@@ -1,12 +1,14 @@
 /**
  * Audit Logs API
  * GET /api/integration/security/audit-logs - List audit logs
+ * Sprint 0 Fix 3: ADMIN ONLY - Audit logs are sensitive
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { prisma } from '@/_lib/prisma';
+import prisma from '../../../_lib/prisma';
+import { adminOnly, type AuthenticatedRequest } from '../../../_lib/auth';
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+export default adminOnly(async (req: AuthenticatedRequest, res: VercelResponse) => {
   if (req.method !== 'GET') {
     return res.status(405).json({ success: false, error: 'Method not allowed' });
   }
@@ -52,7 +54,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     const [logs, total] = await Promise.all([
-      prisma.auditLog.findMany({
+      prisma.immutableAuditLog.findMany({
         where,
         include: {
           user: {
@@ -63,7 +65,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         skip,
         take: limit,
       }),
-      prisma.auditLog.count({ where }),
+      prisma.immutableAuditLog.count({ where }),
     ]);
 
     return res.status(200).json({
@@ -80,4 +82,4 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     console.error('Audit Logs API error:', error);
     return res.status(500).json({ success: false, error: 'Internal server error' });
   }
-}
+});

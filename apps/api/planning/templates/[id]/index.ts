@@ -6,7 +6,8 @@
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { prisma } from '@/_lib/prisma';
+import prisma from '../../../_lib/prisma';
+import { getUserFromRequest } from '../../../_lib/auth';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   const { id } = req.query;
@@ -15,11 +16,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(400).json({ error: 'Template ID is required' });
   }
 
+  const user = getUserFromRequest(req);
+
   try {
     if (req.method === 'GET') {
       return handleGet(id, res);
     } else if (req.method === 'PUT') {
-      return handleUpdate(id, req, res);
+      return handleUpdate(id, req, res, user?.userId || '');
     } else if (req.method === 'DELETE') {
       return handleDelete(id, res);
     } else {
@@ -49,18 +52,6 @@ async function handleGet(id: string, res: VercelResponse) {
           createdAt: true,
         },
       },
-      promotions: {
-        orderBy: { createdAt: 'desc' },
-        take: 5,
-        select: {
-          id: true,
-          code: true,
-          name: true,
-          status: true,
-          startDate: true,
-          endDate: true,
-        },
-      },
     },
   });
 
@@ -74,7 +65,7 @@ async function handleGet(id: string, res: VercelResponse) {
   });
 }
 
-async function handleUpdate(id: string, req: VercelRequest, res: VercelResponse) {
+async function handleUpdate(id: string, req: VercelRequest, res: VercelResponse, userId: string) {
   const template = await prisma.promotionTemplate.findUnique({
     where: { id },
     include: {
@@ -93,11 +84,8 @@ async function handleUpdate(id: string, req: VercelRequest, res: VercelResponse)
     name,
     description,
     category,
-    defaultDuration,
-    defaultBudget,
-    mechanics,
-    eligibility,
-    isActive,
+    isPublic,
+    templateData,
   } = req.body;
 
   // Build changes object for version tracking
@@ -116,31 +104,13 @@ async function handleUpdate(id: string, req: VercelRequest, res: VercelResponse)
     changes.category = { old: template.category, new: category };
     updateData.category = category;
   }
-  if (defaultDuration !== undefined) {
-    const newDuration = parseInt(defaultDuration);
-    if (newDuration !== template.defaultDuration) {
-      changes.defaultDuration = { old: template.defaultDuration, new: newDuration };
-      updateData.defaultDuration = newDuration;
-    }
+  if (isPublic !== undefined && isPublic !== template.isPublic) {
+    changes.isPublic = { old: template.isPublic, new: isPublic };
+    updateData.isPublic = isPublic;
   }
-  if (defaultBudget !== undefined) {
-    const newBudget = parseFloat(defaultBudget);
-    if (newBudget !== template.defaultBudget?.toNumber()) {
-      changes.defaultBudget = { old: template.defaultBudget, new: newBudget };
-      updateData.defaultBudget = newBudget;
-    }
-  }
-  if (mechanics !== undefined) {
-    changes.mechanics = { old: template.mechanics, new: mechanics };
-    updateData.mechanics = mechanics;
-  }
-  if (eligibility !== undefined) {
-    changes.eligibility = { old: template.eligibility, new: eligibility };
-    updateData.eligibility = eligibility;
-  }
-  if (isActive !== undefined && isActive !== template.isActive) {
-    changes.isActive = { old: template.isActive, new: isActive };
-    updateData.isActive = isActive;
+  if (templateData !== undefined) {
+    changes.template = { old: template.template, new: templateData };
+    updateData.template = templateData;
   }
 
   // If no changes, return current template
@@ -157,7 +127,7 @@ async function handleUpdate(id: string, req: VercelRequest, res: VercelResponse)
   const newVersion = currentVersion + 1;
 
   // Update template and create new version in transaction
-  const result = await prisma.$transaction(async (tx) => {
+  const result = await prisma.$transaction(async (tx: any) => {
     // Update template
     const updated = await tx.promotionTemplate.update({
       where: { id },
@@ -179,6 +149,7 @@ async function handleUpdate(id: string, req: VercelRequest, res: VercelResponse)
           ...template,
           ...updateData,
         },
+        createdById: userId,
       },
     });
 
@@ -197,7 +168,7 @@ async function handleDelete(id: string, res: VercelResponse) {
     where: { id },
     include: {
       _count: {
-        select: { promotions: true },
+        select: { versions: true },
       },
     },
   });
@@ -210,7 +181,7 @@ async function handleDelete(id: string, res: VercelResponse) {
   const activePromotions = await prisma.promotion.count({
     where: {
       templateId: id,
-      status: { in: ['DRAFT', 'PENDING', 'APPROVED', 'ACTIVE'] },
+      status: { in: ['DRAFT', 'PLANNED', 'CONFIRMED', 'EXECUTING'] },
     },
   });
 
@@ -223,7 +194,7 @@ async function handleDelete(id: string, res: VercelResponse) {
   // Soft delete - mark as inactive
   await prisma.promotionTemplate.update({
     where: { id },
-    data: { isActive: false },
+    data: { isPublic: false },
   });
 
   return res.status(200).json({

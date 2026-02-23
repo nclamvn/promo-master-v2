@@ -6,7 +6,7 @@
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { prisma } from '@/_lib/prisma';
+import prisma from '../../../../_lib/prisma';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   const { id } = req.query;
@@ -33,7 +33,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 }
 
 async function handleGet(id: string, res: VercelResponse) {
-  const endpoint = await prisma.webhookEndpoint.findUnique({
+  const endpoint = await (prisma as any).webhookEndpoint.findUnique({
     where: { id },
     include: {
       createdBy: {
@@ -50,22 +50,22 @@ async function handleGet(id: string, res: VercelResponse) {
   }
 
   // Get recent deliveries
-  const recentDeliveries = await prisma.webhookDelivery.findMany({
+  const recentDeliveries = await (prisma as any).webhookDelivery.findMany({
     where: { endpointId: id },
     orderBy: { createdAt: 'desc' },
     take: 20,
   });
 
   // Get delivery stats
-  const stats = await prisma.webhookDelivery.groupBy({
+  const stats = await (prisma as any).webhookDelivery.groupBy({
     by: ['status'],
     where: { endpointId: id },
     _count: true,
   });
 
-  const totalDeliveries = stats.reduce((sum, s) => sum + s._count, 0);
-  const successfulDeliveries = stats.find((s) => s.status === 'DELIVERED')?._count || 0;
-  const failedDeliveries = stats.find((s) => s.status === 'FAILED')?._count || 0;
+  const totalDeliveries = stats.reduce((sum: any, s: any) => sum + s._count, 0);
+  const successfulDeliveries = stats.find((s: any) => s.status === 'DELIVERED')?._count || 0;
+  const failedDeliveries = stats.find((s: any) => s.status === 'FAILED')?._count || 0;
 
   return res.status(200).json({
     success: true,
@@ -86,7 +86,7 @@ async function handleGet(id: string, res: VercelResponse) {
 async function handlePut(id: string, req: VercelRequest, res: VercelResponse) {
   const { name, url, events, headers, retryConfig, isActive } = req.body;
 
-  const endpoint = await prisma.webhookEndpoint.findUnique({
+  const endpoint = await (prisma as any).webhookEndpoint.findUnique({
     where: { id },
   });
 
@@ -109,7 +109,7 @@ async function handlePut(id: string, req: VercelRequest, res: VercelResponse) {
     }
   }
 
-  const updatedEndpoint = await prisma.webhookEndpoint.update({
+  const updatedEndpoint = await (prisma as any).webhookEndpoint.update({
     where: { id },
     data: {
       ...(name && { name }),
@@ -132,7 +132,7 @@ async function handlePut(id: string, req: VercelRequest, res: VercelResponse) {
 }
 
 async function handleDelete(id: string, res: VercelResponse) {
-  const endpoint = await prisma.webhookEndpoint.findUnique({
+  const endpoint = await (prisma as any).webhookEndpoint.findUnique({
     where: { id },
   });
 
@@ -144,10 +144,10 @@ async function handleDelete(id: string, res: VercelResponse) {
   }
 
   // Delete related deliveries first
-  await prisma.webhookDelivery.deleteMany({ where: { endpointId: id } });
+  await (prisma as any).webhookDelivery.deleteMany({ where: { endpointId: id } });
 
   // Delete endpoint
-  await prisma.webhookEndpoint.delete({ where: { id } });
+  await (prisma as any).webhookEndpoint.delete({ where: { id } });
 
   return res.status(200).json({
     success: true,

@@ -133,7 +133,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const productIds = rawData.map((r) => r.productId);
       const products = await prisma.product.findMany({
         where: { id: { in: productIds } },
-        select: { id: true, code: true, name: true, sku: true },
+        select: { id: true, sku: true, name: true },
       });
       const productMap = new Map(products.map((p) => [p.id, p]));
 
@@ -180,7 +180,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }),
       prisma.product.findMany({
         where: { id: { in: topProductIds } },
-        select: { id: true, code: true, name: true },
+        select: { id: true, sku: true, name: true },
       }),
     ]);
 

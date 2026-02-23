@@ -2,12 +2,14 @@
  * ERP Integration API - List & Create
  * GET /api/integration/erp - List ERP connections
  * POST /api/integration/erp - Create new ERP connection
+ * Sprint 0 Fix 3: ADMIN ONLY
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { prisma } from '@/_lib/prisma';
+import prisma from '../../../_lib/prisma';
+import { adminOnly, type AuthenticatedRequest } from '../../../_lib/auth';
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+export default adminOnly(async (req: AuthenticatedRequest, res: VercelResponse) => {
   try {
     switch (req.method) {
       case 'GET':
@@ -21,7 +23,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     console.error('ERP API error:', error);
     return res.status(500).json({ success: false, error: 'Internal server error' });
   }
-}
+});
 
 async function handleGet(req: VercelRequest, res: VercelResponse) {
   const { type, status, search } = req.query;
@@ -29,7 +31,7 @@ async function handleGet(req: VercelRequest, res: VercelResponse) {
   const where: Record<string, unknown> = {};
 
   if (type && type !== 'all') {
-    where.type = type;
+    where.erpType = type;
   }
   if (status && status !== 'all') {
     where.status = status;
@@ -45,7 +47,7 @@ async function handleGet(req: VercelRequest, res: VercelResponse) {
         select: { id: true, name: true },
       },
       _count: {
-        select: { mappings: true, syncLogs: true },
+        select: { mappings: true, syncJobs: true },
       },
     },
     orderBy: { createdAt: 'desc' },
@@ -56,11 +58,11 @@ async function handleGet(req: VercelRequest, res: VercelResponse) {
   const active = connections.filter((c) => c.status === 'ACTIVE').length;
   const byType: Record<string, number> = {};
   const lastSyncErrors = connections.filter(
-    (c) => c.lastSyncStatus === 'FAILED' || c.lastSyncStatus === 'COMPLETED_WITH_ERRORS'
+    (c: any) => c.lastPingStatus === false
   ).length;
 
-  connections.forEach((c) => {
-    byType[c.type] = (byType[c.type] || 0) + 1;
+  connections.forEach((c: any) => {
+    byType[c.erpType] = (byType[c.erpType] || 0) + 1;
   });
 
   return res.status(200).json({
@@ -110,11 +112,11 @@ async function handlePost(req: VercelRequest, res: VercelResponse) {
   const connection = await prisma.eRPConnection.create({
     data: {
       name,
-      type,
-      config,
-      syncSchedule,
+      erpType: type,
+      baseUrl: config?.baseUrl || '',
       status: 'INACTIVE',
       createdById: req.body.userId || 'system',
+      companyId: req.body.companyId || 'system',
     },
   });
 

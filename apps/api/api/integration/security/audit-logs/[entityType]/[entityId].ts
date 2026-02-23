@@ -4,7 +4,7 @@
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { prisma } from '@/_lib/prisma';
+import prisma from '../../../../../_lib/prisma';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'GET') {
@@ -21,7 +21,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    const logs = await prisma.auditLog.findMany({
+    const logs = await prisma.immutableAuditLog.findMany({
       where: {
         entityType,
         entityId,
@@ -47,7 +47,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         case 'Claim':
           entityInfo = await prisma.claim.findUnique({
             where: { id: entityId },
-            select: { id: true, claimNumber: true, status: true },
+            select: { id: true, code: true, status: true },
           });
           break;
         case 'Customer':
@@ -59,7 +59,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         case 'Product':
           entityInfo = await prisma.product.findUnique({
             where: { id: entityId },
-            select: { id: true, code: true, name: true },
+            select: { id: true, sku: true, name: true },
           });
           break;
         case 'User':

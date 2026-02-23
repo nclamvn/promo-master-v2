@@ -5,7 +5,9 @@
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import prisma from '@/_lib/prisma';
+import { Prisma } from '@prisma/client';
+import prisma from '../../_lib/prisma';
+import { getUserFromRequest } from '../../_lib/auth';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method === 'OPTIONS') {
@@ -30,9 +32,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
 async function handleList(req: VercelRequest, res: VercelResponse) {
   const {
-    type,
     category,
-    isActive,
+    isPublic,
     search,
     page = '1',
     pageSize = '20',
@@ -45,22 +46,17 @@ async function handleList(req: VercelRequest, res: VercelResponse) {
   // Build where clause
   const where: any = {};
 
-  if (type) {
-    where.type = type;
-  }
-
   if (category) {
     where.category = category;
   }
 
-  if (isActive !== undefined) {
-    where.isActive = isActive === 'true';
+  if (isPublic !== undefined) {
+    where.isPublic = isPublic === 'true';
   }
 
   if (search) {
     where.OR = [
       { name: { contains: search, mode: 'insensitive' } },
-      { code: { contains: search, mode: 'insensitive' } },
       { description: { contains: search, mode: 'insensitive' } },
     ];
   }
@@ -74,7 +70,7 @@ async function handleList(req: VercelRequest, res: VercelResponse) {
           select: { id: true, name: true, email: true },
         },
         _count: {
-          select: { versions: true, promotions: true },
+          select: { versions: true },
         },
       },
       orderBy: { updatedAt: 'desc' },
@@ -86,22 +82,22 @@ async function handleList(req: VercelRequest, res: VercelResponse) {
 
   // Get summary stats
   const summaryStats = await prisma.promotionTemplate.groupBy({
-    by: ['type', 'isActive'],
-    _count: { id: true },
+    by: ['category', 'isPublic'],
+    _count: { _all: true },
   });
 
-  const byType: Record<string, number> = {};
-  let active = 0;
-  let inactive = 0;
+  const byCategory: Record<string, number> = {};
+  let publicCount = 0;
+  let privateCount = 0;
 
   summaryStats.forEach((s) => {
-    if (!byType[s.type]) byType[s.type] = 0;
-    byType[s.type] += s._count.id;
+    if (!byCategory[s.category]) byCategory[s.category] = 0;
+    byCategory[s.category] += s._count._all;
 
-    if (s.isActive) {
-      active += s._count.id;
+    if (s.isPublic) {
+      publicCount += s._count._all;
     } else {
-      inactive += s._count.id;
+      privateCount += s._count._all;
     }
   });
 
@@ -116,60 +112,59 @@ async function handleList(req: VercelRequest, res: VercelResponse) {
     },
     summary: {
       total,
-      active,
-      inactive,
-      byType,
+      public: publicCount,
+      private: privateCount,
+      byCategory,
     },
   });
 }
 
 async function handleCreate(req: VercelRequest, res: VercelResponse) {
+  const user = getUserFromRequest(req);
+  if (!user) return res.status(401).json({ error: 'Unauthorized' });
+
   const {
-    code,
     name,
     description,
-    type,
     category,
-    defaultDuration,
-    defaultBudget,
-    mechanics,
-    eligibility,
+    channels,
+    isPublic,
+    companyId,
+    templateData,
   } = req.body;
 
   // Validate required fields
-  if (!code || !name || !type) {
+  if (!name) {
     return res.status(400).json({
-      error: 'Missing required fields: code, name, type',
+      error: 'Missing required field: name',
     });
   }
 
-  // Check for duplicate code
-  const existing = await prisma.promotionTemplate.findUnique({
-    where: { code },
+  // Check for duplicate name within company
+  const existing = await prisma.promotionTemplate.findFirst({
+    where: { name, companyId: companyId || user.companyId },
   });
 
   if (existing) {
     return res.status(400).json({
-      error: `Template code '${code}' already exists`,
+      error: `Template name '${name}' already exists`,
     });
   }
 
   // Create template with initial version in transaction
-  const result = await prisma.$transaction(async (tx) => {
+  const result = await prisma.$transaction(async (tx: any) => {
     // Create template
     const template = await tx.promotionTemplate.create({
       data: {
-        code,
         name,
         description: description || null,
-        type,
-        category: category || null,
-        defaultDuration: defaultDuration ? parseInt(defaultDuration) : null,
-        defaultBudget: defaultBudget ? parseFloat(defaultBudget) : null,
-        mechanics: mechanics || {},
-        eligibility: eligibility || {},
-        isActive: true,
+        template: templateData || {},
+        category: category || 'CUSTOM',
+        channels: channels || [],
+        isPublic: isPublic || false,
         usageCount: 0,
+        companyId: companyId || user.companyId,
+        createdById: user.userId,
       },
       include: {
         createdBy: {
@@ -184,17 +179,15 @@ async function handleCreate(req: VercelRequest, res: VercelResponse) {
         templateId: template.id,
         version: 1,
         snapshot: {
-          code,
           name,
           description,
-          type,
           category,
-          defaultDuration,
-          defaultBudget,
-          mechanics,
-          eligibility,
+          channels,
+          isPublic,
+          templateData,
         },
-        changes: null,
+        changes: Prisma.JsonNull,
+        createdById: user.userId,
       },
     });
 

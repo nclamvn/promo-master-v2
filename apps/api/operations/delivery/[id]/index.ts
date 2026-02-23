@@ -51,8 +51,6 @@ async function handleGet(id: string, res: VercelResponse) {
           code: true,
           name: true,
           address: true,
-          phone: true,
-          email: true,
         },
       },
       promotion: {
@@ -69,21 +67,13 @@ async function handleGet(id: string, res: VercelResponse) {
           product: {
             select: {
               id: true,
-              code: true,
+              sku: true,
               name: true,
               price: true,
             },
           },
         },
-        orderBy: { createdAt: 'asc' },
       },
-      trackingInfo: {
-        include: {
-          user: { select: { id: true, name: true } },
-        },
-        orderBy: { timestamp: 'desc' },
-      },
-      createdBy: { select: { id: true, name: true, email: true } },
     },
   });
 
@@ -92,9 +82,10 @@ async function handleGet(id: string, res: VercelResponse) {
   }
 
   // Calculate totals
-  const totalItems = order.lines.reduce((sum, line) => sum + line.quantity, 0);
-  const totalDelivered = order.lines.reduce((sum, line) => sum + line.deliveredQty, 0);
-  const totalValue = order.lines.reduce((sum, line) => {
+  const orderWithLines = order as any;
+  const totalItems = orderWithLines.lines.reduce((sum: any, line: any) => sum + line.quantity, 0);
+  const totalDelivered = orderWithLines.lines.reduce((sum: any, line: any) => sum + line.deliveredQty, 0);
+  const totalValue = orderWithLines.lines.reduce((sum: any, line: any) => {
     const price = line.product?.price?.toNumber?.() || line.product?.price || 0;
     return sum + line.quantity * price;
   }, 0);
@@ -150,10 +141,9 @@ async function handleUpdate(id: string, req: VercelRequest, res: VercelResponse)
       promotion: { select: { id: true, code: true, name: true } },
       lines: {
         include: {
-          product: { select: { id: true, code: true, name: true } },
+          product: { select: { id: true, sku: true, name: true } },
         },
       },
-      createdBy: { select: { id: true, name: true } },
     },
   });
 
@@ -181,7 +171,7 @@ async function handleDelete(id: string, res: VercelResponse) {
 
   // Delete in transaction
   await prisma.$transaction([
-    prisma.deliveryTracking.deleteMany({ where: { deliveryOrderId: id } }),
+    (prisma as any).deliveryTracking.deleteMany({ where: { deliveryOrderId: id } }),
     prisma.deliveryLine.deleteMany({ where: { deliveryOrderId: id } }),
     prisma.deliveryOrder.delete({ where: { id } }),
   ]);

@@ -31,6 +31,7 @@ import {
 import { PromotionStatusBadge } from '@/components/promotions/PromotionStatusBadge';
 import { LoadingSpinner } from '@/components/shared/LoadingSpinner';
 import { useFund, useDeleteFund } from '@/hooks/useFunds';
+import { useToast } from '@/hooks/useToast';
 import { formatDate, safePercentageNumber } from '@/lib/utils';
 import { CurrencyDisplay } from '@/components/ui/currency-display';
 import type { Fund, Promotion, FundType } from '@/types';
@@ -101,6 +102,7 @@ export default function FundDetail() {
   // Fetch fund
   const { data: fund, isLoading } = useFund(id || '');
   const deleteFund = useDeleteFund();
+  const { toast } = useToast();
 
   // Use API data or demo data
   const fundData = fund || demoFund;
@@ -115,8 +117,13 @@ export default function FundDetail() {
     : 0;
 
   const handleDelete = async () => {
-    await deleteFund.mutateAsync(id!);
-    navigate('/funds');
+    try {
+      await deleteFund.mutateAsync(id!);
+      toast({ title: 'Thành công', description: 'Đã xóa quỹ' });
+      navigate('/funds');
+    } catch {
+      toast({ title: 'Lỗi', description: 'Không thể xóa quỹ', variant: 'destructive' });
+    }
   };
 
   const getUtilizationColor = (percent: number) => {

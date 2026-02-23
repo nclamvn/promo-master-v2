@@ -5,7 +5,7 @@
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { prisma } from '@/_lib/prisma';
+import prisma from '../../../_lib/prisma';
 import crypto from 'crypto';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -51,14 +51,14 @@ async function handleGet(req: VercelRequest, res: VercelResponse) {
   const sevenDaysLater = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
 
   const total = apiKeys.length;
-  const active = apiKeys.filter((k) => k.isActive).length;
+  const active = apiKeys.filter((k: any) => k.isActive).length;
   const expiringSoon = apiKeys.filter(
-    (k) => k.isActive && k.expiresAt && new Date(k.expiresAt) <= sevenDaysLater && new Date(k.expiresAt) > now
+    (k: any) => k.isActive && k.expiresAt && new Date(k.expiresAt) <= sevenDaysLater && new Date(k.expiresAt) > now
   ).length;
 
   return res.status(200).json({
     success: true,
-    data: apiKeys.map((k) => ({
+    data: apiKeys.map((k: any) => ({
       ...k,
       key: undefined, // Never expose the full key
     })),
@@ -123,26 +123,31 @@ async function handlePost(req: VercelRequest, res: VercelResponse) {
   const apiKey = await prisma.aPIKey.create({
     data: {
       name,
-      key: hashedKey,
-      keyPreview,
-      permissions,
+      keyHash: hashedKey,
+      keyPrefix: keyPreview,
+      scopes: permissions,
       expiresAt: expiresAt ? new Date(expiresAt) : null,
-      rateLimit: rateLimit || null,
+      rateLimitRequests: rateLimit || 1000,
       allowedIPs: allowedIPs || [],
-      isActive: true,
-      usageCount: 0,
+      status: 'ACTIVE',
+      totalRequests: 0,
       createdById: req.body.userId || 'system',
+      companyId: req.body.companyId || 'system',
     },
   });
 
   // Create audit log
-  await prisma.auditLog.create({
+  await prisma.immutableAuditLog.create({
     data: {
-      userId: req.body.userId || null,
-      action: 'create',
+      userId: req.body.userId || 'system',
+      action: 'CREATE',
       entityType: 'APIKey',
       entityId: apiKey.id,
-      newValue: { name, permissions },
+      description: `Created API key: ${name}`,
+      newValues: { name, permissions },
+      companyId: req.body.companyId || 'system',
+      sequenceNumber: Date.now(),
+      entryHash: hashedKey,
     },
   });
 

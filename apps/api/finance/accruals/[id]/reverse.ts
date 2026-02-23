@@ -59,35 +59,35 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(404).json({ error: 'Original GL journal not found' });
     }
 
-    if (originalJournal.reversedAt) {
+    if (originalJournal.status === 'REVERSED') {
       return res.status(400).json({ error: 'GL journal is already reversed' });
     }
 
     // Create reversal journal and update records in transaction
-    const result = await prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async (tx: any) => {
       // Create reversal GL Journal entry (swap debit/credit)
       const reversalJournal = await tx.gLJournal.create({
         data: {
-          entryNumber: generateEntryNumber(),
-          entryDate: new Date(),
+          journalNumber: generateEntryNumber(),
+          journalDate: new Date(),
           description: `REVERSAL: ${originalJournal.description}${reason ? ` - Reason: ${reason}` : ''}`,
-          debitAccount: originalJournal.creditAccount,  // Swap
-          creditAccount: originalJournal.debitAccount,  // Swap
-          amount: originalJournal.amount,
-          reference: `Reversal of ${originalJournal.entryNumber}`,
-          sourceType: 'ACCRUAL',
-          sourceId: accrual.id,
+          companyId: originalJournal.companyId,
+          fiscalPeriodId: originalJournal.fiscalPeriodId,
+          totalDebit: originalJournal.totalCredit,
+          totalCredit: originalJournal.totalDebit,
+          sourceRef: `Reversal of ${originalJournal.journalNumber}`,
+          source: 'REVERSAL',
           status: 'POSTED',
           postedAt: new Date(),
           postedById: user.userId,
-          reversalId: originalJournal.id,
+          createdById: user.userId,
         },
       });
 
-      // Update original GL journal
+      // Update original GL journal status
       await tx.gLJournal.update({
         where: { id: originalJournal.id },
-        data: { reversedAt: new Date() },
+        data: { status: 'REVERSED' },
       });
 
       // Update accrual status
@@ -114,7 +114,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         },
         reversalJournal: {
           ...result.reversalJournal,
-          amount: Number(result.reversalJournal.amount),
+          totalDebit: Number(result.reversalJournal.totalDebit),
         },
       },
       message: 'Accrual reversed successfully',

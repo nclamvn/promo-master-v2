@@ -4,7 +4,7 @@
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { prisma } from '@/_lib/prisma';
+import prisma from '../../../../_lib/prisma';
 import crypto from 'crypto';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -19,7 +19,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    const endpoint = await prisma.webhookEndpoint.findUnique({
+    const endpoint = await (prisma as any).webhookEndpoint.findUnique({
       where: { id },
     });
 
@@ -48,7 +48,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const deliveryResult = await deliverWebhook(endpoint, testPayload, signature);
 
     // Create delivery record
-    await prisma.webhookDelivery.create({
+    await (prisma as any).webhookDelivery.create({
       data: {
         endpointId: id,
         event: 'webhook.test',

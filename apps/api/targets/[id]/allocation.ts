@@ -1,38 +1,29 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node';
+import type { VercelResponse } from '@vercel/node';
 import prisma from '../../_lib/prisma';
-import { getUserFromRequest } from '../../_lib/auth';
+import { kamPlus, type AuthenticatedRequest } from '../../_lib/auth';
 
 /**
  * /targets/:id/allocation
  * GET - Get allocation tree for a target
  * POST - Create new allocation for this target
+ * Sprint 0+1: RBAC + Standard errors
  */
 
 function generateAllocationCode(targetCode: string, geoCode: string): string {
   return `TA-${targetCode}-${geoCode}`;
 }
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (req.method === 'OPTIONS') {
-    res.status(200).end();
-    return;
-  }
-
-  const user = getUserFromRequest(req);
-  if (!user) return res.status(401).json({ error: 'Unauthorized' });
-
+export default kamPlus(async (req: AuthenticatedRequest, res: VercelResponse) => {
   const { id: targetId } = req.query as { id: string };
-  if (!targetId) return res.status(400).json({ error: 'Missing target id' });
+  if (!targetId) return res.status(400).json({ success: false, error: { code: 'VALIDATION_ERROR', message: 'Missing target id' } });
 
   try {
-    // Verify target exists
     const target = await prisma.target.findUnique({ where: { id: targetId } });
     if (!target) {
-      return res.status(404).json({ error: 'Target not found' });
+      return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Target not found' } });
     }
 
     if (req.method === 'GET') {
-      // Get hierarchical allocation tree
       const rootAllocations = await prisma.targetAllocation.findMany({
         where: { targetId, parentId: null },
         orderBy: { createdAt: 'asc' },
@@ -63,19 +54,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         },
       });
 
-      // Calculate summary
-      const allAllocations = await prisma.targetAllocation.findMany({
-        where: { targetId },
-      });
-
-      const totalAllocated = allAllocations.reduce(
-        (sum, a) => sum + Number(a.targetValue), 0
-      );
-      const totalAchieved = allAllocations.reduce(
-        (sum, a) => sum + Number(a.achievedValue), 0
-      );
+      const allAllocations = await prisma.targetAllocation.findMany({ where: { targetId } });
+      const totalAllocated = allAllocations.reduce((sum, a) => sum + Number(a.targetValue), 0);
+      const totalAchieved = allAllocations.reduce((sum, a) => sum + Number(a.achievedValue), 0);
 
       return res.status(200).json({
+        success: true,
         data: rootAllocations,
         summary: {
           totalTarget: Number(target.totalTarget),
@@ -94,73 +78,65 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
       if (!geographicUnitId || targetValue === undefined) {
         return res.status(400).json({
-          error: 'Missing required fields: geographicUnitId, targetValue',
+          success: false,
+          error: { code: 'VALIDATION_ERROR', message: 'Missing required fields: geographicUnitId, targetValue' },
         });
       }
 
-      // Validate geographic unit
-      const geoUnit = await prisma.geographicUnit.findUnique({
-        where: { id: geographicUnitId },
-      });
+      const geoUnit = await prisma.geographicUnit.findUnique({ where: { id: geographicUnitId } });
       if (!geoUnit) {
-        return res.status(400).json({ error: 'Geographic unit not found' });
+        return res.status(400).json({ success: false, error: { code: 'NOT_FOUND', message: 'Geographic unit not found' } });
       }
 
-      // Check for existing allocation
       const existing = await prisma.targetAllocation.findUnique({
         where: { targetId_geographicUnitId: { targetId, geographicUnitId } },
       });
       if (existing) {
-        return res.status(400).json({
-          error: 'Allocation already exists for this geographic unit',
+        return res.status(409).json({
+          success: false,
+          error: { code: 'DUPLICATE_ENTRY', message: 'Allocation already exists for this geographic unit' },
         });
       }
 
-      // Validate parent allocation if provided
       let parentAllocation = null;
       if (parentId) {
-        parentAllocation = await prisma.targetAllocation.findUnique({
-          where: { id: parentId },
-        });
+        parentAllocation = await prisma.targetAllocation.findUnique({ where: { id: parentId } });
         if (!parentAllocation) {
-          return res.status(400).json({ error: 'Parent allocation not found' });
+          return res.status(400).json({ success: false, error: { code: 'NOT_FOUND', message: 'Parent allocation not found' } });
         }
         if (parentAllocation.targetId !== targetId) {
-          return res.status(400).json({
-            error: 'Parent allocation belongs to different target',
-          });
+          return res.status(400).json({ success: false, error: { code: 'VALIDATION_ERROR', message: 'Parent allocation belongs to different target' } });
         }
 
-        // Check if value exceeds parent's remaining
-        const parentValue = Number(parentAllocation.targetValue);
-        const childrenTarget = Number(parentAllocation.childrenTarget);
-        const parentRemaining = parentValue - childrenTarget;
-
+        const parentRemaining = Number(parentAllocation.targetValue) - Number(parentAllocation.childrenTarget);
         if (Number(targetValue) > parentRemaining) {
-          return res.status(400).json({
-            error: `Target value (${targetValue}) exceeds parent remaining (${parentRemaining})`,
+          return res.status(422).json({
+            success: false,
+            error: {
+              code: 'INSUFFICIENT_FUND',
+              message: `Target value (${targetValue}) exceeds parent remaining (${parentRemaining})`,
+            },
           });
         }
       } else {
-        // Root allocation - check against target total
         const currentRootTotal = await prisma.targetAllocation.aggregate({
           where: { targetId, parentId: null },
           _sum: { targetValue: true },
         });
         const totalRootTarget = Number(currentRootTotal._sum.targetValue || 0);
-        const totalTarget = Number(target.totalTarget);
-
-        if (totalRootTarget + Number(targetValue) > totalTarget) {
-          return res.status(400).json({
-            error: `Total root allocations (${totalRootTarget + Number(targetValue)}) exceeds target total (${totalTarget})`,
+        if (totalRootTarget + Number(targetValue) > Number(target.totalTarget)) {
+          return res.status(422).json({
+            success: false,
+            error: {
+              code: 'INSUFFICIENT_FUND',
+              message: `Total root allocations exceed target total`,
+            },
           });
         }
       }
 
-      // Generate code
       const code = generateAllocationCode(target.code, geoUnit.code);
 
-      // Create allocation
       const allocation = await prisma.targetAllocation.create({
         data: {
           code,
@@ -170,7 +146,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           targetValue: Number(targetValue),
           metric: metric || target.metric,
           notes: notes || null,
-          createdBy: user.userId,
+          createdBy: req.auth.userId,
         },
         include: {
           target: { select: { id: true, code: true, name: true, metric: true } },
@@ -179,21 +155,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         },
       });
 
-      // Update parent's childrenTarget
       if (parentId && parentAllocation) {
-        const newChildrenTarget = Number(parentAllocation.childrenTarget) + Number(targetValue);
         await prisma.targetAllocation.update({
           where: { id: parentId },
-          data: { childrenTarget: newChildrenTarget },
+          data: { childrenTarget: Number(parentAllocation.childrenTarget) + Number(targetValue) },
         });
       }
 
-      return res.status(201).json({ data: allocation });
+      return res.status(201).json({ success: true, data: allocation });
     }
 
-    return res.status(405).json({ error: 'Method not allowed' });
+    return res.status(405).json({ success: false, error: { code: 'METHOD_NOT_ALLOWED', message: 'Method not allowed' } });
   } catch (error) {
     console.error('Target allocation error:', error);
-    return res.status(500).json({ error: 'Internal server error' });
+    return res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Internal server error' } });
   }
-}
+});

@@ -6,7 +6,7 @@
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { prisma } from '@/_lib/prisma';
+import prisma from '../../../../_lib/prisma';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   const { id } = req.query;
@@ -33,7 +33,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 }
 
 async function handleGet(id: string, res: VercelResponse) {
-  const connection = await prisma.dMSConnection.findUnique({
+  const connection = await (prisma as any).dMSConnection.findUnique({
     where: { id },
     include: {
       distributor: {
@@ -78,7 +78,7 @@ async function handleGet(id: string, res: VercelResponse) {
 async function handlePut(id: string, req: VercelRequest, res: VercelResponse) {
   const { name, config, syncSchedule, status } = req.body;
 
-  const connection = await prisma.dMSConnection.findUnique({
+  const connection = await (prisma as any).dMSConnection.findUnique({
     where: { id },
   });
 
@@ -89,7 +89,7 @@ async function handlePut(id: string, req: VercelRequest, res: VercelResponse) {
     });
   }
 
-  const updatedConnection = await prisma.dMSConnection.update({
+  const updatedConnection = await (prisma as any).dMSConnection.update({
     where: { id },
     data: {
       ...(name && { name }),
@@ -112,7 +112,7 @@ async function handlePut(id: string, req: VercelRequest, res: VercelResponse) {
 }
 
 async function handleDelete(id: string, res: VercelResponse) {
-  const connection = await prisma.dMSConnection.findUnique({
+  const connection = await (prisma as any).dMSConnection.findUnique({
     where: { id },
   });
 
@@ -123,7 +123,7 @@ async function handleDelete(id: string, res: VercelResponse) {
     });
   }
 
-  await prisma.dMSConnection.delete({ where: { id } });
+  await (prisma as any).dMSConnection.delete({ where: { id } });
 
   return res.status(200).json({
     success: true,

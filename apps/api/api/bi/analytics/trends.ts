@@ -12,7 +12,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   const { metric = 'promotions' } = req.query;
 
-  let trends;
+  let trends: { period: string; value: number; change: number }[];
 
   switch (metric) {
     case 'promotions':

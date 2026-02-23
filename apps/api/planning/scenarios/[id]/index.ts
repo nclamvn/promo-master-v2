@@ -39,10 +39,10 @@ async function handleGet(id: string, res: VercelResponse) {
       baseline: {
         select: {
           id: true,
-          code: true,
-          name: true,
-          baselineValue: true,
-          baselineType: true,
+          category: true,
+          brand: true,
+          baselineVolume: true,
+          baselineRevenue: true,
         },
       },
       createdBy: {
@@ -110,7 +110,7 @@ async function handleUpdate(id: string, req: VercelRequest, res: VercelResponse)
     data: updateData,
     include: {
       baseline: {
-        select: { id: true, code: true, name: true },
+        select: { id: true, category: true, brand: true },
       },
       createdBy: {
         select: { id: true, name: true, email: true },

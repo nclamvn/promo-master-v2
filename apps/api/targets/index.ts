@@ -1,24 +1,15 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node';
-import prisma from '@/_lib/prisma';
-import { getUserFromRequest } from '../_lib/auth';
+import type { VercelResponse } from '@vercel/node';
+import prisma from '../_lib/prisma';
+import { kamPlus, parsePagination, type AuthenticatedRequest } from '../_lib/auth';
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (req.method === 'OPTIONS') {
-    res.status(200).end();
-    return;
-  }
-
-  const user = getUserFromRequest(req);
-  if (!user) return res.status(401).json({ error: 'Unauthorized' });
-
+// Sprint 0+1: RBAC + Pagination cap + Standard errors
+export default kamPlus(async (req: AuthenticatedRequest, res: VercelResponse) => {
   try {
     if (req.method === 'GET') {
-      const { page = '1', limit = '20', year, quarter, month, status, metric, search } = req.query as Record<string, string>;
-      const skip = (parseInt(page) - 1) * parseInt(limit);
-      const take = parseInt(limit);
+      const { year, quarter, month, status, metric, search } = req.query as Record<string, string>;
+      const { skip, limit, page } = parsePagination(req.query as Record<string, unknown>);
 
       const where: Record<string, unknown> = {};
-
       if (year) where.year = parseInt(year);
       if (quarter) where.quarter = parseInt(quarter);
       if (month) where.month = parseInt(month);
@@ -35,26 +26,24 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         prisma.target.findMany({
           where,
           skip,
-          take,
+          take: limit,
           orderBy: [{ year: 'desc' }, { quarter: 'desc' }, { month: 'desc' }],
-          include: {
-            _count: { select: { allocations: true } },
-          },
+          include: { _count: { select: { allocations: true } } },
         }),
         prisma.target.count({ where }),
       ]);
 
-      // Calculate progress for each target
       const targetsWithProgress = targets.map(target => ({
         ...target,
-        progressPercent: parseFloat(target.totalTarget.toString()) > 0
-          ? (parseFloat(target.totalAchieved.toString()) / parseFloat(target.totalTarget.toString())) * 100
+        progressPercent: Number(target.totalTarget) > 0
+          ? (Number(target.totalAchieved) / Number(target.totalTarget)) * 100
           : 0,
       }));
 
       return res.status(200).json({
+        success: true,
         data: targetsWithProgress,
-        pagination: { page: parseInt(page), limit: take, total, totalPages: Math.ceil(total / take) },
+        pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
       });
     }
 
@@ -62,19 +51,26 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const { code, name, description, year, quarter, month, totalTarget, metric } = req.body;
 
       if (!code || !name || !year || totalTarget === undefined) {
-        return res.status(400).json({ error: 'Thiếu trường bắt buộc: code, name, year, totalTarget' });
+        return res.status(400).json({
+          success: false,
+          error: { code: 'VALIDATION_ERROR', message: 'Missing required fields: code, name, year, totalTarget' },
+        });
       }
 
-      // Check for duplicate code
       const existing = await prisma.target.findUnique({ where: { code } });
       if (existing) {
-        return res.status(400).json({ error: 'Mã mục tiêu đã tồn tại' });
+        return res.status(409).json({
+          success: false,
+          error: { code: 'DUPLICATE_ENTRY', message: 'Target code already exists' },
+        });
       }
 
-      // Validate metric
       const validMetrics = ['CASES', 'VOLUME_LITERS', 'REVENUE_VND', 'UNITS'];
       if (metric && !validMetrics.includes(metric)) {
-        return res.status(400).json({ error: 'Đơn vị đo không hợp lệ' });
+        return res.status(400).json({
+          success: false,
+          error: { code: 'VALIDATION_ERROR', message: 'Invalid metric type' },
+        });
       }
 
       const target = await prisma.target.create({
@@ -85,18 +81,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           year: parseInt(year),
           quarter: quarter ? parseInt(quarter) : null,
           month: month ? parseInt(month) : null,
-          totalTarget: parseFloat(totalTarget),
+          totalTarget: Number(totalTarget),
           metric: metric || 'CASES',
-          createdBy: user.userId,
+          createdBy: req.auth.userId,
         },
       });
 
-      return res.status(201).json({ data: target });
+      return res.status(201).json({ success: true, data: target });
     }
 
-    return res.status(405).json({ error: 'Method not allowed' });
+    return res.status(405).json({ success: false, error: { code: 'METHOD_NOT_ALLOWED', message: 'Method not allowed' } });
   } catch (error) {
     console.error('Targets error:', error);
-    return res.status(500).json({ error: 'Lỗi hệ thống' });
+    return res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Internal server error' } });
   }
-}
+});

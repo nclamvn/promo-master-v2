@@ -4,7 +4,7 @@
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { prisma } from '@/_lib/prisma';
+import prisma from '../../../../_lib/prisma';
 import crypto from 'crypto';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -24,7 +24,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    const delivery = await prisma.webhookDelivery.findFirst({
+    const delivery = await (prisma as any).webhookDelivery.findFirst({
       where: {
         id: deliveryId,
         endpointId: id,
@@ -64,7 +64,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const result = await retryWebhookDelivery(delivery.endpoint, delivery.payload, signature);
 
     // Update delivery record
-    await prisma.webhookDelivery.update({
+    await (prisma as any).webhookDelivery.update({
       where: { id: deliveryId },
       data: {
         status: result.success ? 'DELIVERED' : 'FAILED',

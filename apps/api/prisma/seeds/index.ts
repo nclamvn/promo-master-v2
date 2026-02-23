@@ -3,6 +3,7 @@ import { seedUsers } from './users';
 import { seedGeographicUnits } from './geographic-units';
 import { seedDemoData } from './demo-data';
 import { seedPepsiData } from './seed-pepsi';
+import { seedPhase6Claims } from './phase6-claims';
 
 const prisma = new PrismaClient();
 
@@ -22,7 +23,19 @@ async function main() {
   console.log('');
 
   // Seed Pepsi V3 Data (products, stores, contracts, suggestions)
-  await seedPepsiData();
+  try {
+    await seedPepsiData();
+  } catch (e) {
+    console.warn('⚠️  Pepsi seed skipped (missing migration):', (e as Error).message?.slice(0, 80));
+  }
+  console.log('');
+
+  // Phase 6: Claims & Settlement seed data
+  try {
+    await seedPhase6Claims();
+  } catch (e) {
+    console.warn('⚠️  Phase 6 seed skipped:', (e as Error).message?.slice(0, 80));
+  }
   console.log('');
 
   console.log('🎉 Database seed completed!');

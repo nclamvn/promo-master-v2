@@ -49,14 +49,14 @@ export default function BudgetNew() {
         notes: formData.notes || undefined,
       });
       toast({
-        title: 'Success',
-        description: 'Budget created successfully',
+        title: 'Thành công',
+        description: 'Đã tạo ngân sách mới',
       });
       navigate('/budgets');
     } catch {
       toast({
-        title: 'Error',
-        description: 'Failed to create budget',
+        title: 'Lỗi',
+        description: 'Không thể tạo ngân sách',
         variant: 'destructive',
       });
     }
@@ -72,21 +72,21 @@ export default function BudgetNew() {
           </Link>
         </Button>
         <div>
-          <h1 className="text-2xl font-bold">New Budget</h1>
-          <p className="text-muted-foreground">Create a new annual budget</p>
+          <h1 className="text-2xl font-bold">Tạo ngân sách mới</h1>
+          <p className="text-muted-foreground">Tạo ngân sách theo năm</p>
         </div>
       </div>
 
       {/* Form */}
       <Card className="max-w-2xl">
         <CardHeader>
-          <CardTitle>Budget Details</CardTitle>
+          <CardTitle>Thông tin ngân sách</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="code">Budget Code *</Label>
+                <Label htmlFor="code">Mã ngân sách *</Label>
                 <Input
                   id="code"
                   value={formData.code}
@@ -96,7 +96,7 @@ export default function BudgetNew() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="year">Year *</Label>
+                <Label htmlFor="year">Năm *</Label>
                 <Select
                   value={String(formData.year)}
                   onValueChange={(value) => setFormData({ ...formData, year: Number(value) })}
@@ -115,7 +115,7 @@ export default function BudgetNew() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="name">Budget Name *</Label>
+              <Label htmlFor="name">Tên ngân sách *</Label>
               <Input
                 id="name"
                 value={formData.name}
@@ -127,7 +127,7 @@ export default function BudgetNew() {
 
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="totalAmount">Total Amount (VND) *</Label>
+                <Label htmlFor="totalAmount">Tổng ngân sách (VND) *</Label>
                 <Input
                   id="totalAmount"
                   type="number"
@@ -138,13 +138,13 @@ export default function BudgetNew() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="category">Category *</Label>
+                <Label htmlFor="category">Danh mục *</Label>
                 <Select
                   value={formData.category}
                   onValueChange={(value) => setFormData({ ...formData, category: value })}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select category" />
+                    <SelectValue placeholder="Chọn danh mục" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="Trade">Trade</SelectItem>
@@ -157,7 +157,7 @@ export default function BudgetNew() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="department">Department</Label>
+              <Label htmlFor="department">Phòng ban</Label>
               <Input
                 id="department"
                 value={formData.department}
@@ -167,22 +167,22 @@ export default function BudgetNew() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="notes">Notes</Label>
+              <Label htmlFor="notes">Ghi chú</Label>
               <Textarea
                 id="notes"
                 value={formData.notes}
                 onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                placeholder="Additional notes..."
+                placeholder="Ghi chú thêm..."
                 rows={3}
               />
             </div>
 
             <div className="flex gap-2 pt-4">
               <Button type="submit" disabled={createBudget.isPending}>
-                {createBudget.isPending ? 'Creating...' : 'Create Budget'}
+                {createBudget.isPending ? 'Đang tạo...' : 'Tạo ngân sách'}
               </Button>
               <Button type="button" variant="outline" asChild>
-                <Link to="/budgets">Cancel</Link>
+                <Link to="/budgets">Hủy</Link>
               </Button>
             </div>
           </form>

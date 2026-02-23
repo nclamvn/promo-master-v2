@@ -124,12 +124,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
     }
 
+    // Find or create fiscal period for this month
+    let fiscalPeriod = await prisma.fiscalPeriod.findFirst({
+      where: {
+        year,
+        month,
+      },
+    });
+
+    const fiscalPeriodId = fiscalPeriod?.id || '';
+
     // Check for existing accruals in this period
     const existingAccruals = await prisma.accrualEntry.findMany({
       where: {
-        period,
+        fiscalPeriodId,
         promotionId: { in: entries.map(e => e.promotionId) },
-        status: { in: ['PENDING', 'CALCULATED'] },
+        status: 'PENDING',
       },
     });
 
@@ -143,10 +153,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // Save accruals
     const created = await prisma.accrualEntry.createMany({
       data: entries.map(e => ({
+        companyId: (e.promotion as any).companyId || '',
         promotionId: e.promotionId,
-        period: e.period,
+        fiscalPeriodId,
+        entryType: 'MONTHLY_ACCRUAL' as const,
+        entryDate: new Date(),
         amount: new Decimal(e.amount),
-        status: 'CALCULATED',
+        cumulativeAmount: new Decimal(e.amount),
+        status: 'PENDING' as const,
         createdById: user.userId,
       })),
     });
@@ -154,9 +168,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // Fetch created entries with relations
     const savedEntries = await prisma.accrualEntry.findMany({
       where: {
-        period,
+        fiscalPeriodId,
         promotionId: { in: entries.map(e => e.promotionId) },
-        status: 'CALCULATED',
+        status: 'PENDING',
       },
       include: {
         promotion: { select: { id: true, code: true, name: true, budget: true } },

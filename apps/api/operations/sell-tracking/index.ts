@@ -68,7 +68,7 @@ async function handleList(req: VercelRequest, res: VercelResponse) {
       { customer: { name: { contains: search, mode: 'insensitive' } } },
       { customer: { code: { contains: search, mode: 'insensitive' } } },
       { product: { name: { contains: search, mode: 'insensitive' } } },
-      { product: { code: { contains: search, mode: 'insensitive' } } },
+      { product: { sku: { contains: search, mode: 'insensitive' } } },
       { product: { sku: { contains: search, mode: 'insensitive' } } },
     ];
   }
@@ -85,7 +85,7 @@ async function handleList(req: VercelRequest, res: VercelResponse) {
       orderBy,
       include: {
         customer: { select: { id: true, code: true, name: true } },
-        product: { select: { id: true, code: true, name: true, sku: true } },
+        product: { select: { id: true, sku: true, name: true } },
       },
     }),
     prisma.sellTracking.count({ where }),
@@ -203,7 +203,7 @@ async function handleCreate(req: VercelRequest, res: VercelResponse) {
     },
     include: {
       customer: { select: { id: true, code: true, name: true } },
-      product: { select: { id: true, code: true, name: true, sku: true } },
+      product: { select: { id: true, sku: true, name: true } },
     },
   });
 

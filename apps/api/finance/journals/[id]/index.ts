@@ -6,7 +6,7 @@
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { prisma } from '@/_lib/prisma';
+import prisma from '../../../_lib/prisma';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   const { id } = req.query;
@@ -36,26 +36,20 @@ async function handleGet(id: string, res: VercelResponse) {
   const journal = await prisma.gLJournal.findUnique({
     where: { id },
     include: {
-      customer: {
-        select: { id: true, code: true, name: true, channel: true },
-      },
-      promotion: {
-        select: { id: true, code: true, name: true },
-      },
-      accrual: {
-        select: { id: true, code: true, amount: true, status: true },
-      },
-      claim: {
-        select: { id: true, code: true, claimedAmount: true, status: true },
-      },
       lines: {
         orderBy: { lineNumber: 'asc' },
       },
-      reversedBy: {
-        select: { id: true, code: true, journalDate: true },
+      accrualEntries: {
+        select: { id: true, amount: true, status: true },
       },
-      reversalOf: {
-        select: { id: true, code: true, journalDate: true },
+      fiscalPeriod: {
+        select: { id: true, name: true, year: true, month: true },
+      },
+      postedBy: {
+        select: { id: true, name: true },
+      },
+      createdBy: {
+        select: { id: true, name: true },
       },
     },
   });
@@ -83,7 +77,7 @@ async function handleUpdate(id: string, req: VercelRequest, res: VercelResponse)
     });
   }
 
-  const { journalDate, description, reference, lines } = req.body;
+  const { journalDate, description, lines } = req.body;
 
   // If lines are provided, validate balance
   let totalDebit = 0;
@@ -91,8 +85,8 @@ async function handleUpdate(id: string, req: VercelRequest, res: VercelResponse)
 
   if (lines && lines.length > 0) {
     for (const line of lines) {
-      totalDebit += parseFloat(line.debit || 0);
-      totalCredit += parseFloat(line.credit || 0);
+      totalDebit += parseFloat(line.debitAmount || 0);
+      totalCredit += parseFloat(line.creditAmount || 0);
     }
 
     if (Math.abs(totalDebit - totalCredit) > 0.01) {
@@ -103,17 +97,15 @@ async function handleUpdate(id: string, req: VercelRequest, res: VercelResponse)
   }
 
   // Update journal with transaction
-  const updated = await prisma.$transaction(async (tx) => {
+  const updated = await prisma.$transaction(async (tx: any) => {
     // Update journal header
     const journalUpdate = await tx.gLJournal.update({
       where: { id },
       data: {
         journalDate: journalDate ? new Date(journalDate) : undefined,
-        description,
-        reference,
+        description: description || undefined,
         totalDebit: lines ? totalDebit : undefined,
         totalCredit: lines ? totalCredit : undefined,
-        updatedAt: new Date(),
       },
     });
 
@@ -126,11 +118,10 @@ async function handleUpdate(id: string, req: VercelRequest, res: VercelResponse)
           lineNumber: index + 1,
           accountCode: line.accountCode,
           accountName: line.accountName,
-          debit: parseFloat(line.debit || 0),
-          credit: parseFloat(line.credit || 0),
+          debitAmount: parseFloat(line.debitAmount || 0),
+          creditAmount: parseFloat(line.creditAmount || 0),
           description: line.description,
           costCenter: line.costCenter,
-          department: line.department,
         })),
       });
     }
@@ -139,8 +130,6 @@ async function handleUpdate(id: string, req: VercelRequest, res: VercelResponse)
       where: { id },
       include: {
         lines: { orderBy: { lineNumber: 'asc' } },
-        customer: { select: { id: true, code: true, name: true } },
-        promotion: { select: { id: true, code: true, name: true } },
       },
     });
   });

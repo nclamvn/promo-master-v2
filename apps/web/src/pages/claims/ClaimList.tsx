@@ -1,5 +1,5 @@
 /**
- * Claim List Page - Full Implementation
+ * Claim List Page - Phase 6 Enhanced
  */
 
 import { useState, useMemo } from 'react';
@@ -31,163 +31,74 @@ import { ClaimStatusBadge } from '@/components/claims/ClaimStatusBadge';
 import { useClaims, useDeleteClaim } from '@/hooks/useClaims';
 import { formatDate } from '@/lib/utils';
 import { CurrencyDisplay } from '@/components/ui/currency-display';
-import type { Claim, ClaimStatus } from '@/types';
+import type { ClaimStatus } from '@/types';
 
 type ViewMode = 'table' | 'grid';
 
-// Demo data when API not connected
-const demoClaims: Claim[] = [
-  {
-    id: '1',
-    code: 'CLM-2026-001',
-    status: 'SUBMITTED',
-    claimDate: '2026-01-15',
-    claimAmount: 50000000,
-    description: 'Q1 rebate claim for January sales',
-    promotion: {
-      id: '1',
-      code: 'PROMO-2026-001',
-      name: 'Summer Sale Campaign',
-      status: 'ACTIVE',
-      startDate: '2026-01-01',
-      endDate: '2026-03-31',
-      budget: 500000000,
-      actualSpend: 320000000,
-      promotionType: 'TRADE_PROMOTION',
-      customer: { id: '1', code: 'CUST-001', name: 'Customer A', channel: 'MODERN_TRADE', status: 'ACTIVE', createdAt: '', updatedAt: '' },
-      fund: { id: '1', code: 'FUND-001', name: 'Trade Fund Q1', fundType: 'TRADE_FUND', totalBudget: 1000000000, allocatedBudget: 500000000, utilizedBudget: 320000000, availableBudget: 180000000, startDate: '2026-01-01', endDate: '2026-12-31', createdAt: '', updatedAt: '' },
-      createdBy: { id: '1', email: 'user@example.com', name: 'John Doe', role: 'MANAGER', company: { id: '1', name: 'Company' }, createdAt: '', updatedAt: '' },
-      createdAt: '2025-12-01',
-      updatedAt: '2025-12-15',
-    },
-    createdBy: { id: '1', email: 'user@example.com', name: 'John Doe', role: 'MANAGER', company: { id: '1', name: 'Company' }, createdAt: '', updatedAt: '' },
-    createdAt: '2026-01-15',
-    updatedAt: '2026-01-15',
-  },
-  {
-    id: '2',
-    code: 'CLM-2026-002',
-    status: 'APPROVED',
-    claimDate: '2026-01-10',
-    claimAmount: 75000000,
-    approvedAmount: 72000000,
-    description: 'December trade deal settlement',
-    promotion: {
-      id: '2',
-      code: 'PROMO-2026-002',
-      name: 'Q1 Trade Deal',
-      status: 'ACTIVE',
-      startDate: '2026-02-01',
-      endDate: '2026-04-30',
-      budget: 300000000,
-      actualSpend: 0,
-      promotionType: 'TRADE_PROMOTION',
-      customer: { id: '2', code: 'CUST-002', name: 'Customer B', channel: 'KEY_ACCOUNT', status: 'ACTIVE', createdAt: '', updatedAt: '' },
-      fund: { id: '1', code: 'FUND-001', name: 'Trade Fund Q1', fundType: 'TRADE_FUND', totalBudget: 1000000000, allocatedBudget: 500000000, utilizedBudget: 320000000, availableBudget: 180000000, startDate: '2026-01-01', endDate: '2026-12-31', createdAt: '', updatedAt: '' },
-      createdBy: { id: '1', email: 'user@example.com', name: 'John Doe', role: 'MANAGER', company: { id: '1', name: 'Company' }, createdAt: '', updatedAt: '' },
-      createdAt: '2025-12-10',
-      updatedAt: '2025-12-20',
-    },
-    approvedBy: { id: '2', email: 'manager@example.com', name: 'Jane Smith', role: 'ADMIN', company: { id: '1', name: 'Company' }, createdAt: '', updatedAt: '' },
-    createdBy: { id: '1', email: 'user@example.com', name: 'John Doe', role: 'MANAGER', company: { id: '1', name: 'Company' }, createdAt: '', updatedAt: '' },
-    createdAt: '2026-01-10',
-    updatedAt: '2026-01-12',
-  },
-  {
-    id: '3',
-    code: 'CLM-2026-003',
-    status: 'PAID',
-    claimDate: '2025-12-20',
-    claimAmount: 30000000,
-    approvedAmount: 30000000,
-    paidAmount: 30000000,
-    paidAt: '2026-01-05',
-    description: 'Flash sale promotional spend',
-    promotion: {
-      id: '4',
-      code: 'PROMO-2026-004',
-      name: 'Flash Sale Weekend',
-      status: 'COMPLETED',
-      startDate: '2025-12-01',
-      endDate: '2025-12-31',
-      budget: 200000000,
-      actualSpend: 195000000,
-      promotionType: 'TRADE_PROMOTION',
-      customer: { id: '1', code: 'CUST-001', name: 'Customer A', channel: 'MODERN_TRADE', status: 'ACTIVE', createdAt: '', updatedAt: '' },
-      fund: { id: '1', code: 'FUND-001', name: 'Trade Fund Q1', fundType: 'TRADE_FUND', totalBudget: 1000000000, allocatedBudget: 500000000, utilizedBudget: 320000000, availableBudget: 180000000, startDate: '2026-01-01', endDate: '2026-12-31', createdAt: '', updatedAt: '' },
-      createdBy: { id: '1', email: 'user@example.com', name: 'John Doe', role: 'MANAGER', company: { id: '1', name: 'Company' }, createdAt: '', updatedAt: '' },
-      createdAt: '2025-11-15',
-      updatedAt: '2025-12-31',
-    },
-    createdBy: { id: '1', email: 'user@example.com', name: 'John Doe', role: 'MANAGER', company: { id: '1', name: 'Company' }, createdAt: '', updatedAt: '' },
-    createdAt: '2025-12-20',
-    updatedAt: '2026-01-05',
-  },
-  {
-    id: '4',
-    code: 'CLM-2026-004',
-    status: 'UNDER_REVIEW',
-    claimDate: '2026-01-18',
-    claimAmount: 120000000,
-    description: 'Large display promotion settlement',
-    promotion: {
-      id: '1',
-      code: 'PROMO-2026-001',
-      name: 'Summer Sale Campaign',
-      status: 'ACTIVE',
-      startDate: '2026-01-01',
-      endDate: '2026-03-31',
-      budget: 500000000,
-      actualSpend: 320000000,
-      promotionType: 'TRADE_PROMOTION',
-      customer: { id: '1', code: 'CUST-001', name: 'Customer A', channel: 'MODERN_TRADE', status: 'ACTIVE', createdAt: '', updatedAt: '' },
-      fund: { id: '1', code: 'FUND-001', name: 'Trade Fund Q1', fundType: 'TRADE_FUND', totalBudget: 1000000000, allocatedBudget: 500000000, utilizedBudget: 320000000, availableBudget: 180000000, startDate: '2026-01-01', endDate: '2026-12-31', createdAt: '', updatedAt: '' },
-      createdBy: { id: '1', email: 'user@example.com', name: 'John Doe', role: 'MANAGER', company: { id: '1', name: 'Company' }, createdAt: '', updatedAt: '' },
-      createdAt: '2025-12-01',
-      updatedAt: '2025-12-15',
-    },
-    createdBy: { id: '1', email: 'user@example.com', name: 'John Doe', role: 'MANAGER', company: { id: '1', name: 'Company' }, createdAt: '', updatedAt: '' },
-    createdAt: '2026-01-18',
-    updatedAt: '2026-01-20',
-  },
-  {
-    id: '5',
-    code: 'CLM-2026-005',
-    status: 'REJECTED',
-    claimDate: '2026-01-08',
-    claimAmount: 45000000,
-    description: 'Invalid claim - missing documentation',
-    promotion: {
-      id: '3',
-      code: 'PROMO-2026-003',
-      name: 'New Product Launch',
-      status: 'DRAFT',
-      startDate: '2026-03-01',
-      endDate: '2026-05-31',
-      budget: 800000000,
-      actualSpend: 0,
-      promotionType: 'CONSUMER_PROMOTION',
-      customer: { id: '3', code: 'CUST-003', name: 'Customer C', channel: 'GENERAL_TRADE', status: 'ACTIVE', createdAt: '', updatedAt: '' },
-      fund: { id: '2', code: 'FUND-002', name: 'Marketing Fund', fundType: 'MARKETING_FUND', totalBudget: 2000000000, allocatedBudget: 800000000, utilizedBudget: 0, availableBudget: 1200000000, startDate: '2026-01-01', endDate: '2026-12-31', createdAt: '', updatedAt: '' },
-      createdBy: { id: '1', email: 'user@example.com', name: 'John Doe', role: 'MANAGER', company: { id: '1', name: 'Company' }, createdAt: '', updatedAt: '' },
-      createdAt: '2025-12-15',
-      updatedAt: '2025-12-22',
-    },
-    createdBy: { id: '1', email: 'user@example.com', name: 'John Doe', role: 'MANAGER', company: { id: '1', name: 'Company' }, createdAt: '', updatedAt: '' },
-    createdAt: '2026-01-08',
-    updatedAt: '2026-01-10',
-  },
+const statusOptions: { value: string; label: string }[] = [
+  { value: 'all', label: 'Tất cả trạng thái' },
+  { value: 'DRAFT', label: 'Nháp' },
+  { value: 'SUBMITTED', label: 'Đã gửi' },
+  { value: 'VALIDATING', label: 'Đang xác thực' },
+  { value: 'VALIDATION_FAILED', label: 'Lỗi xác thực' },
+  { value: 'PENDING_MATCH', label: 'Chờ đối soát' },
+  { value: 'MATCHED', label: 'Đã đối soát' },
+  { value: 'UNDER_REVIEW', label: 'Đang xem xét' },
+  { value: 'APPROVED', label: 'Đã duyệt' },
+  { value: 'PARTIALLY_APPROVED', label: 'Duyệt 1 phần' },
+  { value: 'REJECTED', label: 'Từ chối' },
+  { value: 'SETTLED', label: 'Đã thanh toán' },
+  { value: 'PARTIALLY_SETTLED', label: 'TT 1 phần' },
+  { value: 'CANCELLED', label: 'Đã hủy' },
 ];
 
-const statusOptions: { value: ClaimStatus | 'all'; label: string }[] = [
-  { value: 'all', label: 'All Status' },
-  { value: 'DRAFT', label: 'Draft' },
-  { value: 'SUBMITTED', label: 'Submitted' },
-  { value: 'UNDER_REVIEW', label: 'Under Review' },
-  { value: 'APPROVED', label: 'Approved' },
-  { value: 'REJECTED', label: 'Rejected' },
-  { value: 'PAID', label: 'Paid' },
-  { value: 'CANCELLED', label: 'Cancelled' },
+// Demo data
+const demoClaims = [
+  {
+    id: '1', code: 'CLM-2026-001', status: 'SUBMITTED' as ClaimStatus,
+    claimDate: '2026-01-15', amount: 50000000, claimAmount: 50000000,
+    description: 'Q1 rebate claim', type: 'REBATE',
+    customer: { id: '1', name: 'BigC', channel: 'MT' },
+    promotion: { id: '1', code: 'PROMO-001', name: 'Tết 2026', status: 'EXECUTING' },
+    _count: { lineItems: 3, settlements: 0, approvals: 0 },
+    createdAt: '2026-01-15', updatedAt: '2026-01-15',
+  },
+  {
+    id: '2', code: 'CLM-2026-002', status: 'APPROVED' as ClaimStatus,
+    claimDate: '2026-01-10', amount: 75000000, claimAmount: 75000000, approvedAmount: 72000000,
+    description: 'December trade deal', type: 'DISCOUNT',
+    customer: { id: '2', name: 'CoopMart', channel: 'MT' },
+    promotion: { id: '2', code: 'PROMO-002', name: 'Q1 Trade', status: 'CONFIRMED' },
+    _count: { lineItems: 5, settlements: 1, approvals: 1 },
+    createdAt: '2026-01-10', updatedAt: '2026-01-12',
+  },
+  {
+    id: '3', code: 'CLM-2026-003', status: 'SETTLED' as ClaimStatus,
+    claimDate: '2025-12-20', amount: 30000000, claimAmount: 30000000, approvedAmount: 30000000, settledAmount: 30000000,
+    description: 'Flash sale settlement', type: 'PROMOTION',
+    customer: { id: '1', name: 'BigC', channel: 'MT' },
+    promotion: { id: '4', code: 'PROMO-004', name: 'Flash Sale', status: 'COMPLETED' },
+    _count: { lineItems: 2, settlements: 1, approvals: 1 },
+    createdAt: '2025-12-20', updatedAt: '2026-01-05',
+  },
+  {
+    id: '4', code: 'CLM-2026-004', status: 'UNDER_REVIEW' as ClaimStatus,
+    claimDate: '2026-01-18', amount: 120000000, claimAmount: 120000000,
+    description: 'Display promotion', type: 'DISPLAY',
+    customer: { id: '3', name: 'Lotte Mart', channel: 'MT' },
+    promotion: { id: '1', code: 'PROMO-001', name: 'Tết 2026', status: 'EXECUTING' },
+    _count: { lineItems: 8, settlements: 0, approvals: 0 },
+    createdAt: '2026-01-18', updatedAt: '2026-01-20',
+  },
+  {
+    id: '5', code: 'CLM-2026-005', status: 'REJECTED' as ClaimStatus,
+    claimDate: '2026-01-08', amount: 45000000, claimAmount: 45000000,
+    description: 'Thiếu chứng từ', type: 'OTHER',
+    customer: { id: '4', name: 'Winmart', channel: 'MT' },
+    promotion: { id: '3', code: 'PROMO-003', name: 'New Product', status: 'DRAFT' },
+    _count: { lineItems: 1, settlements: 0, approvals: 1 },
+    createdAt: '2026-01-08', updatedAt: '2026-01-10',
+  },
 ];
 
 export default function ClaimList() {
@@ -195,7 +106,6 @@ export default function ClaimList() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [viewMode, setViewMode] = useState<ViewMode>('table');
 
-  // Get filters from URL
   const filters = {
     search: searchParams.get('search') || '',
     status: (searchParams.get('status') || '') as ClaimStatus | '',
@@ -205,7 +115,6 @@ export default function ClaimList() {
   const page = Number(searchParams.get('page')) || 1;
   const pageSize = Number(searchParams.get('pageSize')) || 20;
 
-  // Fetch claims
   const { data, isLoading, error } = useClaims({
     page,
     pageSize,
@@ -216,33 +125,25 @@ export default function ClaimList() {
 
   const deleteClaim = useDeleteClaim();
 
-  // Use API data or demo data
-  const claims = (data?.claims?.length ? data.claims : demoClaims);
+  const claims = data?.claims?.length ? data.claims : demoClaims;
   const metadata = data?.metadata || {
-    totalCount: demoClaims.length,
-    pageSize: 20,
-    pageNumber: 1,
-    totalPages: 1,
-    hasNextPage: false,
-    hasPreviousPage: false,
+    totalCount: demoClaims.length, total: demoClaims.length,
+    pageSize: 20, limit: 20, pageNumber: 1, page: 1,
+    totalPages: 1, hasNextPage: false, hasPreviousPage: false,
   };
 
-  // Filter demo data locally when API not connected
   const filteredClaims = useMemo(() => {
-    if (data?.claims) return claims; // API handles filtering
-
-    return claims.filter((claim: Claim) => {
+    if (data?.claims) return claims;
+    return claims.filter((claim: any) => {
       if (filters.search && !claim.code.toLowerCase().includes(filters.search.toLowerCase()) &&
-          !claim.promotion?.name.toLowerCase().includes(filters.search.toLowerCase())) {
+          !claim.customer?.name?.toLowerCase().includes(filters.search.toLowerCase())) {
         return false;
       }
       if (filters.status && claim.status !== filters.status) return false;
-      if (filters.promotionId && claim.promotion?.id !== filters.promotionId) return false;
       return true;
     });
   }, [claims, filters, data?.claims]);
 
-  // Update URL params
   const updateFilters = (newFilters: Partial<typeof filters>) => {
     const merged = { ...filters, ...newFilters };
     const params = new URLSearchParams();
@@ -268,52 +169,58 @@ export default function ClaimList() {
   };
 
   const handleDelete = async (id: string) => {
-    if (window.confirm('Are you sure you want to delete this claim?')) {
+    if (window.confirm('Bạn có chắc chắn muốn xóa claim này?')) {
       await deleteClaim.mutateAsync(id);
     }
   };
 
-  // Table columns
-  const columns: ColumnDef<Claim>[] = useMemo(
+  const columns: ColumnDef<any>[] = useMemo(
     () => [
       {
         accessorKey: 'code',
-        header: 'Claim Code',
-        cell: ({ row }) => (
-          <Link
-            to={`/claims/${row.original.id}`}
-            className="font-medium text-primary hover:underline"
-          >
+        header: 'Mã Claim',
+        cell: ({ row }: any) => (
+          <Link to={`/claims/${row.original.id}`} className="font-medium text-primary hover:underline">
             {row.original.code}
           </Link>
         ),
       },
       {
+        accessorKey: 'customer',
+        header: 'Khách hàng',
+        cell: ({ row }: any) => (
+          <div>
+            <p className="font-medium">{row.original.customer?.name || '-'}</p>
+            {row.original.customer?.channel && (
+              <p className="text-sm text-muted-foreground">{row.original.customer.channel}</p>
+            )}
+          </div>
+        ),
+      },
+      {
         accessorKey: 'promotion',
         header: 'Promotion',
-        cell: ({ row }) => (
+        cell: ({ row }: any) => (
           <div>
-            <p className="font-medium">{row.original.promotion?.name}</p>
-            <p className="text-sm text-muted-foreground">
-              {row.original.promotion?.code}
-            </p>
+            <p className="font-medium">{row.original.promotion?.name || '-'}</p>
+            <p className="text-sm text-muted-foreground">{row.original.promotion?.code || ''}</p>
           </div>
         ),
       },
       {
         accessorKey: 'status',
-        header: 'Status',
-        cell: ({ row }) => <ClaimStatusBadge status={row.original.status} />,
+        header: 'Trạng thái',
+        cell: ({ row }: any) => <ClaimStatusBadge status={row.original.status} />,
       },
       {
-        accessorKey: 'claimAmount',
-        header: 'Amount',
-        cell: ({ row }) => (
+        accessorKey: 'amount',
+        header: 'Số tiền',
+        cell: ({ row }: any) => (
           <div>
-            <CurrencyDisplay amount={row.original.claimAmount} size="sm" />
+            <CurrencyDisplay amount={row.original.claimAmount || row.original.amount} size="sm" />
             {row.original.approvedAmount && (
               <p className="text-sm text-emerald-600 dark:text-emerald-400">
-                Approved: <CurrencyDisplay amount={row.original.approvedAmount} size="sm" showToggle={false} />
+                Duyệt: <CurrencyDisplay amount={row.original.approvedAmount} size="sm" showToggle={false} />
               </p>
             )}
           </div>
@@ -321,12 +228,12 @@ export default function ClaimList() {
       },
       {
         accessorKey: 'claimDate',
-        header: 'Claim Date',
-        cell: ({ row }) => formatDate(row.original.claimDate),
+        header: 'Ngày claim',
+        cell: ({ row }: any) => formatDate(row.original.claimDate),
       },
       {
         id: 'actions',
-        cell: ({ row }) => (
+        cell: ({ row }: any) => (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon">
@@ -335,20 +242,14 @@ export default function ClaimList() {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={() => navigate(`/claims/${row.original.id}`)}>
-                <Eye className="mr-2 h-4 w-4" />
-                View
+                <Eye className="mr-2 h-4 w-4" />Xem
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => navigate(`/claims/${row.original.id}/edit`)}>
-                <Edit className="mr-2 h-4 w-4" />
-                Edit
+                <Edit className="mr-2 h-4 w-4" />Sửa
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem
-                onClick={() => handleDelete(row.original.id)}
-                className="text-red-600"
-              >
-                <Trash2 className="mr-2 h-4 w-4" />
-                Delete
+              <DropdownMenuItem onClick={() => handleDelete(row.original.id)} className="text-red-600">
+                <Trash2 className="mr-2 h-4 w-4" />Xóa
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -359,113 +260,78 @@ export default function ClaimList() {
   );
 
   if (isLoading) {
-    return <LoadingSpinner fullScreen text="Loading claims..." />;
+    return <LoadingSpinner fullScreen text="Đang tải claims..." />;
   }
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold">Claims</h1>
-          <p className="text-muted-foreground">
-            Manage promotion claims and settlements
-          </p>
+          <p className="text-muted-foreground">Quản lý claims & thanh toán khuyến mãi</p>
         </div>
         <Button asChild>
           <Link to="/claims/new">
-            <Plus className="mr-2 h-4 w-4" />
-            New Claim
+            <Plus className="mr-2 h-4 w-4" />Tạo Claim
           </Link>
         </Button>
       </div>
 
-      {/* Filters & View Toggle */}
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
           <SearchInput
             value={filters.search}
             onChange={(search) => updateFilters({ search })}
-            placeholder="Search claims..."
+            placeholder="Tìm kiếm claims..."
             className="w-full sm:w-80"
           />
-
           <Select
             value={filters.status || 'all'}
             onValueChange={(status) => updateFilters({ status: status === 'all' ? '' : status as ClaimStatus })}
           >
-            <SelectTrigger className="w-full sm:w-44">
-              <SelectValue placeholder="Status" />
+            <SelectTrigger className="w-full sm:w-52">
+              <SelectValue placeholder="Trạng thái" />
             </SelectTrigger>
             <SelectContent>
               {statusOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
+                <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
               ))}
             </SelectContent>
           </Select>
         </div>
 
         <div className="flex items-center gap-2">
-          <Button
-            variant={viewMode === 'table' ? 'default' : 'outline'}
-            size="icon"
-            onClick={() => setViewMode('table')}
-          >
+          <Button variant={viewMode === 'table' ? 'default' : 'outline'} size="icon" onClick={() => setViewMode('table')}>
             <List className="h-4 w-4" />
           </Button>
-          <Button
-            variant={viewMode === 'grid' ? 'default' : 'outline'}
-            size="icon"
-            onClick={() => setViewMode('grid')}
-          >
+          <Button variant={viewMode === 'grid' ? 'default' : 'outline'} size="icon" onClick={() => setViewMode('grid')}>
             <LayoutGrid className="h-4 w-4" />
           </Button>
         </div>
       </div>
 
-      {/* Content */}
       {filteredClaims.length === 0 ? (
         <EmptyState
-          title="No claims found"
-          description={
-            filters.search || filters.status
-              ? 'Try adjusting your filters'
-              : 'Get started by creating your first claim'
-          }
-          action={
-            <Button asChild>
-              <Link to="/claims/new">
-                <Plus className="mr-2 h-4 w-4" />
-                Create Claim
-              </Link>
-            </Button>
-          }
+          title="Không tìm thấy claim"
+          description={filters.search || filters.status ? 'Thử thay đổi bộ lọc' : 'Bắt đầu bằng cách tạo claim đầu tiên'}
+          action={<Button asChild><Link to="/claims/new"><Plus className="mr-2 h-4 w-4" />Tạo Claim</Link></Button>}
         />
       ) : viewMode === 'table' ? (
         <Card>
           <CardContent className="p-0">
-            <DataTable
-              columns={columns}
-              data={filteredClaims}
-              error={error?.message}
-              onRowClick={(row) => navigate(`/claims/${row.id}`)}
-            />
+            <DataTable columns={columns} data={filteredClaims} error={error?.message} onRowClick={(row: any) => navigate(`/claims/${row.id}`)} />
           </CardContent>
         </Card>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {filteredClaims.map((claim: Claim) => (
+          {filteredClaims.map((claim: any) => (
             <Link key={claim.id} to={`/claims/${claim.id}`}>
               <Card className="transition-shadow hover:shadow-md">
                 <CardHeader className="pb-2">
                   <div className="flex items-start justify-between">
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground">
-                        {claim.code}
-                      </p>
-                      <CardTitle className="mt-1 text-lg">{claim.promotion?.name}</CardTitle>
+                      <p className="text-sm font-medium text-muted-foreground">{claim.code}</p>
+                      <CardTitle className="mt-1 text-lg">{claim.customer?.name || claim.promotion?.name}</CardTitle>
                     </div>
                     <ClaimStatusBadge status={claim.status} />
                   </div>
@@ -476,15 +342,14 @@ export default function ClaimList() {
                       <Receipt className="h-4 w-4" />
                       <span>{formatDate(claim.claimDate)}</span>
                     </div>
-
                     <div className="pt-2 border-t">
                       <div className="flex justify-between items-center">
-                        <span className="text-sm text-muted-foreground">Claimed</span>
-                        <CurrencyDisplay amount={claim.claimAmount} size="sm" />
+                        <span className="text-sm text-muted-foreground">Số tiền</span>
+                        <CurrencyDisplay amount={claim.claimAmount || claim.amount} size="sm" />
                       </div>
                       {claim.approvedAmount && (
                         <div className="flex justify-between items-center mt-1">
-                          <span className="text-sm text-muted-foreground">Approved</span>
+                          <span className="text-sm text-muted-foreground">Đã duyệt</span>
                           <CurrencyDisplay amount={claim.approvedAmount} size="sm" valueClassName="text-emerald-600 dark:text-emerald-400" />
                         </div>
                       )}
@@ -497,13 +362,12 @@ export default function ClaimList() {
         </div>
       )}
 
-      {/* Pagination */}
       {filteredClaims.length > 0 && (
         <Pagination
-          currentPage={metadata.pageNumber}
-          totalPages={metadata.totalPages}
-          pageSize={metadata.pageSize}
-          totalCount={metadata.totalCount}
+          currentPage={metadata.pageNumber || metadata.page || 1}
+          totalPages={metadata.totalPages || 1}
+          pageSize={metadata.pageSize || metadata.limit || 20}
+          totalCount={metadata.totalCount || metadata.total || filteredClaims.length}
           onPageChange={updatePage}
           onPageSizeChange={updatePageSize}
         />

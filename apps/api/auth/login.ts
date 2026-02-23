@@ -1,9 +1,11 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import bcrypt from 'bcryptjs';
-import prisma from '@/_lib/prisma';
-import { signToken } from '../_lib/auth';
+import prisma from '../_lib/prisma';
+import { signToken, signRefreshToken } from '../_lib/auth';
+import { authRateLimit } from '../_lib/rateLimiter';
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+// Sprint 0 Fix 6: Rate limit login (10 attempts per 15 min)
+export default authRateLimit(async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method === 'OPTIONS') {
     res.status(200).end();
     return;
@@ -54,7 +56,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     });
 
     // Generate refresh token (longer expiry)
-    const refreshToken = signToken({
+    const refreshToken = signRefreshToken({
       userId: user.id,
       companyId: user.companyId,
       email: user.email,
@@ -79,4 +81,4 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     console.error('Login error:', error);
     res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Internal server error' } });
   }
-}
+});

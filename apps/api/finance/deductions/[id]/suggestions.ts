@@ -14,7 +14,7 @@ interface MatchingSuggestion {
       id: string;
       code: string;
       name: string;
-    };
+    } | null;
   };
   confidence: number;
   matchReasons: string[];
@@ -22,7 +22,7 @@ interface MatchingSuggestion {
 
 // Calculate match confidence between deduction and claim
 function calculateMatchConfidence(
-  deduction: { amount: number; invoiceDate: Date; customerId: string },
+  deduction: { amount: number; sourceDate: Date; customerId: string },
   claim: { amount: number; claimDate: Date; customerId: string }
 ): { confidence: number; reasons: string[] } {
   const reasons: string[] = [];
@@ -53,7 +53,7 @@ function calculateMatchConfidence(
 
   // Date proximity
   const daysDiff = Math.abs(
-    (deduction.invoiceDate.getTime() - claim.claimDate.getTime()) / (1000 * 60 * 60 * 24)
+    (deduction.sourceDate.getTime() - claim.claimDate.getTime()) / (1000 * 60 * 60 * 24)
   );
 
   if (daysDiff <= 7) {
@@ -108,9 +108,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(404).json({ error: 'Deduction not found' });
     }
 
-    if (deduction.status !== 'OPEN') {
+    if (deduction.status !== 'PENDING') {
       return res.status(400).json({
-        error: 'Deduction is not open for matching',
+        error: 'Deduction is not pending for matching',
         suggestions: [],
       });
     }
@@ -147,7 +147,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const { confidence, reasons } = calculateMatchConfidence(
           {
             amount: deductionAmount,
-            invoiceDate: deduction.invoiceDate,
+            sourceDate: deduction.sourceDate || new Date(),
             customerId: deduction.customerId,
           },
           {
@@ -179,7 +179,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       data: suggestions,
       deduction: {
         id: deduction.id,
-        code: deduction.code,
+        deductionNumber: deduction.deductionNumber,
         amount: deductionAmount,
         customer: deduction.customer.name,
       },

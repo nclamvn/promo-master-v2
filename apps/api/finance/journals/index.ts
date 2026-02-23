@@ -5,7 +5,7 @@
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { prisma } from '@/_lib/prisma';
+import prisma from '../../_lib/prisma';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
@@ -26,9 +26,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 async function handleList(req: VercelRequest, res: VercelResponse) {
   const {
     status,
-    type,
-    customerId,
-    promotionId,
+    source,
     startDate,
     endDate,
     page = '1',
@@ -46,16 +44,8 @@ async function handleList(req: VercelRequest, res: VercelResponse) {
     where.status = status;
   }
 
-  if (type) {
-    where.journalType = type;
-  }
-
-  if (customerId) {
-    where.customerId = customerId;
-  }
-
-  if (promotionId) {
-    where.promotionId = promotionId;
+  if (source) {
+    where.source = source;
   }
 
   if (startDate || endDate) {
@@ -73,27 +63,21 @@ async function handleList(req: VercelRequest, res: VercelResponse) {
     prisma.gLJournal.findMany({
       where,
       include: {
-        customer: {
-          select: { id: true, code: true, name: true },
-        },
-        promotion: {
-          select: { id: true, code: true, name: true },
-        },
-        accrual: {
-          select: { id: true, code: true },
-        },
-        claim: {
-          select: { id: true, code: true },
-        },
         lines: {
           select: {
             id: true,
             accountCode: true,
             accountName: true,
-            debit: true,
-            credit: true,
+            debitAmount: true,
+            creditAmount: true,
             description: true,
           },
+        },
+        fiscalPeriod: {
+          select: { id: true, name: true, year: true, month: true },
+        },
+        createdBy: {
+          select: { id: true, name: true },
         },
       },
       orderBy: { journalDate: 'desc' },
@@ -118,7 +102,7 @@ async function handleList(req: VercelRequest, res: VercelResponse) {
     postedAmount: 0,
   };
 
-  summary.forEach((s) => {
+  summary.forEach((s: any) => {
     if (s.status === 'DRAFT') {
       summaryData.totalDraft = s._count.id;
       summaryData.draftAmount = s._sum.totalDebit?.toNumber() || 0;
@@ -144,21 +128,19 @@ async function handleList(req: VercelRequest, res: VercelResponse) {
 
 async function handleCreate(req: VercelRequest, res: VercelResponse) {
   const {
-    journalType,
+    companyId,
+    fiscalPeriodId,
     journalDate,
     description,
-    customerId,
-    promotionId,
-    accrualId,
-    claimId,
-    reference,
+    source = 'ADJUSTMENT',
+    sourceRef,
     lines,
   } = req.body;
 
   // Validate required fields
-  if (!journalType || !journalDate || !lines || lines.length === 0) {
+  if (!companyId || !fiscalPeriodId || !journalDate || !description || !lines || lines.length === 0) {
     return res.status(400).json({
-      error: 'Missing required fields: journalType, journalDate, lines',
+      error: 'Missing required fields: companyId, fiscalPeriodId, journalDate, description, lines',
     });
   }
 
@@ -166,8 +148,8 @@ async function handleCreate(req: VercelRequest, res: VercelResponse) {
   let totalDebit = 0;
   let totalCredit = 0;
   for (const line of lines) {
-    totalDebit += parseFloat(line.debit || 0);
-    totalCredit += parseFloat(line.credit || 0);
+    totalDebit += parseFloat(line.debitAmount || 0);
+    totalCredit += parseFloat(line.creditAmount || 0);
   }
 
   if (Math.abs(totalDebit - totalCredit) > 0.01) {
@@ -176,46 +158,39 @@ async function handleCreate(req: VercelRequest, res: VercelResponse) {
     });
   }
 
-  // Generate journal code
-  const count = await prisma.gLJournal.count();
-  const code = `JNL-${String(count + 1).padStart(6, '0')}`;
+  // Generate journal number
+  const timestamp = Date.now().toString(36).toUpperCase();
+  const random = Math.random().toString(36).substring(2, 6).toUpperCase();
+  const journalNumber = `JE-${timestamp}-${random}`;
 
   // Create journal with lines
   const journal = await prisma.gLJournal.create({
     data: {
-      code,
-      journalType,
+      journalNumber,
+      companyId,
+      fiscalPeriodId,
       journalDate: new Date(journalDate),
       description,
-      reference,
+      source,
+      sourceRef: sourceRef || null,
       status: 'DRAFT',
       totalDebit,
       totalCredit,
-      customerId: customerId || null,
-      promotionId: promotionId || null,
-      accrualId: accrualId || null,
-      claimId: claimId || null,
+      createdById: req.body.userId || 'system',
       lines: {
         create: lines.map((line: any, index: number) => ({
           lineNumber: index + 1,
           accountCode: line.accountCode,
           accountName: line.accountName,
-          debit: parseFloat(line.debit || 0),
-          credit: parseFloat(line.credit || 0),
+          debitAmount: parseFloat(line.debitAmount || 0),
+          creditAmount: parseFloat(line.creditAmount || 0),
           description: line.description,
           costCenter: line.costCenter,
-          department: line.department,
         })),
       },
     },
     include: {
       lines: true,
-      customer: {
-        select: { id: true, code: true, name: true },
-      },
-      promotion: {
-        select: { id: true, code: true, name: true },
-      },
     },
   });
 

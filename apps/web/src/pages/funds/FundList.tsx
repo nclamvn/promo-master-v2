@@ -30,6 +30,7 @@ import { EmptyState } from '@/components/shared/EmptyState';
 import { LoadingSpinner } from '@/components/shared/LoadingSpinner';
 import { SearchInput } from '@/components/shared/SearchInput';
 import { useFunds, useDeleteFund } from '@/hooks/useFunds';
+import { useToast } from '@/hooks/useToast';
 import { formatDate } from '@/lib/utils';
 import { CurrencyDisplay } from '@/components/ui/currency-display';
 import type { Fund, FundType } from '@/types';
@@ -153,6 +154,7 @@ export default function FundList() {
   });
 
   const deleteFund = useDeleteFund();
+  const { toast } = useToast();
 
   // Use API data or demo data
   const funds = data?.funds || demoFunds;
@@ -204,8 +206,13 @@ export default function FundList() {
   };
 
   const handleDelete = async (id: string) => {
-    if (window.confirm('Are you sure you want to delete this fund?')) {
-      await deleteFund.mutateAsync(id);
+    if (window.confirm('Bạn có chắc muốn xóa quỹ này?')) {
+      try {
+        await deleteFund.mutateAsync(id);
+        toast({ title: 'Thành công', description: 'Đã xóa quỹ' });
+      } catch {
+        toast({ title: 'Lỗi', description: 'Không thể xóa quỹ', variant: 'destructive' });
+      }
     }
   };
 
@@ -325,15 +332,15 @@ export default function FundList() {
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Funds</h1>
+          <h1 className="text-2xl font-bold">Quỹ khuyến mãi</h1>
           <p className="text-muted-foreground">
-            Manage promotional funds and budgets
+            Quản lý quỹ và ngân sách khuyến mãi
           </p>
         </div>
         <Button asChild>
           <Link to="/funds/new">
             <Plus className="mr-2 h-4 w-4" />
-            New Fund
+            Tạo mới
           </Link>
         </Button>
       </div>
@@ -344,7 +351,7 @@ export default function FundList() {
           <SearchInput
             value={filters.search}
             onChange={(search) => updateFilters({ search })}
-            placeholder="Search funds..."
+            placeholder="Tìm kiếm quỹ..."
             className="w-full sm:w-80"
           />
 

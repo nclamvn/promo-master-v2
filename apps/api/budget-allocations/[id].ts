@@ -1,24 +1,23 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node';
-import prisma from '@/_lib/prisma';
-import { getUserFromRequest } from '../_lib/auth';
+import type { VercelResponse } from '@vercel/node';
+import prisma from '../_lib/prisma';
+import { kamPlus, type AuthenticatedRequest } from '../_lib/auth';
 
-// Helper to calculate available amount
+/**
+ * /budget-allocations/:id
+ * GET - Get single budget allocation
+ * PUT/PATCH - Update budget allocation
+ * DELETE - Delete budget allocation
+ * Sprint 0+1: RBAC + Standard errors
+ */
+
 function calculateAvailable(allocated: number, childrenAllocated: number): number {
   return Math.max(0, allocated - childrenAllocated);
 }
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (req.method === 'OPTIONS') {
-    res.status(200).end();
-    return;
-  }
-
-  const user = getUserFromRequest(req);
-  if (!user) return res.status(401).json({ error: 'Unauthorized' });
-
+export default kamPlus(async (req: AuthenticatedRequest, res: VercelResponse) => {
   const { id } = req.query;
   if (!id || typeof id !== 'string') {
-    return res.status(400).json({ error: 'ID không hợp lệ' });
+    return res.status(400).json({ success: false, error: { code: 'VALIDATION_ERROR', message: 'Missing or invalid id' } });
   }
 
   try {
@@ -54,10 +53,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
 
       if (!allocation) {
-        return res.status(404).json({ error: 'Không tìm thấy phân bổ ngân sách' });
+        return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Budget allocation not found' } });
       }
 
-      return res.status(200).json({ data: allocation });
+      return res.status(200).json({ success: true, data: allocation });
     }
 
     if (req.method === 'PUT' || req.method === 'PATCH') {
@@ -69,40 +68,39 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
 
       if (!existing) {
-        return res.status(404).json({ error: 'Không tìm thấy phân bổ ngân sách' });
+        return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Budget allocation not found' } });
       }
 
-      // Check status - only DRAFT can be modified
       if (existing.status !== 'DRAFT' && allocatedAmount !== undefined) {
-        return res.status(400).json({ error: 'Chỉ có thể sửa phân bổ ở trạng thái DRAFT' });
+        return res.status(400).json({
+          success: false,
+          error: { code: 'VALIDATION_ERROR', message: 'Can only modify DRAFT allocations' },
+        });
       }
 
       const updateData: Record<string, unknown> = {};
 
-      // Handle amount update
       if (allocatedAmount !== undefined) {
-        const newAmount = parseFloat(allocatedAmount);
-        const oldAmount = parseFloat(existing.allocatedAmount.toString());
-        const childrenAllocated = parseFloat(existing.childrenAllocated.toString());
+        const newAmount = Number(allocatedAmount);
+        const oldAmount = Number(existing.allocatedAmount);
+        const childrenAllocated = Number(existing.childrenAllocated);
         const amountDiff = newAmount - oldAmount;
 
-        // New amount must cover children allocations
         if (newAmount < childrenAllocated) {
           return res.status(400).json({
-            error: `Số tiền mới (${newAmount}) không đủ cho phân bổ con (${childrenAllocated})`,
+            success: false,
+            error: { code: 'VALIDATION_ERROR', message: `New amount (${newAmount}) is less than children total (${childrenAllocated})` },
           });
         }
 
-        // If has parent, check parent's available
         if (existing.parentId && existing.parent) {
-          const parentAvailable = parseFloat(existing.parent.availableToAllocate.toString());
+          const parentAvailable = Number(existing.parent.availableToAllocate);
           if (amountDiff > parentAvailable) {
-            return res.status(400).json({
-              error: `Số tiền tăng thêm (${amountDiff}) vượt quá số khả dụng của cha (${parentAvailable})`,
+            return res.status(422).json({
+              success: false,
+              error: { code: 'INSUFFICIENT_FUND', message: `Increase (${amountDiff}) exceeds parent available (${parentAvailable})` },
             });
           }
-
-          // Update parent's childrenAllocated
           await prisma.budgetAllocation.update({
             where: { id: existing.parentId },
             data: {
@@ -111,17 +109,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             },
           });
         } else {
-          // Root allocation - check budget total
-          const currentTotal = parseFloat(existing.budget.allocatedAmount.toString());
-          const budgetTotal = parseFloat(existing.budget.totalAmount.toString());
+          const currentTotal = Number(existing.budget.allocatedAmount);
+          const budgetTotal = Number(existing.budget.totalAmount);
           if (currentTotal + amountDiff > budgetTotal) {
-            return res.status(400).json({
-              error: `Tổng phân bổ (${currentTotal + amountDiff}) vượt quá tổng ngân sách (${budgetTotal})`,
+            return res.status(422).json({
+              success: false,
+              error: { code: 'INSUFFICIENT_FUND', message: 'Total allocations exceed budget total' },
             });
           }
         }
 
-        // Update budget's allocatedAmount
         await prisma.budget.update({
           where: { id: existing.budgetId },
           data: { allocatedAmount: { increment: amountDiff } },
@@ -133,17 +130,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
       if (notes !== undefined) updateData.notes = notes;
 
-      // Handle status update
       if (status !== undefined) {
         const validStatuses = ['DRAFT', 'PENDING_APPROVAL', 'APPROVED', 'REJECTED', 'LOCKED'];
         if (!validStatuses.includes(status)) {
-          return res.status(400).json({ error: 'Trạng thái không hợp lệ' });
+          return res.status(400).json({ success: false, error: { code: 'VALIDATION_ERROR', message: 'Invalid status' } });
         }
-
         updateData.status = status;
-
         if (status === 'APPROVED') {
-          updateData.approvedBy = user.userId;
+          updateData.approvedBy = req.auth.userId;
           updateData.approvedAt = new Date();
         }
       }
@@ -158,7 +152,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         },
       });
 
-      return res.status(200).json({ data: updated });
+      return res.status(200).json({ success: true, data: updated });
     }
 
     if (req.method === 'DELETE') {
@@ -168,23 +162,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
 
       if (!existing) {
-        return res.status(404).json({ error: 'Không tìm thấy phân bổ ngân sách' });
+        return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Budget allocation not found' } });
       }
 
-      // Check status - only DRAFT can be deleted
       if (existing.status !== 'DRAFT') {
-        return res.status(400).json({ error: 'Chỉ có thể xóa phân bổ ở trạng thái DRAFT' });
+        return res.status(400).json({ success: false, error: { code: 'VALIDATION_ERROR', message: 'Can only delete DRAFT allocations' } });
       }
-
-      // Check for children
       if (existing._count.children > 0) {
-        return res.status(400).json({ error: 'Không thể xóa vì có phân bổ con' });
+        return res.status(400).json({ success: false, error: { code: 'VALIDATION_ERROR', message: 'Cannot delete: has children' } });
       }
 
-      const deletedAmount = parseFloat(existing.allocatedAmount.toString());
+      const deletedAmount = Number(existing.allocatedAmount);
 
-      // Update parent's childrenAllocated if has parent
-      if (existing.parentId && existing.parent) {
+      if (existing.parentId) {
         await prisma.budgetAllocation.update({
           where: { id: existing.parentId },
           data: {
@@ -194,20 +184,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         });
       }
 
-      // Update budget's allocatedAmount
       await prisma.budget.update({
         where: { id: existing.budgetId },
         data: { allocatedAmount: { decrement: deletedAmount } },
       });
 
       await prisma.budgetAllocation.delete({ where: { id } });
-
-      return res.status(200).json({ message: 'Đã xóa phân bổ ngân sách' });
+      return res.status(200).json({ success: true });
     }
 
-    return res.status(405).json({ error: 'Method not allowed' });
+    return res.status(405).json({ success: false, error: { code: 'METHOD_NOT_ALLOWED', message: 'Method not allowed' } });
   } catch (error) {
     console.error('Budget Allocation error:', error);
-    return res.status(500).json({ error: 'Lỗi hệ thống' });
+    return res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Internal server error' } });
   }
-}
+});

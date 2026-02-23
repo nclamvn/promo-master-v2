@@ -1,25 +1,24 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node';
-import prisma from '@/_lib/prisma';
-import { getUserFromRequest } from '../_lib/auth';
+import type { VercelResponse } from '@vercel/node';
+import prisma from '../_lib/prisma';
+import { kamPlus, type AuthenticatedRequest } from '../_lib/auth';
 
-// Helper to calculate progress percent
+/**
+ * /target-allocations/:id
+ * GET - Get single target allocation
+ * PUT/PATCH - Update target allocation (value, achieved, status)
+ * DELETE - Delete target allocation
+ * Sprint 0+1: RBAC + Standard errors
+ */
+
 function calculateProgress(achieved: number, target: number): number {
   if (target <= 0) return 0;
-  return Math.min(100, (achieved / target) * 100);
+  return Math.min(100, Math.round((achieved / target) * 1000) / 10);
 }
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (req.method === 'OPTIONS') {
-    res.status(200).end();
-    return;
-  }
-
-  const user = getUserFromRequest(req);
-  if (!user) return res.status(401).json({ error: 'Unauthorized' });
-
+export default kamPlus(async (req: AuthenticatedRequest, res: VercelResponse) => {
   const { id } = req.query;
   if (!id || typeof id !== 'string') {
-    return res.status(400).json({ error: 'ID không hợp lệ' });
+    return res.status(400).json({ success: false, error: { code: 'VALIDATION_ERROR', message: 'Missing or invalid id' } });
   }
 
   try {
@@ -55,10 +54,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
 
       if (!allocation) {
-        return res.status(404).json({ error: 'Không tìm thấy phân bổ mục tiêu' });
+        return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Target allocation not found' } });
       }
 
-      return res.status(200).json({ data: allocation });
+      return res.status(200).json({ success: true, data: allocation });
     }
 
     if (req.method === 'PUT' || req.method === 'PATCH') {
@@ -70,59 +69,55 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
 
       if (!existing) {
-        return res.status(404).json({ error: 'Không tìm thấy phân bổ mục tiêu' });
+        return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Target allocation not found' } });
       }
 
       const updateData: Record<string, unknown> = {};
 
-      // Handle target value update
       if (targetValue !== undefined) {
-        // Check status - only DRAFT can have target modified
         if (existing.status !== 'DRAFT') {
-          return res.status(400).json({ error: 'Chỉ có thể sửa mục tiêu ở trạng thái DRAFT' });
-        }
-
-        const newValue = parseFloat(targetValue);
-        const oldValue = parseFloat(existing.targetValue.toString());
-        const childrenTarget = parseFloat(existing.childrenTarget.toString());
-        const valueDiff = newValue - oldValue;
-
-        // New value must cover children targets
-        if (newValue < childrenTarget) {
           return res.status(400).json({
-            error: `Giá trị mới (${newValue}) không đủ cho phân bổ con (${childrenTarget})`,
+            success: false,
+            error: { code: 'VALIDATION_ERROR', message: 'Can only modify target value for DRAFT allocations' },
           });
         }
 
-        // If has parent, check parent's remaining
-        if (existing.parentId && existing.parent) {
-          const parentValue = parseFloat(existing.parent.targetValue.toString());
-          const parentChildrenTarget = parseFloat(existing.parent.childrenTarget.toString());
-          const parentRemaining = parentValue - parentChildrenTarget + oldValue;
+        const newValue = Number(targetValue);
+        const oldValue = Number(existing.targetValue);
+        const childrenTarget = Number(existing.childrenTarget);
+        const valueDiff = newValue - oldValue;
 
+        if (newValue < childrenTarget) {
+          return res.status(400).json({
+            success: false,
+            error: { code: 'VALIDATION_ERROR', message: `New value (${newValue}) is less than children total (${childrenTarget})` },
+          });
+        }
+
+        if (existing.parentId && existing.parent) {
+          const parentValue = Number(existing.parent.targetValue);
+          const parentChildren = Number(existing.parent.childrenTarget);
+          const parentRemaining = parentValue - parentChildren + oldValue;
           if (newValue > parentRemaining) {
-            return res.status(400).json({
-              error: `Giá trị mới (${newValue}) vượt quá số còn lại của cha (${parentRemaining})`,
+            return res.status(422).json({
+              success: false,
+              error: { code: 'INSUFFICIENT_FUND', message: `New value (${newValue}) exceeds parent remaining (${parentRemaining})` },
             });
           }
-
-          // Update parent's childrenTarget
           await prisma.targetAllocation.update({
             where: { id: existing.parentId },
             data: { childrenTarget: { increment: valueDiff } },
           });
         } else {
-          // Root allocation - check total target
           const currentRootTotal = await prisma.targetAllocation.aggregate({
             where: { targetId: existing.targetId, parentId: null, id: { not: id } },
             _sum: { targetValue: true },
           });
-          const otherRootTotal = parseFloat(currentRootTotal._sum.targetValue?.toString() || '0');
-          const totalTarget = parseFloat(existing.target.totalTarget.toString());
-
-          if (otherRootTotal + newValue > totalTarget) {
-            return res.status(400).json({
-              error: `Tổng mục tiêu gốc (${otherRootTotal + newValue}) vượt quá tổng mục tiêu (${totalTarget})`,
+          const otherRoot = Number(currentRootTotal._sum.targetValue || 0);
+          if (otherRoot + newValue > Number(existing.target.totalTarget)) {
+            return res.status(422).json({
+              success: false,
+              error: { code: 'INSUFFICIENT_FUND', message: 'Total root allocations exceed target total' },
             });
           }
         }
@@ -130,43 +125,32 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         updateData.targetValue = newValue;
       }
 
-      // Handle achieved value update
       if (achievedValue !== undefined) {
-        const newAchieved = parseFloat(achievedValue);
+        const newAchieved = Number(achievedValue);
         updateData.achievedValue = newAchieved;
-
-        const targetVal = targetValue !== undefined
-          ? parseFloat(targetValue)
-          : parseFloat(existing.targetValue.toString());
+        const targetVal = targetValue !== undefined ? Number(targetValue) : Number(existing.targetValue);
         updateData.progressPercent = calculateProgress(newAchieved, targetVal);
 
-        // Update parent's totalAchieved (propagate up)
-        if (existing.targetId) {
-          const allAllocations = await prisma.targetAllocation.findMany({
-            where: { targetId: existing.targetId },
-          });
-
-          const totalAchieved = allAllocations.reduce((sum, alloc) => {
-            if (alloc.id === id) {
-              return sum + newAchieved;
-            }
-            return sum + parseFloat(alloc.achievedValue.toString());
-          }, 0);
-
-          await prisma.target.update({
-            where: { id: existing.targetId },
-            data: { totalAchieved },
-          });
-        }
+        // Propagate total achieved up to target
+        const allAllocations = await prisma.targetAllocation.findMany({
+          where: { targetId: existing.targetId },
+        });
+        const totalAchieved = allAllocations.reduce((sum, alloc) => {
+          if (alloc.id === id) return sum + newAchieved;
+          return sum + Number(alloc.achievedValue);
+        }, 0);
+        await prisma.target.update({
+          where: { id: existing.targetId },
+          data: { totalAchieved },
+        });
       }
 
       if (notes !== undefined) updateData.notes = notes;
 
-      // Handle status update
       if (status !== undefined) {
         const validStatuses = ['DRAFT', 'PENDING_APPROVAL', 'APPROVED', 'REJECTED', 'LOCKED'];
         if (!validStatuses.includes(status)) {
-          return res.status(400).json({ error: 'Trạng thái không hợp lệ' });
+          return res.status(400).json({ success: false, error: { code: 'VALIDATION_ERROR', message: 'Invalid status' } });
         }
         updateData.status = status;
       }
@@ -181,7 +165,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         },
       });
 
-      return res.status(200).json({ data: updated });
+      return res.status(200).json({ success: true, data: updated });
     }
 
     if (req.method === 'DELETE') {
@@ -191,23 +175,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
 
       if (!existing) {
-        return res.status(404).json({ error: 'Không tìm thấy phân bổ mục tiêu' });
+        return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Target allocation not found' } });
       }
 
-      // Check status - only DRAFT can be deleted
       if (existing.status !== 'DRAFT') {
-        return res.status(400).json({ error: 'Chỉ có thể xóa phân bổ ở trạng thái DRAFT' });
+        return res.status(400).json({ success: false, error: { code: 'VALIDATION_ERROR', message: 'Can only delete DRAFT allocations' } });
       }
-
-      // Check for children
       if (existing._count.children > 0) {
-        return res.status(400).json({ error: 'Không thể xóa vì có phân bổ con' });
+        return res.status(400).json({ success: false, error: { code: 'VALIDATION_ERROR', message: 'Cannot delete: has children' } });
       }
 
-      const deletedValue = parseFloat(existing.targetValue.toString());
-
-      // Update parent's childrenTarget if has parent
-      if (existing.parentId && existing.parent) {
+      const deletedValue = Number(existing.targetValue);
+      if (existing.parentId) {
         await prisma.targetAllocation.update({
           where: { id: existing.parentId },
           data: { childrenTarget: { decrement: deletedValue } },
@@ -215,13 +194,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
 
       await prisma.targetAllocation.delete({ where: { id } });
-
-      return res.status(200).json({ message: 'Đã xóa phân bổ mục tiêu' });
+      return res.status(200).json({ success: true });
     }
 
-    return res.status(405).json({ error: 'Method not allowed' });
+    return res.status(405).json({ success: false, error: { code: 'METHOD_NOT_ALLOWED', message: 'Method not allowed' } });
   } catch (error) {
     console.error('Target Allocation error:', error);
-    return res.status(500).json({ error: 'Lỗi hệ thống' });
+    return res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Internal server error' } });
   }
-}
+});

@@ -1,22 +1,15 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node';
+import type { VercelResponse } from '@vercel/node';
 import prisma from '../_lib/prisma';
-import { getUserFromRequest } from '../_lib/auth';
+import { kamPlus, parsePagination, type AuthenticatedRequest } from '../_lib/auth';
 
 /**
  * /fund-activities
  * GET - List fund activities with filtering
  * POST - Create new fund activity (link budget to activity)
+ * Sprint 0+1: RBAC + Pagination cap + Standard errors
  */
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (req.method === 'OPTIONS') {
-    res.status(200).end();
-    return;
-  }
-
-  const user = getUserFromRequest(req);
-  if (!user) return res.status(401).json({ error: 'Unauthorized' });
-
+export default kamPlus(async (req: AuthenticatedRequest, res: VercelResponse) => {
   try {
     if (req.method === 'GET') {
       const {
@@ -25,12 +18,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         activityType,
         status,
         promotionId,
-        page = '1',
-        pageSize = '20',
-      } = req.query;
-
-      const skip = (Number(page) - 1) * Number(pageSize);
-      const take = Number(pageSize);
+      } = req.query as Record<string, string>;
+      const { skip, limit, page } = parsePagination(req.query as Record<string, unknown>);
 
       const where: Record<string, unknown> = {};
       if (budgetId) where.budgetId = budgetId;
@@ -43,7 +32,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         prisma.fundActivity.findMany({
           where,
           skip,
-          take,
+          take: limit,
           orderBy: { createdAt: 'desc' },
           include: {
             budget: {
@@ -57,7 +46,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         prisma.fundActivity.count({ where }),
       ]);
 
-      // Transform decimal fields
       const transformed = activities.map((a) => ({
         ...a,
         allocatedAmount: Number(a.allocatedAmount),
@@ -79,13 +67,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }));
 
       return res.status(200).json({
+        success: true,
         data: transformed,
-        metadata: {
-          total,
-          page: Number(page),
-          pageSize: Number(pageSize),
-          totalPages: Math.ceil(total / Number(pageSize)),
-        },
+        pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
       });
     }
 
@@ -103,45 +87,43 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         notes,
       } = req.body;
 
-      // Validate required fields
       if (!budgetId || !activityType || !activityName || allocatedAmount === undefined) {
         return res.status(400).json({
-          error: 'Missing required fields: budgetId, activityType, activityName, allocatedAmount',
+          success: false,
+          error: { code: 'VALIDATION_ERROR', message: 'Missing required fields: budgetId, activityType, activityName, allocatedAmount' },
         });
       }
 
-      // Validate budget exists
       const budget = await prisma.budget.findUnique({
         where: { id: budgetId },
       });
       if (!budget) {
-        return res.status(400).json({ error: 'Budget not found' });
+        return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Budget not found' } });
       }
 
-      // Validate allocation if provided
       if (budgetAllocationId) {
         const allocation = await prisma.budgetAllocation.findUnique({
           where: { id: budgetAllocationId },
         });
         if (!allocation) {
-          return res.status(400).json({ error: 'Budget allocation not found' });
+          return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Budget allocation not found' } });
         }
         if (allocation.budgetId !== budgetId) {
           return res.status(400).json({
-            error: 'Allocation does not belong to specified budget',
+            success: false,
+            error: { code: 'VALIDATION_ERROR', message: 'Allocation does not belong to specified budget' },
           });
         }
       }
 
-      // Validate activity type
       const validTypes = ['promotion', 'display', 'sampling', 'event', 'listing_fee'];
       if (!validTypes.includes(activityType)) {
         return res.status(400).json({
-          error: `Invalid activity type. Must be one of: ${validTypes.join(', ')}`,
+          success: false,
+          error: { code: 'VALIDATION_ERROR', message: `Invalid activity type. Must be one of: ${validTypes.join(', ')}` },
         });
       }
 
-      // Create activity
       const activity = await prisma.fundActivity.create({
         data: {
           budgetId,
@@ -154,7 +136,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           startDate: startDate ? new Date(startDate) : new Date(),
           endDate: endDate ? new Date(endDate) : new Date(),
           notes: notes || null,
-          createdBy: user.userId,
+          createdBy: req.auth.userId,
         },
         include: {
           budget: {
@@ -167,6 +149,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
 
       return res.status(201).json({
+        success: true,
         data: {
           ...activity,
           allocatedAmount: Number(activity.allocatedAmount),
@@ -175,9 +158,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
     }
 
-    return res.status(405).json({ error: 'Method not allowed' });
+    return res.status(405).json({ success: false, error: { code: 'METHOD_NOT_ALLOWED', message: 'Method not allowed' } });
   } catch (error) {
     console.error('Fund activity error:', error);
-    return res.status(500).json({ error: 'Internal server error' });
+    return res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Internal server error' } });
   }
-}
+});

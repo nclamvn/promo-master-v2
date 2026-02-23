@@ -174,7 +174,6 @@ async function handleDetect(
     where,
     include: {
       customer: { select: { id: true, code: true, name: true } },
-      products: { select: { id: true, code: true, name: true } },
     },
   });
 
@@ -189,7 +188,7 @@ async function handleDetect(
   // Detect clashes
   const clashes: any[] = [];
   const existingClashes = await prisma.promotionClash.findMany({
-    where: { status: { in: ['DETECTED', 'REVIEWING'] } },
+    where: { status: { in: ['DETECTED', 'ACKNOWLEDGED'] } },
     select: { promotionAId: true, promotionBId: true },
   });
 
@@ -211,16 +210,17 @@ async function handleDetect(
 
       if (clashResult.hasClash) {
         clashes.push({
+          companyId: (promoA as any).companyId || '',
           promotionAId: promoA.id,
           promotionBId: promoB.id,
           clashType: clashResult.type,
           severity: clashResult.severity,
           description: clashResult.description,
-          overlapStart: clashResult.overlapStart,
-          overlapEnd: clashResult.overlapEnd,
-          affectedCustomers: clashResult.affectedCustomers,
-          affectedProducts: clashResult.affectedProducts,
-          potentialImpact: clashResult.potentialImpact,
+          overlapStartDate: clashResult.overlapStart,
+          overlapEndDate: clashResult.overlapEnd,
+          affectedCustomer: clashResult.affectedCustomers?.[0] || null,
+          affectedProducts: clashResult.affectedProducts || [],
+          estimatedImpact: clashResult.potentialImpact,
           status: 'DETECTED',
           detectedAt: new Date(),
         });

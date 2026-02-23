@@ -13,14 +13,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   try {
     if (req.method === 'GET') {
-      const { page = '1', limit = '20', status, promotionId, period } = req.query as Record<string, string>;
+      const { page = '1', limit = '20', status, promotionId, fiscalPeriodId } = req.query as Record<string, string>;
       const skip = (parseInt(page) - 1) * parseInt(limit);
       const take = parseInt(limit);
 
       const where: Record<string, unknown> = {};
       if (status) where.status = status;
       if (promotionId) where.promotionId = promotionId;
-      if (period) where.period = period;
+      if (fiscalPeriodId) where.fiscalPeriodId = fiscalPeriodId;
 
       const [accruals, total, summaryData] = await Promise.all([
         prisma.accrualEntry.findMany({
@@ -53,7 +53,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       summaryData.forEach((item) => {
         const amount = Number(item._sum.amount) || 0;
         summary.totalAmount += amount;
-        if (item.status === 'PENDING' || item.status === 'CALCULATED') {
+        if (item.status === 'PENDING') {
           summary.pendingAmount += amount;
         } else if (item.status === 'POSTED') {
           summary.postedAmount += amount;
@@ -70,17 +70,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     if (req.method === 'POST') {
-      const { promotionId, period, amount, notes } = req.body;
+      const { promotionId, companyId, fiscalPeriodId, amount, notes, entryType = 'MONTHLY_ACCRUAL' } = req.body;
 
-      if (!promotionId || !period || amount === undefined) {
-        return res.status(400).json({ error: 'Missing required fields: promotionId, period, amount' });
+      if (!promotionId || !fiscalPeriodId || !companyId || amount === undefined) {
+        return res.status(400).json({ error: 'Missing required fields: promotionId, companyId, fiscalPeriodId, amount' });
       }
 
       const accrual = await prisma.accrualEntry.create({
         data: {
+          companyId,
           promotionId,
-          period,
+          fiscalPeriodId,
+          entryType,
+          entryDate: new Date(),
           amount: parseFloat(amount),
+          cumulativeAmount: parseFloat(amount),
           notes: notes || null,
           createdById: user.userId,
         },

@@ -1,28 +1,21 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node';
+import type { VercelResponse } from '@vercel/node';
 import prisma from '../_lib/prisma';
-import { getUserFromRequest } from '../_lib/auth';
+import { kamPlus, type AuthenticatedRequest } from '../_lib/auth';
+import { checkVersion, OptimisticLockError } from '../_lib/optimistic-lock';
 
 /**
  * /fund-activities/:id
  * GET - Get single fund activity
  * PUT/PATCH - Update fund activity (spent amount, revenue, status)
  * DELETE - Delete fund activity
+ * Sprint 0+1: RBAC + Optimistic Locking + Standard errors
  */
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (req.method === 'OPTIONS') {
-    res.status(200).end();
-    return;
-  }
-
-  const user = getUserFromRequest(req);
-  if (!user) return res.status(401).json({ error: 'Unauthorized' });
-
+export default kamPlus(async (req: AuthenticatedRequest, res: VercelResponse) => {
   const { id } = req.query as { id: string };
-  if (!id) return res.status(400).json({ error: 'Missing activity id' });
+  if (!id) return res.status(400).json({ success: false, error: { code: 'VALIDATION_ERROR', message: 'Missing activity id' } });
 
   try {
-    // Get existing activity
     const activity = await prisma.fundActivity.findUnique({
       where: { id },
       include: {
@@ -50,11 +43,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     });
 
     if (!activity) {
-      return res.status(404).json({ error: 'Fund activity not found' });
+      return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Fund activity not found' } });
     }
 
     if (req.method === 'GET') {
       return res.status(200).json({
+        success: true,
         data: {
           ...activity,
           allocatedAmount: Number(activity.allocatedAmount),
@@ -83,6 +77,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     if (req.method === 'PUT' || req.method === 'PATCH') {
       const {
+        updatedAt: clientUpdatedAt,
         activityName,
         activityCode,
         allocatedAmount,
@@ -94,6 +89,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         status,
         notes,
       } = req.body;
+
+      // Sprint 1 Fix 1: Optimistic locking
+      if (!clientUpdatedAt) {
+        return res.status(400).json({
+          success: false,
+          error: { code: 'MISSING_VERSION', message: 'updatedAt is required for updates.' },
+        });
+      }
+      checkVersion(activity.updatedAt, clientUpdatedAt, 'FundActivity', id);
 
       const updateData: Record<string, unknown> = {};
 
@@ -115,12 +119,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       if (endDate !== undefined) updateData.endDate = new Date(endDate);
       if (notes !== undefined) updateData.notes = notes;
 
-      // Validate status
       if (status !== undefined) {
         const validStatuses = ['PLANNED', 'ACTIVE', 'COMPLETED', 'CANCELLED'];
         if (!validStatuses.includes(status)) {
           return res.status(400).json({
-            error: `Invalid status. Must be one of: ${validStatuses.join(', ')}`,
+            success: false,
+            error: { code: 'VALIDATION_ERROR', message: `Invalid status. Must be one of: ${validStatuses.join(', ')}` },
           });
         }
         updateData.status = status;
@@ -156,6 +160,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
 
       return res.status(200).json({
+        success: true,
         data: {
           ...updated,
           allocatedAmount: Number(updated.allocatedAmount),
@@ -169,10 +174,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     if (req.method === 'DELETE') {
-      // Only allow deletion of PLANNED activities
       if (activity.status !== 'PLANNED') {
         return res.status(400).json({
-          error: 'Can only delete PLANNED activities',
+          success: false,
+          error: { code: 'VALIDATION_ERROR', message: 'Can only delete PLANNED activities' },
         });
       }
 
@@ -180,9 +185,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(200).json({ success: true });
     }
 
-    return res.status(405).json({ error: 'Method not allowed' });
+    return res.status(405).json({ success: false, error: { code: 'METHOD_NOT_ALLOWED', message: 'Method not allowed' } });
   } catch (error) {
+    if (error instanceof OptimisticLockError) {
+      return res.status(409).json({
+        success: false,
+        error: {
+          code: 'CONFLICT',
+          message: error.message,
+          details: { entityType: error.entityType, entityId: error.entityId },
+        },
+      });
+    }
     console.error('Fund activity detail error:', error);
-    return res.status(500).json({ error: 'Internal server error' });
+    return res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Internal server error' } });
   }
-}
+});

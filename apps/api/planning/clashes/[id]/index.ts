@@ -48,14 +48,14 @@ async function handleGet(id: string, res: VercelResponse) {
       promotionA: {
         include: {
           customer: { select: { id: true, code: true, name: true } },
-          products: { select: { id: true, code: true, name: true } },
+          tactics: { include: { items: true } },
           fund: { select: { id: true, code: true, name: true } },
         },
       },
       promotionB: {
         include: {
           customer: { select: { id: true, code: true, name: true } },
-          products: { select: { id: true, code: true, name: true } },
+          tactics: { include: { items: true } },
           fund: { select: { id: true, code: true, name: true } },
         },
       },
@@ -110,11 +110,11 @@ async function handleUpdate(
   }
 
   if (resolution) {
-    updateData.resolution = resolution;
+    updateData.resolutionNote = resolution;
   }
 
   if (notes !== undefined) {
-    updateData.notes = notes;
+    updateData.description = notes;
   }
 
   const updated = await prisma.promotionClash.update({

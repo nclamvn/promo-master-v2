@@ -4,7 +4,7 @@
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { prisma } from '@/_lib/prisma';
+import prisma from '../../../../_lib/prisma';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'GET') {
@@ -43,13 +43,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     const [deliveries, total] = await Promise.all([
-      prisma.webhookDelivery.findMany({
+      (prisma as any).webhookDelivery.findMany({
         where,
         orderBy: { createdAt: 'desc' },
         skip,
         take: limit,
       }),
-      prisma.webhookDelivery.count({ where }),
+      (prisma as any).webhookDelivery.count({ where }),
     ]);
 
     return res.status(200).json({

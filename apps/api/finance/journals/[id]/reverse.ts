@@ -4,7 +4,7 @@
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { prisma } from '@/_lib/prisma';
+import prisma from '../../../_lib/prisma';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
@@ -36,52 +36,44 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
     }
 
-    if (journal.reversedById) {
-      return res.status(400).json({
-        error: 'This journal has already been reversed',
-      });
-    }
-
     const { reason, reversalDate } = req.body;
 
     if (!reason) {
       return res.status(400).json({ error: 'Reversal reason is required' });
     }
 
-    // Create reversal journal and update original in transaction
-    const result = await prisma.$transaction(async (tx) => {
-      // Generate reversal journal code
-      const count = await tx.gLJournal.count();
-      const reversalCode = `JNL-${String(count + 1).padStart(6, '0')}-REV`;
+    // Generate reversal journal number
+    const timestamp = Date.now().toString(36).toUpperCase();
+    const random = Math.random().toString(36).substring(2, 6).toUpperCase();
+    const reversalNumber = `JE-REV-${timestamp}-${random}`;
 
+    // Create reversal journal and update original in transaction
+    const result = await prisma.$transaction(async (tx: any) => {
       // Create reversal journal with swapped debits/credits
       const reversalJournal = await tx.gLJournal.create({
         data: {
-          code: reversalCode,
-          journalType: journal.journalType,
+          journalNumber: reversalNumber,
+          companyId: journal.companyId,
+          fiscalPeriodId: journal.fiscalPeriodId,
           journalDate: reversalDate ? new Date(reversalDate) : new Date(),
-          description: `Reversal of ${journal.code}: ${reason}`,
-          reference: journal.reference,
+          description: `Reversal of ${journal.journalNumber}: ${reason}`,
+          source: 'REVERSAL',
+          sourceRef: journal.id,
           status: 'POSTED',
           totalDebit: journal.totalCredit,
           totalCredit: journal.totalDebit,
-          customerId: journal.customerId,
-          promotionId: journal.promotionId,
-          accrualId: journal.accrualId,
-          claimId: journal.claimId,
-          reversalOfId: journal.id,
           postedAt: new Date(),
-          postedBy: req.body.userId || 'system',
+          postedById: req.body.userId || null,
+          createdById: req.body.userId || journal.createdById,
           lines: {
-            create: journal.lines.map((line, index) => ({
+            create: journal.lines.map((line: any, index: number) => ({
               lineNumber: index + 1,
               accountCode: line.accountCode,
               accountName: line.accountName,
-              debit: line.credit, // Swap debit and credit
-              credit: line.debit,
+              debitAmount: line.creditAmount, // Swap debit and credit
+              creditAmount: line.debitAmount,
               description: `Reversal: ${line.description || ''}`,
               costCenter: line.costCenter,
-              department: line.department,
             })),
           },
         },
@@ -95,8 +87,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         where: { id },
         data: {
           status: 'REVERSED',
-          reversedById: reversalJournal.id,
-          reversedAt: new Date(),
         },
       });
 

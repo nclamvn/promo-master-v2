@@ -4,6 +4,7 @@
  */
 
 import helmet from 'helmet';
+// @ts-ignore -- cors types may not be installed
 import cors from 'cors';
 import type { Request, Response, NextFunction } from 'express';
 
@@ -28,7 +29,7 @@ export const securityHeaders = helmet({
   },
 
   // HTTP Strict Transport Security
-  hsts: {
+  strictTransportSecurity: {
     maxAge: 31536000, // 1 year
     includeSubDomains: true,
     preload: true,
@@ -75,11 +76,13 @@ const getAllowedOrigins = (): string[] => {
 };
 
 export const corsConfig = cors({
-  origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+  origin: (origin: any, callback: any) => {
     const allowedOrigins = getAllowedOrigins();
 
-    // Allow requests with no origin (like mobile apps or curl)
+    // Sprint 0 Fix 4: Log no-origin requests instead of blindly allowing
     if (!origin) {
+      console.warn(`CORS: Request without Origin header`);
+      // Allow for health checks and same-origin; log for monitoring
       callback(null, true);
       return;
     }

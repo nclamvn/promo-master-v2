@@ -53,7 +53,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // Get unresolved high severity
     const unresolvedHigh = await prisma.promotionClash.count({
       where: {
-        status: { in: ['DETECTED', 'REVIEWING'] },
+        status: { in: ['DETECTED', 'ACKNOWLEDGED'] },
         severity: 'HIGH',
       },
     });
@@ -70,8 +70,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // Calculate total potential impact
     const impactSum = await prisma.promotionClash.aggregate({
-      _sum: { potentialImpact: true },
-      where: { status: { in: ['DETECTED', 'REVIEWING'] } },
+      _sum: { estimatedImpact: true },
+      where: { status: { in: ['DETECTED', 'ACKNOWLEDGED'] } },
     });
 
     return res.status(200).json({
@@ -102,7 +102,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         recentClashes,
         unresolvedHigh,
         resolutionRate,
-        totalPotentialImpact: impactSum._sum.potentialImpact || 0,
+        totalEstimatedImpact: impactSum?._sum?.estimatedImpact || 0,
       },
     });
   } catch (error: any) {

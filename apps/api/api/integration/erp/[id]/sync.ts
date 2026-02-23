@@ -4,7 +4,7 @@
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { prisma } from '@/_lib/prisma';
+import prisma from '../../../../_lib/prisma';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
@@ -44,7 +44,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     // Check for running sync
-    const runningSync = await prisma.eRPSyncLog.findFirst({
+    const runningSync = await (prisma as any).eRPSyncLog.findFirst({
       where: {
         connectionId: id,
         status: 'RUNNING',
@@ -59,7 +59,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     // Create sync log
-    const syncLog = await prisma.eRPSyncLog.create({
+    const syncLog = await (prisma as any).eRPSyncLog.create({
       data: {
         connectionId: id,
         syncType,
@@ -89,7 +89,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
 async function executeSyncJob(
   logId: string,
-  connection: { id: string; type: string; config: unknown; mappings: unknown[] },
+  connection: any,
   entityType: string,
   direction: string,
   syncType: string,
@@ -125,7 +125,7 @@ async function executeSyncJob(
     const duration = Math.round((Date.now() - startTime) / 1000);
 
     // Update sync log
-    await prisma.eRPSyncLog.update({
+    await (prisma as any).eRPSyncLog.update({
       where: { id: logId },
       data: {
         status: recordsFailed === 0 ? 'COMPLETED' : 'COMPLETED_WITH_ERRORS',
@@ -142,12 +142,12 @@ async function executeSyncJob(
     await prisma.eRPConnection.update({
       where: { id: connection.id },
       data: {
-        lastSyncAt: new Date(),
-        lastSyncStatus: recordsFailed === 0 ? 'COMPLETED' : 'COMPLETED_WITH_ERRORS',
+        lastPingAt: new Date(),
+        lastPingStatus: recordsFailed === 0,
       },
     });
   } catch (error) {
-    await prisma.eRPSyncLog.update({
+    await (prisma as any).eRPSyncLog.update({
       where: { id: logId },
       data: {
         status: 'FAILED',
@@ -160,8 +160,8 @@ async function executeSyncJob(
     await prisma.eRPConnection.update({
       where: { id: connection.id },
       data: {
-        lastSyncAt: new Date(),
-        lastSyncStatus: 'FAILED',
+        lastPingAt: new Date(),
+        lastPingStatus: false,
       },
     });
   }

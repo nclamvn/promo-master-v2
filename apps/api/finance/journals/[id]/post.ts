@@ -4,7 +4,7 @@
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { prisma } from '@/_lib/prisma';
+import prisma from '../../../_lib/prisma';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
@@ -43,8 +43,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     // Validate balance
-    const totalDebit = journal.lines.reduce((sum, l) => sum + (l.debit?.toNumber() || 0), 0);
-    const totalCredit = journal.lines.reduce((sum, l) => sum + (l.credit?.toNumber() || 0), 0);
+    const totalDebit = journal.lines.reduce((sum: number, l: any) => sum + (l.debitAmount?.toNumber() || 0), 0);
+    const totalCredit = journal.lines.reduce((sum: number, l: any) => sum + (l.creditAmount?.toNumber() || 0), 0);
 
     if (Math.abs(totalDebit - totalCredit) > 0.01) {
       return res.status(400).json({
@@ -58,12 +58,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       data: {
         status: 'POSTED',
         postedAt: new Date(),
-        postedBy: req.body.userId || 'system',
+        postedById: req.body.userId || null,
       },
       include: {
         lines: { orderBy: { lineNumber: 'asc' } },
-        customer: { select: { id: true, code: true, name: true } },
-        promotion: { select: { id: true, code: true, name: true } },
       },
     });
 

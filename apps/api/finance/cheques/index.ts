@@ -5,7 +5,7 @@
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { prisma } from '@/_lib/prisma';
+import prisma from '../../_lib/prisma';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
@@ -26,7 +26,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 async function handleList(req: VercelRequest, res: VercelResponse) {
   const {
     status,
-    customerId,
+    payeeId,
     bankAccount,
     startDate,
     endDate,
@@ -47,8 +47,8 @@ async function handleList(req: VercelRequest, res: VercelResponse) {
     where.status = status;
   }
 
-  if (customerId) {
-    where.customerId = customerId;
+  if (payeeId) {
+    where.payeeId = payeeId;
   }
 
   if (bankAccount) {
@@ -56,12 +56,12 @@ async function handleList(req: VercelRequest, res: VercelResponse) {
   }
 
   if (startDate || endDate) {
-    where.chequeDate = {};
+    where.issueDate = {};
     if (startDate) {
-      where.chequeDate.gte = new Date(startDate as string);
+      where.issueDate.gte = new Date(startDate as string);
     }
     if (endDate) {
-      where.chequeDate.lte = new Date(endDate as string);
+      where.issueDate.lte = new Date(endDate as string);
     }
   }
 
@@ -77,25 +77,25 @@ async function handleList(req: VercelRequest, res: VercelResponse) {
 
   // Get cheques with pagination
   const [cheques, total] = await Promise.all([
-    prisma.cheque.findMany({
+    prisma.chequebookEntry.findMany({
       where,
       include: {
-        customer: {
+        payee: {
           select: { id: true, code: true, name: true },
         },
         claim: {
           select: { id: true, code: true, claimedAmount: true },
         },
       },
-      orderBy: { chequeDate: 'desc' },
+      orderBy: { issueDate: 'desc' },
       skip,
       take: limitNum,
     }),
-    prisma.cheque.count({ where }),
+    prisma.chequebookEntry.count({ where }),
   ]);
 
   // Get summary stats
-  const summary = await prisma.cheque.groupBy({
+  const summary = await prisma.chequebookEntry.groupBy({
     by: ['status'],
     _count: { id: true },
     _sum: { amount: true },
@@ -111,7 +111,7 @@ async function handleList(req: VercelRequest, res: VercelResponse) {
     pendingAmount: 0,
   };
 
-  summary.forEach((s) => {
+  summary.forEach((s: any) => {
     const count = s._count.id;
     const amount = s._sum.amount?.toNumber() || 0;
 
@@ -148,32 +148,31 @@ async function handleList(req: VercelRequest, res: VercelResponse) {
 
 async function handleCreate(req: VercelRequest, res: VercelResponse) {
   const {
-    customerId,
+    payeeId,
     claimId,
     chequeNumber,
-    chequeDate,
+    issueDate,
+    dueDate,
     amount,
     bankAccount,
-    bankName,
-    payee,
     memo,
   } = req.body;
 
   // Validate required fields
-  if (!customerId || !chequeNumber || !chequeDate || !amount) {
+  if (!payeeId || !chequeNumber || !issueDate || !amount || !dueDate) {
     return res.status(400).json({
-      error: 'Missing required fields: customerId, chequeNumber, chequeDate, amount',
+      error: 'Missing required fields: payeeId, chequeNumber, issueDate, dueDate, amount',
     });
   }
 
   // Check for duplicate cheque number
-  const existing = await prisma.cheque.findFirst({
-    where: { chequeNumber, bankAccount },
+  const existing = await prisma.chequebookEntry.findFirst({
+    where: { chequeNumber },
   });
 
   if (existing) {
     return res.status(400).json({
-      error: `Cheque number ${chequeNumber} already exists for this bank account`,
+      error: `Cheque number ${chequeNumber} already exists`,
     });
   }
 
@@ -188,35 +187,28 @@ async function handleCreate(req: VercelRequest, res: VercelResponse) {
       return res.status(400).json({ error: 'Claim not found' });
     }
 
-    if (claim.status !== 'APPROVED' && claim.status !== 'PAID') {
+    if (claim.status !== 'APPROVED' && claim.status !== 'SETTLED') {
       return res.status(400).json({
-        error: 'Cheque can only be issued for approved or paid claims',
+        error: 'Cheque can only be issued for approved or settled claims',
       });
     }
   }
 
-  // Generate code
-  const count = await prisma.cheque.count();
-  const code = `CHQ-${String(count + 1).padStart(6, '0')}`;
-
   // Create cheque
-  const cheque = await prisma.cheque.create({
+  const cheque = await prisma.chequebookEntry.create({
     data: {
-      code,
-      customerId,
+      payeeId,
       claimId: claimId || null,
       chequeNumber,
-      chequeDate: new Date(chequeDate),
+      issueDate: new Date(issueDate),
+      dueDate: new Date(dueDate),
       amount: parseFloat(amount),
       bankAccount: bankAccount || null,
-      bankName: bankName || null,
-      payee: payee || null,
       memo: memo || null,
       status: 'ISSUED',
-      issuedAt: new Date(),
     },
     include: {
-      customer: {
+      payee: {
         select: { id: true, code: true, name: true },
       },
       claim: {

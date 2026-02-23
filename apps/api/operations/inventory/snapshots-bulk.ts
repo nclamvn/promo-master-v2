@@ -86,8 +86,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         : [],
     ]);
 
-    const customerMap = new Map<string, string>(customers.map((c) => [c.code, c.id]));
-    const productMap = new Map<string, string>(products.map((p) => [p.sku, p.id]));
+    const customerMap = new Map<string, string>((customers as any[]).map((c) => [c.code, c.id]));
+    const productMap = new Map<string, string>((products as any[]).map((p) => [p.sku, p.id]));
 
     // Process items
     const results: BulkResult[] = [];
